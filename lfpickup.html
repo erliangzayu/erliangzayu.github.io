@@ -1,0 +1,732 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wesley的便签盒</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "SF Pro Text", "PingFang SC", sans-serif;
+        }
+        body {
+            background-color: #f9f7f5;
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        /* 提示说明文本 */
+        .tips-text {
+            font-size: 12px;
+            color: #999;
+            margin-bottom: 10px;
+            text-align: center;
+            line-height: 1.5;
+        }
+        /* 签盒样式 */
+        .lottery-box {
+            width: 90%;
+            max-width: 700px;
+            height: 320px;
+            border: 1px solid #e0d8d0;
+            border-radius: 16px;
+            background-color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 20px 0;
+            box-shadow: 0 6px 12px rgba(0,0,0,0.04);
+            position: relative;
+        }
+        .hint {
+            color: #999;
+            font-size: 19px;
+            text-align: center;
+            padding: 0 20px;
+        }
+        .result {
+            font-size: 22px;
+            color: #333;
+            text-align: center;
+            padding: 0 20px;
+            line-height: 1.8;
+            opacity: 0;
+            transition: opacity 0.8s ease;
+        }
+        .result.show {
+            opacity: 1;
+        }
+        /* 进度提示 */
+        .progress-text {
+            font-size: 14px;
+            color: #666;
+            margin: 10px 0;
+        }
+        /* 抽一张按钮容器：单独一行、居中 */
+        .draw-btn-wrapper {
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            margin: 20px 0; /* 和上下内容拉开距离 */
+        }
+        /* 抽一张按钮样式 */
+        .draw-btn {
+            padding: 12px 36px;
+            background-color: #e8ded2;
+            border: none;
+            border-radius: 28px;
+            color: #5a5045;
+            font-size: 18px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .draw-btn:hover {
+            background-color: #d8c9bc;
+            transform: scale(1.05);
+        }
+        .draw-btn:disabled {
+            background-color: #eee;
+            color: #999;
+            cursor: not-allowed;
+            transform: none;
+        }
+        /* 销毁按钮容器：页面最底部、单独一行、居中 */
+        .clear-btn-wrapper {
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            margin: 30px 0 20px 0; /* 顶部留足距离，底部留边 */
+        }
+        /* 销毁按钮样式 */
+        .clear-btn {
+            padding: 6px 18px;
+            background-color: #f8e0e0;
+            border: 1px solid #e88080;
+            border-radius: 20px;
+            color: #d33a3a;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .clear-btn:hover {
+            background-color: #f5d0d0;
+        }
+        /* 隐藏原按钮组 */
+        .btn-group {
+            display: none;
+        }
+        /* 抽屉样式核心 */
+        .drawer-container {
+            width: 90%;
+            max-width: 700px;
+            margin-bottom: 15px;
+            border: 1px solid #e0d8d0;
+            border-radius: 16px;
+            background-color: #fff;
+            overflow: hidden;
+        }
+        .drawer-header {
+            padding: 12px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            border-bottom: 1px solid #f5f2ef;
+        }
+        .drawer-title {
+            font-size: 16px;
+            color: #5a5045;
+            font-weight: 500;
+        }
+        .drawer-arrow {
+            width: 16px;
+            height: 16px;
+            border-top: 2px solid #999;
+            border-right: 2px solid #999;
+            transform: rotate(135deg);
+            transition: transform 0.3s ease;
+        }
+        .drawer-arrow.expanded {
+            transform: rotate(315deg);
+        }
+        .drawer-content {
+            padding: 15px 20px;
+            display: none; /* 默认收起 */
+        }
+        .drawer-content.expanded {
+            display: block;
+        }
+        /* Tag筛选区（抽屉内） */
+        .tag-filter-section {
+            width: 100%;
+        }
+        .filter-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        .filter-title {
+            font-size: 17px;
+            color: #666;
+        }
+        .logic-switch {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .logic-switch span {
+            font-size: 14px;
+            color: #666;
+        }
+        .switch-btn {
+            padding: 4px 12px;
+            border: 1px solid #e0d8d0;
+            border-radius: 16px;
+            background-color: #fff;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        .switch-btn.active {
+            background-color: #e8ded2;
+            color: #5a5045;
+            border-color: #e8ded2;
+        }
+        /* Tag分类容器 */
+        .tag-categories {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        .tag-category {
+            margin-bottom: 8px;
+        }
+        .category-name {
+            font-size: 15px;
+            color: #888;
+            margin-bottom: 8px;
+            padding-left: 5px;
+        }
+        .tag-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        .tag-item {
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: none; /* 默认隐藏所有Tag */
+        }
+        /* Tag样式区分 */
+        .tag-role {
+            border: 1px solid #d8c9bc;
+            color: #5a5045;
+            background-color: #f5f2ef;
+        }
+        .tag-org {
+            border: 1px solid #c8d8e4;
+            color: #4a6572;
+            background-color: #f0f5f9;
+        }
+        .tag-scene {
+            border: 1px solid #d4c5e0;
+            color: #6a5b7b;
+            background-color: #f7f4fa;
+        }
+        /* 选中/推荐Tag样式 */
+        .tag-item.selected {
+            background-color: #e8ded2;
+            color: #fff;
+            border-color: #e8ded2;
+        }
+        .tag-item.recommend {
+            border: 2px solid #f5c76f;
+            box-shadow: 0 0 0 2px rgba(245,199,111,0.2);
+        }
+        /* 历史记录区（抽屉内） */
+        .history-section {
+            width: 100%;
+            padding: 0;
+            border: none;
+            border-radius: 0;
+            background-color: transparent;
+            box-shadow: none;
+        }
+        .history-title {
+            font-size: 17px;
+            color: #666;
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .clear-filter-btn {
+            font-size: 14px;
+            color: #5a5045;
+            cursor: pointer;
+            text-decoration: underline;
+        }
+        .history-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .history-item {
+            padding: 8px 16px;
+            background-color: #f9f7f5;
+            border-radius: 12px;
+            font-size: 15px;
+            color: #5a5045;
+            position: relative;
+        }
+        .history-tag-badge {
+            display: flex;
+            gap: 4px;
+            margin-top: 6px;
+            flex-wrap: wrap;
+        }
+        .history-tag {
+            padding: 2px 8px;
+            font-size: 12px;
+            border-radius: 8px;
+            background-color: #f0f0f0;
+            color: #777;
+        }
+        .empty-history {
+            font-size: 15px;
+            color: #999;
+            text-align: center;
+            padding: 20px 0;
+        }
+        /* 响应式适配 */
+        @media (max-width: 600px) {
+            .lottery-box {
+                height: 280px;
+            }
+            .result {
+                font-size: 20px;
+            }
+            .draw-btn {
+                padding: 10px 24px;
+                font-size: 16px;
+            }
+            .clear-btn {
+                padding: 4px 14px;
+                font-size: 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 缓存提示说明 -->
+    <div class="tips-text">
+        💡 提示：本便签盒为 Wesley 本地私藏，清理浏览器缓存会遗失所有情报碎片，仅本设备留存，不跨设备同步
+    </div>
+    <!-- 抽签盒 -->
+    <div class="lottery-box">
+        <div class="hint" id="hint">点击下方抽一张...会掉出什么呢？</div>
+        <div class="result" id="result"></div>
+    </div>
+
+    <!-- 抽签进度 -->
+    <div class="progress-text" id="progressText">本轮进度：0/0</div>
+
+    <!-- 抽一张按钮（单独一行、居中） -->
+    <div class="draw-btn-wrapper">
+        <button class="draw-btn" onclick="drawLottery()" id="drawBtn">抽一张</button>
+    </div>
+
+    <!-- Tag筛选抽屉 -->
+    <div class="drawer-container">
+        <div class="drawer-header" onclick="toggleDrawer('tagDrawer')">
+            <div class="drawer-title">✨ 按Tag筛选日常</div>
+            <div class="drawer-arrow" id="tagDrawerArrow"></div>
+        </div>
+        <div class="drawer-content" id="tagDrawerContent">
+            <div class="tag-filter-section">
+                <div class="filter-header">
+                    <div class="filter-title">筛选逻辑</div>
+                    <div class="logic-switch">
+                        <span>筛选逻辑：</span>
+                        <div class="switch-btn active" id="andSwitch" onclick="switchLogic('and')">且</div>
+                        <div class="switch-btn" id="orSwitch" onclick="switchLogic('or')">或</div>
+                    </div>
+                </div>
+
+                <div class="tag-categories">
+                    <!-- 角色Tag -->
+                    <div class="tag-category">
+                        <div class="category-name">🏃🏻‍♂️ 市民</div>
+                        <div class="tag-list" id="roleTagList">
+                            <!-- JS自动生成 -->
+                        </div>
+                    </div>
+
+                    <!-- 组织Tag -->
+                    <div class="tag-category">
+                        <div class="category-name">🧑‍🧑‍🧒‍🧒 组织</div>
+                        <div class="tag-list" id="orgTagList">
+                            <!-- JS自动生成 -->
+                        </div>
+                    </div>
+
+                    <!-- 场景Tag -->
+                    <div class="tag-category">
+                        <div class="category-name">📍 场景</div>
+                        <div class="tag-list" id="sceneTagList">
+                            <!-- JS自动生成 -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 历史记录抽屉 -->
+    <div class="drawer-container">
+        <div class="drawer-header" onclick="toggleDrawer('historyDrawer')">
+            <div class="drawer-title">📝 已记录的便签</div>
+            <div class="drawer-arrow" id="historyDrawerArrow"></div>
+        </div>
+        <div class="drawer-content" id="historyDrawerContent">
+            <div class="history-section">
+                <div class="history-title">
+                    <span>历史记录</span>
+                    <span class="clear-filter-btn" onclick="clearAllFilter()">取消便签筛选</span>
+                </div>
+                <div class="history-list" id="historyList">
+                    <div class="empty-history">还没抽过便签哦～</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 销毁所有便签按钮（页面最底部、单独一行、居中） -->
+    <div class="clear-btn-wrapper">
+        <button class="clear-btn" onclick="confirmClearHistory()">销毁所有便签</button>
+    </div>
+
+    <script>
+        // ====================== 第一步：初始化数据和配置 ======================
+        // 1. 基础Tag分类
+        const TAG_CATEGORIES = {
+            role: ["杂鱼", "肆", "小林哲也", "北原真辉", "松本悠真", "凌", "渡边晴南", "Sophia", "Léona", "Noo", "Lee", "竹本律", "Adriana", "Felix", "Olivia", "Wesley", "Sasa", "Marcel"],
+            org: ["竹本会","幻日乐队"],
+            scene: ["九木酒屋", "雾港仓库", "幻日排练室", "福源堂"]
+        };
+
+        // 2. 全局变量（移除倒计时/重新抽取相关变量）
+        let INIT_EVENTS = []; // 从JSON加载的事件池
+        let remainingEvents = []; // 剩余可抽事件
+        let drawnEvents = []; // 已抽事件
+        let selectedTags = []; // 选中的Tag
+        let filterLogic = "and"; // 筛选逻辑：and/or
+        let tagRecommendMap = {}; // Tag推荐映射
+        let appearedTags = new Set(); // 已出现的Tag（抽过才显示）
+        let drawnEventIds = new Set(); // 记录已抽过的事件ID（避免重复）
+        let allEventIds = []; // 所有事件的ID列表
+
+        // ====================== 第二步：加载JSON文件 ======================
+        fetch('lfpickup.json')
+            .then(response => {
+                if (!response.ok) throw new Error("JSON文件加载失败");
+                return response.json();
+            })
+            .then(data => {
+                INIT_EVENTS = data;
+                INIT_EVENTS = INIT_EVENTS.map((event, index) => ({
+                    id: `event_${index + 1}`,
+                    text: event.text,
+                    tags: event.tags
+                }));
+                initDB();
+                initTagList();
+                initEventIds();
+                updateProgress();
+            })
+            .catch(error => {
+                console.error("加载失败：", error);
+                alert("日常池加载失败，请检查lfpickup.json文件是否正确上传");
+            });
+
+        // ====================== 第三步：本地数据库操作 ======================
+        function initDB() {
+            const savedEvents = localStorage.getItem("ocDailyEvents");
+            if (!savedEvents) {
+                const eventsWithMeta = INIT_EVENTS.map((event) => ({
+                    id: event.id,
+                    text: event.text,
+                    tags: event.tags,
+                    createTime: new Date().toLocaleString()
+                }));
+                localStorage.setItem("ocDailyEvents", JSON.stringify(eventsWithMeta));
+                remainingEvents = [...eventsWithMeta];
+            } else {
+                remainingEvents = JSON.parse(savedEvents);
+            }
+            initTagRecommend();
+            const savedDrawnEvents = localStorage.getItem("ocDrawnEvents");
+            if (savedDrawnEvents) {
+                drawnEvents = JSON.parse(savedDrawnEvents);
+                drawnEvents.forEach(event => {
+                    event.tags.forEach(tag => appearedTags.add(tag));
+                });
+                showAppearedTags();
+                renderHistoryList(drawnEvents);
+            }
+        }
+
+        function getAllEventsFromDB() {
+            return JSON.parse(localStorage.getItem("ocDailyEvents")) || [];
+        }
+
+        function saveDrawnEventToDB(event) {
+            drawnEvents.push(event);
+            localStorage.setItem("ocDrawnEvents", JSON.stringify(drawnEvents));
+            event.tags.forEach(tag => appearedTags.add(tag));
+            showAppearedTags();
+        }
+
+        function clearDB() {
+            localStorage.removeItem("ocDailyEvents");
+            localStorage.removeItem("ocDrawnEvents");
+            localStorage.removeItem("ocDrawnEventIds");
+            remainingEvents = [];
+            drawnEvents = [];
+            selectedTags = [];
+            filterLogic = "and";
+            appearedTags.clear();
+            drawnEventIds.clear();
+            document.getElementById("andSwitch").classList.add("active");
+            document.getElementById("orSwitch").classList.remove("active");
+            initDB();
+            updateProgress();
+        }
+
+        // ====================== 第四步：防重复抽签逻辑 ======================
+        function initEventIds() {
+            allEventIds = INIT_EVENTS.map(event => event.id);
+            const savedDrawnIds = localStorage.getItem("ocDrawnEventIds");
+            if (savedDrawnIds) {
+                drawnEventIds = new Set(JSON.parse(savedDrawnIds));
+            }
+            updateRemainingEvents();
+        }
+
+        function updateRemainingEvents() {
+            remainingEvents = INIT_EVENTS.filter(event => !drawnEventIds.has(event.id));
+            updateProgress();
+        }
+
+        function saveDrawnIds() {
+            localStorage.setItem("ocDrawnEventIds", JSON.stringify(Array.from(drawnEventIds)));
+        }
+
+        function updateProgress() {
+            const progressText = document.getElementById("progressText");
+            progressText.textContent = `本轮进度：${drawnEventIds.size}/${allEventIds.length}`;
+        }
+
+        // ====================== 第五步：Tag按需显示 ======================
+        function initTagList() {
+            renderTagList("roleTagList", TAG_CATEGORIES.role, "tag-role");
+            renderTagList("orgTagList", TAG_CATEGORIES.org, "tag-org");
+            renderTagList("sceneTagList", TAG_CATEGORIES.scene, "tag-scene");
+        }
+
+        function renderTagList(containerId, tags, className) {
+            const container = document.getElementById(containerId);
+            container.innerHTML = "";
+            tags.forEach(tag => {
+                const tagItem = document.createElement("div");
+                tagItem.className = `tag-item ${className}`;
+                tagItem.textContent = tag;
+                tagItem.id = `tag-${tag}`;
+                tagItem.onclick = () => toggleTagSelection(tag, tagItem);
+                container.appendChild(tagItem);
+            });
+        }
+
+        function showAppearedTags() {
+            appearedTags.forEach(tag => {
+                const tagElement = document.getElementById(`tag-${tag}`);
+                if (tagElement) tagElement.style.display = "inline-block";
+            });
+        }
+
+        function toggleTagSelection(tag, element) {
+            if (selectedTags.includes(tag)) {
+                selectedTags = selectedTags.filter(t => t !== tag);
+                element.classList.remove("selected");
+            } else {
+                selectedTags.push(tag);
+                element.classList.add("selected");
+                highlightRecommendTags(tag);
+            }
+            filterEvents();
+        }
+
+        function initTagRecommend() {
+            const allEvents = getAllEventsFromDB();
+            allEvents.forEach(event => {
+                const tags = event.tags;
+                tags.forEach(tag1 => {
+                    if (!tagRecommendMap[tag1]) tagRecommendMap[tag1] = {};
+                    tags.forEach(tag2 => {
+                        if (tag1 !== tag2) {
+                            tagRecommendMap[tag1][tag2] = (tagRecommendMap[tag1][tag2] || 0) + 1;
+                        }
+                    });
+                });
+            });
+        }
+
+        function highlightRecommendTags(activeTag) {
+            document.querySelectorAll(".tag-item").forEach(item => {
+                item.classList.remove("recommend");
+            });
+            const recommendTags = tagRecommendMap[activeTag];
+            if (!recommendTags) return;
+            const sortedTags = Object.entries(recommendTags)
+                .sort((a, b) => b[1] - a[1])
+                .slice(0, 3)
+                .map(item => item[0]);
+            sortedTags.forEach(tag => {
+                const tagElement = document.getElementById(`tag-${tag}`);
+                if (tagElement) tagElement.classList.add("recommend");
+            });
+        }
+
+        function switchLogic(logic) {
+            filterLogic = logic;
+            document.getElementById("andSwitch").classList.toggle("active", logic === "and");
+            document.getElementById("orSwitch").classList.toggle("active", logic === "or");
+            filterEvents();
+        }
+
+        function filterEvents() {
+            let filteredEvents = [...drawnEvents];
+            if (selectedTags.length > 0) {
+                if (filterLogic === "and") {
+                    filteredEvents = filteredEvents.filter(event => 
+                        selectedTags.every(tag => event.tags.includes(tag))
+                    );
+                } else {
+                    filteredEvents = filteredEvents.filter(event => 
+                        selectedTags.some(tag => event.tags.includes(tag))
+                    );
+                }
+            }
+            renderHistoryList(filteredEvents);
+        }
+
+        function clearAllFilter() {
+            selectedTags = [];
+            document.querySelectorAll(".tag-item").forEach(item => {
+                item.classList.remove("selected");
+                item.classList.remove("recommend");
+            });
+            filterLogic = "and";
+            document.getElementById("andSwitch").classList.add("active");
+            document.getElementById("orSwitch").classList.remove("active");
+            renderHistoryList(drawnEvents);
+        }
+
+        // ====================== 第六步：抽签核心功能（重点修改） ======================
+        function drawLottery() {
+            const drawBtn = document.getElementById("drawBtn");
+            const resultElement = document.getElementById("result");
+            
+            document.getElementById("hint").style.display = "none";
+            
+            if (remainingEvents.length === 0) {
+                // 1. 按钮永久变灰不可点击
+                drawBtn.disabled = true;
+                // 2. 显示指定文案，换行展示提示语
+                resultElement.innerHTML = "✨ 更多未来正在发生！<br/>👀 可点击已记录便签及Tags进行分类浏览<br/>🗑️ 点击销毁便签可重新抽取～";
+                resultElement.classList.add("show");
+                return;
+            }
+
+            const randomIndex = Math.floor(Math.random() * remainingEvents.length);
+            const selectedEvent = remainingEvents[randomIndex];
+            
+            drawnEventIds.add(selectedEvent.id);
+            saveDrawnIds();
+            updateRemainingEvents();
+            
+            saveDrawnEventToDB(selectedEvent);
+            resultElement.textContent = selectedEvent.text;
+            resultElement.classList.add("show");
+            filterEvents();
+        }
+
+        function renderHistoryList(events) {
+            const historyList = document.getElementById("historyList");
+            historyList.innerHTML = "";
+            
+            if (events.length === 0) {
+                historyList.innerHTML = '<div class="empty-history">还没抽过便签哦～</div>';
+                return;
+            }
+            
+            events.forEach(event => {
+                const item = document.createElement("div");
+                item.className = "history-item";
+                
+                const textDiv = document.createElement("div");
+                textDiv.textContent = event.text;
+                
+                const tagBadge = document.createElement("div");
+                tagBadge.className = "history-tag-badge";
+                event.tags.forEach(tag => {
+                    const tagSpan = document.createElement("span");
+                    tagSpan.className = "history-tag";
+                    tagSpan.textContent = tag;
+                    tagBadge.appendChild(tagSpan);
+                });
+                
+                item.appendChild(textDiv);
+                item.appendChild(tagBadge);
+                historyList.appendChild(item);
+            });
+        }
+
+        // ====================== 第七步：交互优化 ======================
+        function toggleDrawer(drawerName) {
+            const content = document.getElementById(`${drawerName}Content`);
+            const arrow = document.getElementById(`${drawerName}Arrow`);
+            content.classList.toggle("expanded");
+            arrow.classList.toggle("expanded");
+        }
+
+        function confirmClearHistory() {
+            if (confirm("⚠️ 确认销毁所有已阅便签记录？\n此操作不可恢复，且仅清空本设备记录！")) {
+                clearAllHistory();
+                alert("已销毁所有便签记录～");
+            }
+        }
+
+        function clearAllHistory() {
+            clearDB();
+            document.getElementById("result").classList.remove("show");
+            document.getElementById("hint").style.display = "block";
+            // 销毁记录后恢复按钮可点击
+            const drawBtn = document.getElementById("drawBtn");
+            drawBtn.disabled = false;
+            clearAllFilter();
+            renderHistoryList([]);
+            document.querySelectorAll(".tag-item").forEach(item => {
+                item.style.display = "none";
+            });
+        }
+    </script>
+</body>
+</html>
