@@ -152,6 +152,93 @@
         .drawer-content.expanded {
             display: block;
         }
+        .tag-filter-section {
+            width: 100%;
+        }
+        .filter-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        .filter-title {
+            font-size: 17px;
+            color: #666;
+        }
+        .logic-switch {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .logic-switch span {
+            font-size: 14px;
+            color: #666;
+        }
+        .switch-btn {
+            padding: 4px 12px;
+            border: 1px solid #e0d8d0;
+            border-radius: 16px;
+            background-color: #fff;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        .switch-btn.active {
+            background-color: #e8ded2;
+            color: #5a5045;
+            border-color: #e8ded2;
+        }
+        .tag-categories {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        .tag-category {
+            margin-bottom: 8px;
+        }
+        .category-name {
+            font-size: 15px;
+            color: #888;
+            margin-bottom: 8px;
+            padding-left: 5px;
+        }
+        .tag-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        .tag-item {
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: none;
+        }
+        .tag-role {
+            border: 1px solid #d8c9bc;
+            color: #5a5045;
+            background-color: #f5f2ef;
+        }
+        .tag-org {
+            border: 1px solid #c8d8e4;
+            color: #4a6572;
+            background-color: #f0f5f9;
+        }
+        .tag-scene {
+            border: 1px solid #d4c5e0;
+            color: #6a5b7b;
+            background-color: #f7f4fa;
+        }
+        .tag-category-type {
+            border: 1px solid #e0c8b0;
+            color: #8a6d3b;
+            background-color: #faf6f0;
+        }
+        .tag-item.selected {
+            background-color: #e8ded2;
+            color: #fff;
+            border-color: #e8ded2;
+        }
         .history-section {
             width: 100%;
             padding: 0;
@@ -236,6 +323,46 @@
     <div class="draw-btn-wrapper">
         <button class="draw-btn" onclick="drawLottery()" id="drawBtn">抽一张</button>
     </div>
+
+    <!-- 保留Tag筛选抽屉 -->
+    <div class="drawer-container">
+        <div class="drawer-header" onclick="toggleDrawer('tagDrawer')">
+            <div class="drawer-title">✨ 按Tag筛选日常</div>
+            <div class="drawer-arrow" id="tagDrawerArrow"></div>
+        </div>
+        <div class="drawer-content" id="tagDrawerContent">
+            <div class="tag-filter-section">
+                <div class="filter-header">
+                    <div class="filter-title">筛选逻辑</div>
+                    <div class="logic-switch">
+                        <span>筛选逻辑：</span>
+                        <div class="switch-btn active" id="andSwitch" onclick="switchLogic('and')">且</div>
+                        <div class="switch-btn" id="orSwitch" onclick="switchLogic('or')">或</div>
+                    </div>
+                </div>
+                <div class="tag-categories">
+                    <div class="tag-category">
+                        <div class="category-name">🏃🏻‍♂️ 市民</div>
+                        <div class="tag-list" id="roleTagList"></div>
+                    </div>
+                    <div class="tag-category">
+                        <div class="category-name">🧑‍🧑‍🧒‍🧒 组织</div>
+                        <div class="tag-list" id="orgTagList"></div>
+                    </div>
+                    <div class="tag-category">
+                        <div class="category-name">📍 场景</div>
+                        <div class="tag-list" id="sceneTagList"></div>
+                    </div>
+                    <div class="tag-category">
+                        <div class="category-name">📂 类别</div>
+                        <div class="tag-list" id="categoryTagList"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 历史记录抽屉 -->
     <div class="drawer-container">
         <div class="drawer-header" onclick="toggleDrawer('historyDrawer')">
             <div class="drawer-title">📝 已记录的便签</div>
@@ -245,7 +372,7 @@
             <div class="history-section">
                 <div class="history-title">
                     <span>历史记录</span>
-                    <span class="clear-filter-btn" onclick="clearAllFilter()">清空筛选</span>
+                    <span class="clear-filter-btn" onclick="clearAllFilter()">取消便签筛选</span>
                 </div>
                 <div class="history-list" id="historyList">
                     <div class="empty-history">还没抽过便签哦～</div>
@@ -253,41 +380,55 @@
             </div>
         </div>
     </div>
+
     <div class="clear-btn-wrapper">
         <button class="clear-btn" onclick="confirmClearHistory()">销毁所有便签</button>
     </div>
 
     <script>
-        // 全局变量（只保留核心，移除Tag推荐相关）
+        // 1. 基础Tag分类（保留你原来的，新增Ling适配）
+        const TAG_CATEGORIES = {
+            role: ["杂鱼", "肆", "小林哲也", "北原真辉", "松本悠真", "凌", "Ling", "渡边晴南", "Sophia", "Léona", "Noo", "Lee", "竹本律", "Adriana", "Felix", "Olivia", "Wesley", "Sasa", "Marcel"],
+            org: ["竹本会","幻日乐队"],
+            scene: ["九木酒屋", "雾港仓库", "幻日排练室", "福源堂"],
+            category: ["秘密", "剪报"]
+        };
+
+        // 2. 全局变量（移除tagRecommendMap，保留筛选相关）
         let INIT_EVENTS = [];
         let remainingEvents = [];
         let drawnEvents = [];
+        let selectedTags = [];
+        let filterLogic = "and";
+        let appearedTags = new Set();
         let drawnEventIds = new Set();
         let allEventIds = [];
 
-        // 加载JSON（简化版，无Tag推荐）
+        // 3. 加载JSON（绝对路径+全兜底，彻底避免undefined）
         fetch('https://erliangzayu.github.io/lfpickup.json', { cache: 'no-cache' })
             .then(response => {
-                if (!response.ok) throw new Error("JSON文件加载失败");
+                if (!response.ok) throw new Error(`JSON请求失败：${response.status}`);
                 return response.json();
             })
             .then(data => {
-                // 格式化数据，强制兜底tags为数组
+                if (!Array.isArray(data)) throw new Error("JSON不是数组格式");
+                // 格式化数据，给text/tags双重兜底
                 INIT_EVENTS = data.map((event, index) => ({
                     id: `event_${index + 1}`,
-                    text: event.text || "",
-                    tags: Array.isArray(event.tags) ? event.tags : [] // 兜底
+                    text: event.text || "无内容",
+                    tags: Array.isArray(event.tags) ? event.tags : []
                 }));
                 initDB();
+                initTagList();
                 initEventIds();
                 updateProgress();
             })
             .catch(error => {
-                console.error("加载失败：", error);
-                alert("日常池加载失败，请检查JSON文件是否正确");
+                console.error("加载失败详情：", error);
+                alert(`日常池加载失败：${error.message}\n请检查JSON文件是否在仓库根目录`);
             });
 
-        // 本地存储操作（移除Tag推荐相关）
+        // 4. 本地存储操作（移除推荐相关代码）
         function initDB() {
             const savedEvents = localStorage.getItem("ocDailyEvents");
             if (!savedEvents) {
@@ -303,15 +444,47 @@
                 remainingEvents = JSON.parse(savedEvents);
             }
 
-            // 加载已抽记录
+            // 加载已抽记录，初始化已出现Tag
             const savedDrawnEvents = localStorage.getItem("ocDrawnEvents");
             if (savedDrawnEvents) {
                 drawnEvents = JSON.parse(savedDrawnEvents);
+                drawnEvents.forEach(event => {
+                    event.tags.forEach(tag => appearedTags.add(tag));
+                });
+                showAppearedTags();
                 renderHistoryList(drawnEvents);
             }
         }
 
-        // 防重复抽签逻辑
+        function getAllEventsFromDB() {
+            return JSON.parse(localStorage.getItem("ocDailyEvents")) || [];
+        }
+
+        function saveDrawnEventToDB(event) {
+            drawnEvents.push(event);
+            localStorage.setItem("ocDrawnEvents", JSON.stringify(drawnEvents));
+            // 抽中后显示对应Tag
+            event.tags.forEach(tag => appearedTags.add(tag));
+            showAppearedTags();
+        }
+
+        function clearDB() {
+            localStorage.removeItem("ocDailyEvents");
+            localStorage.removeItem("ocDrawnEvents");
+            localStorage.removeItem("ocDrawnEventIds");
+            remainingEvents = [];
+            drawnEvents = [];
+            selectedTags = [];
+            filterLogic = "and";
+            appearedTags.clear();
+            drawnEventIds.clear();
+            document.getElementById("andSwitch").classList.add("active");
+            document.getElementById("orSwitch").classList.remove("active");
+            initDB();
+            updateProgress();
+        }
+
+        // 5. 防重复抽签逻辑（保留原功能）
         function initEventIds() {
             allEventIds = INIT_EVENTS.map(event => event.id);
             const savedDrawnIds = localStorage.getItem("ocDrawnEventIds");
@@ -331,21 +504,90 @@
         }
 
         function updateProgress() {
-            const progressText = document.getElementById("progressText");
-            progressText.textContent = `本轮进度：${drawnEventIds.size}/${allEventIds.length}`;
+            document.getElementById("progressText").textContent = `本轮进度：${drawnEventIds.size}/${allEventIds.length}`;
         }
 
-        // 核心抽签功能
+        // 6. Tag筛选逻辑（保留且/或，移除推荐高亮）
+        function initTagList() {
+            renderTagList("roleTagList", TAG_CATEGORIES.role, "tag-role");
+            renderTagList("orgTagList", TAG_CATEGORIES.org, "tag-org");
+            renderTagList("sceneTagList", TAG_CATEGORIES.scene, "tag-scene");
+            renderTagList("categoryTagList", TAG_CATEGORIES.category, "tag-category-type");
+        }
+
+        function renderTagList(containerId, tags, className) {
+            const container = document.getElementById(containerId);
+            container.innerHTML = "";
+            tags.forEach(tag => {
+                const tagItem = document.createElement("div");
+                tagItem.className = `tag-item ${className}`;
+                tagItem.textContent = tag;
+                tagItem.id = `tag-${tag}`;
+                tagItem.onclick = () => toggleTagSelection(tag, tagItem);
+                container.appendChild(tagItem);
+            });
+        }
+
+        // 抽中后才显示对应Tag（保留原功能）
+        function showAppearedTags() {
+            appearedTags.forEach(tag => {
+                const tagEl = document.getElementById(`tag-${tag}`);
+                if (tagEl) tagEl.style.display = "inline-block";
+            });
+        }
+
+        // 切换Tag选中状态（移除推荐高亮调用）
+        function toggleTagSelection(tag, element) {
+            if (selectedTags.includes(tag)) {
+                selectedTags = selectedTags.filter(t => t !== tag);
+                element.classList.remove("selected");
+            } else {
+                selectedTags.push(tag);
+                element.classList.add("selected");
+            }
+            filterEvents(); // 只保留筛选，删掉推荐高亮
+        }
+
+        // 筛选逻辑（且/或，保留原功能）
+        function switchLogic(logic) {
+            filterLogic = logic;
+            document.getElementById("andSwitch").classList.toggle("active", logic === "and");
+            document.getElementById("orSwitch").classList.toggle("active", logic === "or");
+            filterEvents();
+        }
+
+        function filterEvents() {
+            let filteredEvents = [...drawnEvents];
+            if (selectedTags.length > 0) {
+                filteredEvents = filterLogic === "and"
+                    ? filteredEvents.filter(e => selectedTags.every(t => e.tags.includes(t)))
+                    : filteredEvents.filter(e => selectedTags.some(t => e.tags.includes(t)));
+            }
+            renderHistoryList(filteredEvents);
+        }
+
+        // 清空筛选（保留原功能）
+        function clearAllFilter() {
+            selectedTags = [];
+            document.querySelectorAll(".tag-item").forEach(item => {
+                item.classList.remove("selected");
+            });
+            filterLogic = "and";
+            document.getElementById("andSwitch").classList.add("active");
+            document.getElementById("orSwitch").classList.remove("active");
+            renderHistoryList(drawnEvents);
+        }
+
+        // 7. 抽签核心功能（保留原功能）
         function drawLottery() {
             const drawBtn = document.getElementById("drawBtn");
-            const resultElement = document.getElementById("result");
-            
+            const resultEl = document.getElementById("result");
             document.getElementById("hint").style.display = "none";
-            
+
             if (remainingEvents.length === 0) {
                 drawBtn.disabled = true;
-                resultElement.innerHTML = "✨ 更多未来正在发生！<br/>📃 可查看已记录便签<br/>🗑️ 点击销毁所有便签即可重新抽取～";
-                resultElement.classList.add("show");
+                resultEl.innerHTML = "✨ 更多未来正在发生！<br/>📃 可通过Tags筛选已阅便签 <br/>🗑️ 点击销毁所有便签即可重新抽取～";
+                resultEl.classList.add("show");
                 return;
             }
 
@@ -356,32 +598,29 @@
             saveDrawnIds();
             updateRemainingEvents();
             
-            // 保存已抽记录
-            drawnEvents.push(selectedEvent);
-            localStorage.setItem("ocDrawnEvents", JSON.stringify(drawnEvents));
-            
-            resultElement.innerHTML = selectedEvent.text;
-            resultElement.classList.add("show");
-            renderHistoryList(drawnEvents);
+            saveDrawnEventToDB(selectedEvent);
+            resultEl.innerHTML = selectedEvent.text;
+            resultEl.classList.add("show");
+            filterEvents();
         }
 
-        // 渲染历史记录
+        // 8. 渲染历史记录（保留原功能）
         function renderHistoryList(events) {
             const historyList = document.getElementById("historyList");
             historyList.innerHTML = "";
-            
+
             if (events.length === 0) {
                 historyList.innerHTML = '<div class="empty-history">还没抽过便签哦～</div>';
                 return;
             }
-            
+
             events.forEach(event => {
                 const item = document.createElement("div");
                 item.className = "history-item";
-                
+
                 const textDiv = document.createElement("div");
                 textDiv.innerHTML = event.text;
-                
+
                 const tagBadge = document.createElement("div");
                 tagBadge.className = "history-tag-badge";
                 event.tags.forEach(tag => {
@@ -390,14 +629,14 @@
                     tagSpan.textContent = tag;
                     tagBadge.appendChild(tagSpan);
                 });
-                
+
                 item.appendChild(textDiv);
                 item.appendChild(tagBadge);
                 historyList.appendChild(item);
             });
         }
 
-        // 基础交互
+        // 9. 基础交互（抽屉/销毁记录，保留原功能）
         function toggleDrawer(drawerName) {
             const content = document.getElementById(`${drawerName}Content`);
             const arrow = document.getElementById(`${drawerName}Arrow`);
@@ -406,33 +645,22 @@
         }
 
         function confirmClearHistory() {
-            if (confirm("⚠️ 确认销毁所有已阅便签记录？\n此操作不可恢复！")) {
+            if (confirm("⚠️ 确认销毁所有已阅便签记录？\n此操作不可恢复，且仅清空本设备记录！")) {
                 clearAllHistory();
                 alert("已销毁所有便签记录～");
             }
         }
 
         function clearAllHistory() {
-            localStorage.removeItem("ocDailyEvents");
-            localStorage.removeItem("ocDrawnEvents");
-            localStorage.removeItem("ocDrawnEventIds");
-            
-            INIT_EVENTS = [];
-            remainingEvents = [];
-            drawnEvents = [];
-            drawnEventIds.clear();
-            allEventIds = [];
-            
+            clearDB();
             document.getElementById("result").classList.remove("show");
             document.getElementById("hint").style.display = "block";
             document.getElementById("drawBtn").disabled = false;
-            
+            clearAllFilter();
             renderHistoryList([]);
-            updateProgress();
-        }
-
-        function clearAllFilter() {
-            renderHistoryList(drawnEvents);
+            document.querySelectorAll(".tag-item").forEach(item => {
+                item.style.display = "none";
+            });
         }
     </script>
 </body>
