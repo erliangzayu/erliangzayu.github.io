@@ -28,15 +28,18 @@
             line-height: 1.5;
         }
         /* 签盒样式 */
+        /* 签盒样式：改为自适应高度 */
         .lottery-box {
             width: 90%;
-            max-width: 700px;
-            height: 320px;
+            max-width: 700px; /* 限制最大宽度，避免电脑端太宽 */
+            min-height: 200px; /* 最小高度，保证空状态也好看 */
+            height: auto; /* 让高度随内容自动撑开 */
+            padding: 30px 20px; /* 内边距，让文字和边框有呼吸感 */
             border: 1px solid #e0d8d0;
             border-radius: 16px;
             background-color: #fff;
             display: flex;
-            align-items: center;
+            align-items: flex-start; /* 文字从顶部开始排，更自然 */
             justify-content: center;
             margin: 20px 0;
             box-shadow: 0 6px 12px rgba(0,0,0,0.04);
@@ -48,14 +51,18 @@
             text-align: center;
             padding: 0 20px;
         }
+        /* 结果文字排版优化 */
         .result {
             font-size: 22px;
             color: #333;
-            text-align: center;
-            padding: 0 20px;
-            line-height: 1.8;
+            text-align: left; /* 改为左对齐，比居中更易读 */
+            line-height: 1.6; /* 行高更舒适 */
             opacity: 0;
             transition: opacity 0.8s ease;
+            /* 自动排版核心 */
+            word-wrap: break-word; /* 允许长单词换行 */
+            overflow-wrap: break-word; /* 现代浏览器换行标准 */
+            hyphens: auto; /* 自动断词（英文更明显，中文也能优化） */
         }
         .result.show {
             opacity: 1;
@@ -284,13 +291,15 @@
             flex-wrap: wrap;
             gap: 10px;
         }
-        .history-item {
-            padding: 8px 16px;
-            background-color: #f9f7f5;
-            border-radius: 12px;
+       /* 历史记录里的便签文字排版 */
+        .history-item > div:first-child {
             font-size: 15px;
-            color: #5a5045;
-            position: relative;
+            line-height: 1.5;
+            text-align: left;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            hyphens: auto;
+        }
         }
         .history-tag-badge {
             display: flex;
