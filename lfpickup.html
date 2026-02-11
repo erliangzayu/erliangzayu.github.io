@@ -493,18 +493,24 @@
             } else {
                 remainingEvents = JSON.parse(savedEvents);
             }
-            initTagRecommend();
-            const savedDrawnEvents = localStorage.getItem("ocDrawnEvents");
-            if (savedDrawnEvents) {
-                drawnEvents = JSON.parse(savedDrawnEvents);
-                drawnEvents.forEach(event => {
-                    event.tags.forEach(tag => appearedTags.add(tag));
-                });
-                showAppearedTags();
-                renderHistoryList(drawnEvents);
-            }
-        }
-
+            function initTagRecommend() {
+    const allEvents = getAllEventsFromDB();
+    allEvents.forEach(event => {
+        // 核心加这1行：兜底tags为空数组
+        const tags = event.tags || [];
+        // 再加1行：如果不是数组，直接跳过
+        if (!Array.isArray(tags)) return;
+        
+        tags.forEach(tag1 => {
+            if (!tagRecommendMap[tag1]) tagRecommendMap[tag1] = {};
+            tags.forEach(tag2 => {
+                if (tag1 !== tag2) {
+                    tagRecommendMap[tag1][tag2] = (tagRecommendMap[tag1][tag2] || 0) + 1;
+                }
+            });
+        });
+    });
+}
         function getAllEventsFromDB() {
             return JSON.parse(localStorage.getItem("ocDailyEvents")) || [];
         }
