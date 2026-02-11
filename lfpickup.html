@@ -28,8 +28,7 @@
             line-height: 1.5;
         }
         /* 签盒样式 */
-        /* 签盒样式：改为自适应高度 */
-        .lottery-box {
+       .lottery-box {
             width: 90%;
             max-width: 700px; /* 限制最大宽度，避免电脑端太宽 */
             min-height: 200px; /* 最小高度，保证空状态也好看 */
@@ -39,7 +38,7 @@
             border-radius: 16px;
             background-color: #fff;
             display: flex;
-            align-items: flex-start; /* 文字从顶部开始排，更自然 */
+            align-items: center; /* 改回垂直居中 */
             justify-content: center;
             margin: 20px 0;
             box-shadow: 0 6px 12px rgba(0,0,0,0.04);
@@ -53,16 +52,16 @@
         }
         /* 结果文字排版优化 */
         .result {
-            font-size: 22px;
+            font-size: 18px; /* 从22px调小，更舒适 */
             color: #333;
-            text-align: left; /* 改为左对齐，比居中更易读 */
-            line-height: 1.6; /* 行高更舒适 */
+            text-align: center; /* 改回居中显示 */
+            line-height: 1.6; /* 行高保持舒适，不修改 */
             opacity: 0;
             transition: opacity 0.8s ease;
-            /* 自动排版核心 */
-            word-wrap: break-word; /* 允许长单词换行 */
-            overflow-wrap: break-word; /* 现代浏览器换行标准 */
-            hyphens: auto; /* 自动断词（英文更明显，中文也能优化） */
+            /* 保留换行优化，不影响居中 */
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            hyphens: auto;
         }
         .result.show {
             opacity: 1;
@@ -292,14 +291,13 @@
             gap: 10px;
         }
        /* 历史记录里的便签文字排版 */
-        .history-item > div:first-child {
+         .history-item {
+            padding: 8px 16px;
+            background-color: #f9f7f5;
+            border-radius: 12px;
             font-size: 15px;
-            line-height: 1.5;
-            text-align: left;
-            word-wrap: break-word;
-            overflow-wrap: break-word;
-            hyphens: auto;
-        }
+            color: #5a5045;
+            position: relative;
         }
         .history-tag-badge {
             display: flex;
@@ -321,22 +319,23 @@
             padding: 20px 0;
         }
         /* 响应式适配 */
-        @media (max-width: 600px) {
-            .lottery-box {
-                height: 280px;
-            }
-            .result {
-                font-size: 20px;
-            }
-            .draw-btn {
-                padding: 10px 24px;
-                font-size: 16px;
-            }
-            .clear-btn {
-                padding: 4px 14px;
-                font-size: 12px;
-            }
+    @media (max-width: 600px) {
+        .lottery-box {
+            min-height: 280px;
         }
+        .result {
+            font-size: 16px; /* 手机端从20px调小 */
+        }
+        .draw-btn {
+            padding: 10px 24px;
+            font-size: 16px;
+        }
+        .clear-btn {
+            padding: 4px 14px;
+            font-size: 12px;
+        }
+    }
+
     </style>
 </head>
 <body>
@@ -677,7 +676,7 @@
                 // 1. 按钮永久变灰不可点击
                 drawBtn.disabled = true;
                 // 2. 显示指定文案，换行展示提示语
-                resultElement.innerHTML = "更多未来正在发生！<br/>可点击已记录便签及Tags进行分类浏览";
+                resultElement.innerHTML = "✨ 更多未来正在发生！<br/>📃 可点击已记录便签及Tags进行分类浏览 <br/>🗑️ 点击销毁所有便签即可重新抽取～";
                 resultElement.classList.add("show");
                 return;
             }
