@@ -681,7 +681,7 @@
             updateRemainingEvents();
             
             saveDrawnEventToDB(selectedEvent);
-            resultElement.textContent = selectedEvent.text;
+            resultElement.innerHTML = selectedEvent.text;
             resultElement.classList.add("show");
             filterEvents();
         }
@@ -700,7 +700,7 @@
                 item.className = "history-item";
                 
                 const textDiv = document.createElement("div");
-                textDiv.textContent = event.text;
+                textDiv.innerHTML = event.text;
                 
                 const tagBadge = document.createElement("div");
                 tagBadge.className = "history-tag-badge";
