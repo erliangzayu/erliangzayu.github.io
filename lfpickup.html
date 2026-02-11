@@ -335,7 +335,6 @@
             font-size: 12px;
         }
     }
-
     </style>
 </head>
 <body>
@@ -457,7 +456,7 @@
         let allEventIds = []; // 所有事件的ID列表
 
         // ====================== 第二步：加载JSON文件 =====================
-        fetch('/lfpickup.json')
+        fetch('lfpickup.json')
             .then(response => {
                 if (!response.ok) throw new Error("JSON文件加载失败");
                 return response.json();
