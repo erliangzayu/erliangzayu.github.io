@@ -457,28 +457,27 @@
         let allEventIds = []; // 所有事件的ID列表
 
         // ====================== 第二步：加载JSON文件 =====================
-        // 替换原 fetch 代码（第465行左右）
-fetch('https://erliangzayu.github.io/lfpickup.json', { cache: 'no-cache' })
-    .then(response => {
-        if (!response.ok) throw new Error(`JSON加载失败：${response.status} ${response.statusText}`);
-        return response.json();
-    })
-    .then(data => {
-        INIT_EVENTS = data;
-        INIT_EVENTS = INIT_EVENTS.map((event, index) => ({
-            id: `event_${index + 1}`,
-            text: event.text,
-            tags: event.tags || [] // 新增：兜底空数组，避免tags undefined
-        }));
-        initDB();
-        initTagList(); 
-        initEventIds();
-        updateProgress();
-    })
-    .catch(error => {
-        console.error("加载失败：", error);
-        alert(`日常池加载失败：${error.message}\n请检查：\n1. JSON文件是否存在（当前地址：https://erliangzayu.github.io/lfpickup.json）\n2. 网络是否正常`);
-    });
+        fetch('lfpickup.json')
+            .then(response => {
+                if (!response.ok) throw new Error("JSON文件加载失败");
+                return response.json();
+            })
+            .then(data => {
+                INIT_EVENTS = data;
+                INIT_EVENTS = INIT_EVENTS.map((event, index) => ({
+                    id: `event_${index + 1}`,
+                    text: event.text,
+                    tags: event.tags
+                }));
+                initDB();
+                initTagList(); // 初始化所有Tag列表（含新增的类别）
+                initEventIds();
+                updateProgress();
+            })
+            .catch(error => {
+                console.error("加载失败：", error);
+                alert("日常池加载失败，请检查lfpickup.json文件是否正确上传");
+            });
 
         // ====================== 第三步：本地数据库操作 ======================
         function initDB() {
