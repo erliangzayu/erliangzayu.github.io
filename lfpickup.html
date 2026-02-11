@@ -240,6 +240,12 @@
             color: #6a5b7b;
             background-color: #f7f4fa;
         }
+        /* 新增：类别Tag样式 */
+        .tag-category-type {
+            border: 1px solid #e0c8b0;
+            color: #8a6d3b;
+            background-color: #faf6f0;
+        }
         /* 选中/推荐Tag样式 */
         .tag-item.selected {
             background-color: #e8ded2;
@@ -384,6 +390,14 @@
                             <!-- JS自动生成 -->
                         </div>
                     </div>
+
+                    <!-- 新增：类别Tag -->
+                    <div class="tag-category">
+                        <div class="category-name">📂 类别</div>
+                        <div class="tag-list" id="categoryTagList">
+                            <!-- JS自动生成 -->
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -415,11 +429,12 @@
 
     <script>
         // ====================== 第一步：初始化数据和配置 ======================
-        // 1. 基础Tag分类
+        // 1. 基础Tag分类（新增：category类别）
         const TAG_CATEGORIES = {
             role: ["杂鱼", "肆", "小林哲也", "北原真辉", "松本悠真", "凌", "渡边晴南", "Sophia", "Léona", "Noo", "Lee", "竹本律", "Adriana", "Felix", "Olivia", "Wesley", "Sasa", "Marcel"],
             org: ["竹本会","幻日乐队"],
-            scene: ["九木酒屋", "雾港仓库", "幻日排练室", "福源堂"]
+            scene: ["九木酒屋", "雾港仓库", "幻日排练室", "福源堂"],
+            category: ["秘密", "剪报"] // 新增：类别Tag
         };
 
         // 2. 全局变量（移除倒计时/重新抽取相关变量）
@@ -447,7 +462,7 @@
                     tags: event.tags
                 }));
                 initDB();
-                initTagList();
+                initTagList(); // 初始化所有Tag列表（含新增的类别）
                 initEventIds();
                 updateProgress();
             })
@@ -536,9 +551,12 @@
 
         // ====================== 第五步：Tag按需显示 ======================
         function initTagList() {
+            // 初始化原有Tag列表
             renderTagList("roleTagList", TAG_CATEGORIES.role, "tag-role");
             renderTagList("orgTagList", TAG_CATEGORIES.org, "tag-org");
             renderTagList("sceneTagList", TAG_CATEGORIES.scene, "tag-scene");
+            // 新增：初始化类别Tag列表
+            renderTagList("categoryTagList", TAG_CATEGORIES.category, "tag-category-type");
         }
 
         function renderTagList(containerId, tags, className) {
@@ -650,7 +668,7 @@
                 // 1. 按钮永久变灰不可点击
                 drawBtn.disabled = true;
                 // 2. 显示指定文案，换行展示提示语
-                resultElement.innerHTML = "✨ 更多未来正在发生！<br/>👀 可点击已记录便签及Tags进行分类浏览<br/>🗑️ 点击销毁便签可重新抽取～";
+                resultElement.innerHTML = "更多未来正在发生！<br/>可点击已记录便签及Tags进行分类浏览";
                 resultElement.classList.add("show");
                 return;
             }
