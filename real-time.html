@@ -1,1 +1,460 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🦁 Lionfish城 · OC实时行踪</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+        body { background: #0f1623; color: #e6edf3; padding: 20px; min-height: 100vh; overflow-x: hidden; }
+        
+        /* 顶部时间+路径 */
+        .header { text-align: center; margin-bottom: 24px; }
+        .title { font-size: 24px; font-weight: 600; color: #d7e4ff; margin-bottom: 8px; }
+        .real-clock { display: inline-block; background: #1b263b; padding: 8px 16px; border-radius: 30px; color: #a9b8d4; font-size: 15px; }
+        .area-path { margin-top: 8px; font-size: 14px; color: #8a9bb8; }
+        
+        /* 大区导航 */
+        .big-area-scroll { display: flex; gap: 10px; overflow-x: auto; padding: 8px 0; scrollbar-width: none; margin-bottom: 12px; }
+        .big-area-scroll::-webkit-scrollbar { display: none; }
+        .big-area-tab { white-space: nowrap; padding: 8px 16px; border: 2px solid #253450; border-radius: 20px; cursor: pointer; transition: 0.3s; color: #c2d0e7; }
+        .big-area-tab.active { background: #3a6ef0; color: #fff; border-color: #3a6ef0; }
+        
+        /* 小地点导航+拖拽容器 */
+        .small-area-wrap { position: relative; overflow: hidden; }
+        .small-area-scroll { display: flex; gap: 12px; padding: 10px 0; transition: transform 0.3s ease; }
+        .small-area-tab { white-space: nowrap; padding: 10px 20px; border: 2px solid #253450; border-radius: 30px; cursor: pointer; transition: 0.3s; color: #c2d0e7; flex-shrink: 0; }
+        .small-area-tab.active { background: #4d82f9; color: #fff; border-color: #4d82f9; }
+        
+        /* 主体容器：OC卡片 + 主人栏 */
+        .main-container { display: flex; gap: 20px; margin-top: 20px; }
+        .oc-container { flex: 1; }
+        .owner-sidebar { width: 280px; background: #172135; border-radius: 18px; padding: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.3); flex-shrink: 0; display: none; }
+        .owner-title { font-size: 16px; font-weight: 600; color: #edf2ff; margin-bottom: 12px; border-bottom: 1px solid #253450; padding-bottom: 8px; }
+        .owner-card { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+        .owner-avatar { width: 40px; height: 40px; border-radius: 10px; object-fit: cover; }
+        .owner-info { flex: 1; }
+        .owner-name { font-size: 15px; font-weight: 600; color: #edf2ff; }
+        .owner-status { font-size: 12px; color: #9cb8e7; }
+        
+        /* OC卡片网格 */
+        .oc-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
+        .oc-card { position: relative; background: #172135; border-radius: 18px; padding: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.3); border-left: 4px solid #4d82f9; cursor: pointer; transition: 0.3s; }
+        .oc-card:hover { transform: translateY(-4px); box-shadow: 0 8px 20px rgba(77,130,249,0.25); }
+        .oc-avatar { width: 50px; height: 50px; border-radius: 12px; object-fit: cover; margin-right: 12px; }
+        .oc-row { display: flex; align-items: center; }
+        .oc-info { flex: 1; }
+        .oc-name { font-size: 16px; font-weight: 600; color: #edf2ff; margin-bottom: 4px; }
+        .oc-place { font-size: 12px; color: #9cb8e7; }
+        .oc-action { font-size: 14px; color: #c2d0e7; margin-top: 6px; line-height: 1.4; }
+        
+        /* 悬浮弹窗 */
+        .oc-popup { position: absolute; bottom: calc(100% + 10px); left: 50%; transform: translateX(-50%); width: 200px; background: #1e2a44; color: #e6edf3; padding: 12px; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.4); font-size: 14px; line-height: 1.5; z-index: 10; opacity: 0; pointer-events: none; transition: 0.2s; }
+        .oc-card:hover .oc-popup { opacity: 1; pointer-events: all; }
+        .oc-popup a { color: #5f9fff; text-decoration: underline; }
+        
+        /* 聊天气泡 */
+        .chat-bubble-wrap { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); z-index: 999; display: flex; flex-direction: column; gap: 8px; max-width: 80%; }
+        .chat-bubble { background: #1e2a44; padding: 12px 16px; border-radius: 18px; box-shadow: 0 4px 12px rgba(0,0,0,0.4); display: flex; align-items: center; gap: 10px; animation: fadeInUp 0.3s ease; }
+        .chat-avatar { width: 36px; height: 36px; border-radius: 50%; object-fit: cover; }
+        .chat-content { flex: 1; }
+        .chat-name { font-size: 12px; color: #9cb8e7; margin-bottom: 2px; }
+        .chat-text { font-size: 14px; color: #e6edf3; }
+        
+        /* 空状态 */
+        .empty { grid-column: span 2; text-align: center; padding: 60px 0; color: #6b7fa5; }
+        
+        /* 动画 */
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translate(-50%, 20px); }
+            to { opacity: 1; transform: translate(-50%, 0); }
+        }
+        @keyframes fadeOut {
+            from { opacity: 1; }
+            to { opacity: 0; }
+        }
+        .fade-out { animation: fadeOut 0.3s ease forwards; }
+        
+        /* 移动端适配 */
+        @media (max-width: 768px) {
+            .main-container { flex-direction: column; }
+            .owner-sidebar { width: 100%; display: none; margin-top: 20px; }
+            .oc-grid { grid-template-columns: 1fr; }
+            .chat-bubble-wrap { bottom: 20px; max-width: 90%; }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="title">🦁 Lionfish城 · OC实时行踪</div>
+        <div class="real-clock" id="clock">加载系统时间…</div>
+        <div class="area-path" id="areaPath">1区 > 居酒屋</div>
+    </div>
 
+    <!-- 大区导航 -->
+    <div class="big-area-scroll" id="bigAreaWrap"></div>
+
+    <!-- 小地点导航（支持拖拽） -->
+    <div class="small-area-wrap" id="smallAreaWrap">
+        <div class="small-area-scroll" id="smallAreaScroll"></div>
+    </div>
+
+    <!-- 主体：OC卡片 + 主人栏 -->
+    <div class="main-container">
+        <div class="oc-container" id="ocContainer">
+            <div class="empty">加载中...</div>
+        </div>
+        <div class="owner-sidebar" id="ownerSidebar">
+            <div class="owner-title">📍 地点主人</div>
+            <div id="ownerContent"></div>
+        </div>
+    </div>
+
+    <!-- 聊天气泡容器 -->
+    <div class="chat-bubble-wrap" id="chatBubbleWrap"></div>
+
+    <script>
+        // 全局变量
+        let ocData = [];
+        let areaData = [];
+        let chatData = [];
+        let randomData = [];
+        let currentBigArea = "";
+        let currentSmallArea = "";
+        let chatTriggered = new Set(); // 记录已触发的对话，防止重复
+        
+        // 1. 加载所有JSON数据库
+        async function loadAllData() {
+            try {
+                // 加载JSON文件（GitHub Pages路径，和real-time.html同目录）
+                const [ocRes, areaRes, chatRes, randomRes] = await Promise.all([
+                    fetch('./ocData.json'),
+                    fetch('./areaData.json'),
+                    fetch('./chatData.json'),
+                    fetch('./randomData.json')
+                ]);
+                
+                ocData = await ocRes.json();
+                areaData = await areaRes.json();
+                randomData = await randomRes.json();
+                chatData = await chatRes.json();
+                
+                // 初始化页面
+                initAreaNav();
+                initDragScroll();
+                updateRealTime();
+                renderOC();
+                // 每分钟更新一次
+                setInterval(updateRealTime, 60000);
+            } catch (err) {
+                console.error("加载数据失败：", err);
+                document.getElementById("ocContainer").innerHTML = `<div class="empty">数据加载失败，请检查JSON文件</div>`;
+            }
+        }
+
+        // 2. 初始化大区/小地点导航
+        function initAreaNav() {
+            const bigAreaWrap = document.getElementById("bigAreaWrap");
+            const smallAreaScroll = document.getElementById("smallAreaScroll");
+            
+            // 渲染大区
+            const bigAreas = [...new Set(areaData.map(item => item.bigArea))];
+            bigAreaWrap.innerHTML = bigAreas.map(area => `
+                <div class="big-area-tab" data-area="${area}">${area}</div>
+            `).join('');
+            
+            // 默认选中第一个大区
+            currentBigArea = bigAreas[0];
+            document.querySelector(`.big-area-tab[data-area="${currentBigArea}"]`).classList.add("active");
+            
+            // 渲染当前大区的小地点
+            renderSmallArea(currentBigArea);
+            
+            // 大区切换事件
+            document.querySelectorAll(".big-area-tab").forEach(tab => {
+                tab.addEventListener("click", () => {
+                    document.querySelectorAll(".big-area-tab").forEach(t => t.classList.remove("active"));
+                    tab.classList.add("active");
+                    currentBigArea = tab.dataset.area;
+                    renderSmallArea(currentBigArea);
+                });
+            });
+            
+            // 小地点切换事件
+            smallAreaScroll.addEventListener("click", (e) => {
+                const tab = e.target.closest(".small-area-tab");
+                if (!tab) return;
+                document.querySelectorAll(".small-area-tab").forEach(t => t.classList.remove("active"));
+                tab.classList.add("active");
+                currentSmallArea = tab.dataset.area;
+                updateAreaPath();
+                renderOC();
+                renderOwnerSidebar();
+            });
+        }
+
+        // 3. 渲染小地点
+        function renderSmallArea(bigArea) {
+            const smallAreaScroll = document.getElementById("smallAreaScroll");
+            const smallAreas = areaData.filter(item => item.bigArea === bigArea).map(item => item.smallArea);
+            
+            smallAreaScroll.innerHTML = smallAreas.map(area => `
+                <div class="small-area-tab" data-area="${area}">${area}</div>
+            `).join('');
+            
+            // 默认选中第一个小地点
+            currentSmallArea = smallAreas[0];
+            document.querySelector(`.small-area-tab[data-area="${currentSmallArea}"]`).classList.add("active");
+            updateAreaPath();
+            renderOwnerSidebar();
+        }
+
+        // 4. 更新当前路径（如：1区 > 居酒屋）
+        function updateAreaPath() {
+            document.getElementById("areaPath").innerText = `${currentBigArea} > ${currentSmallArea}`;
+        }
+
+        // 5. 初始化拖拽滑动（小地点）
+        function initDragScroll() {
+            const wrap = document.getElementById("smallAreaWrap");
+            const scroll = document.getElementById("smallAreaScroll");
+            let startX = 0;
+            let scrollLeft = 0;
+            let isDragging = false;
+            
+            // PC端拖拽
+            wrap.addEventListener("mousedown", (e) => {
+                isDragging = true;
+                startX = e.pageX - wrap.offsetLeft;
+                scrollLeft = scroll.scrollLeft;
+                wrap.style.cursor = "grabbing";
+            });
+            
+            wrap.addEventListener("mouseleave", () => {
+                isDragging = false;
+                wrap.style.cursor = "grab";
+            });
+            
+            wrap.addEventListener("mouseup", () => {
+                isDragging = false;
+                wrap.style.cursor = "grab";
+            });
+            
+            wrap.addEventListener("mousemove", (e) => {
+                if (!isDragging) return;
+                e.preventDefault();
+                const x = e.pageX - wrap.offsetLeft;
+                const walk = (x - startX) * 2;
+                scroll.scrollLeft = scrollLeft - walk;
+            });
+            
+            // 移动端触摸滑动
+            wrap.addEventListener("touchstart", (e) => {
+                isDragging = true;
+                startX = e.touches[0].pageX - wrap.offsetLeft;
+                scrollLeft = scroll.scrollLeft;
+            });
+            
+            wrap.addEventListener("touchend", () => {
+                isDragging = false;
+            });
+            
+            wrap.addEventListener("touchmove", (e) => {
+                if (!isDragging) return;
+                const x = e.touches[0].pageX - wrap.offsetLeft;
+                const walk = (x - startX) * 2;
+                scroll.scrollLeft = scrollLeft - walk;
+            });
+        }
+
+        // 6. 获取实时系统时间
+        function getRealTime() {
+            const d = new Date();
+            return {
+                week: d.getDay(),       // 0=周日,1=周一...6=周六
+                hour: d.getHours(),     // 0-23
+                minute: d.getMinutes(), // 0-59
+                str: `${["周日","周一","周二","周三","周四","周五","周六"][d.getDay()]} ${d.getHours()}:${String(d.getMinutes()).padStart(2,'0')}`
+            };
+        }
+
+        // 7. 更新实时时间显示
+        function updateRealTime() {
+            const now = getRealTime();
+            document.getElementById("clock").innerText = "当前 · " + now.str;
+            // 重新渲染OC（时间变化可能导致OC状态变化）
+            renderOC();
+        }
+
+        // 8. 获取随机文案
+        function getRandomText(arr) {
+            return arr[Math.floor(Math.random() * arr.length)];
+        }
+
+        // 9. 渲染OC卡片
+        function renderOC() {
+            const now = getRealTime();
+            const ocContainer = document.getElementById("ocContainer");
+            
+            // 筛选当前时间、当前小地点的OC
+            const filteredOC = ocData.filter(oc => 
+                oc.week.includes(now.week) && 
+                oc.hour[0] <= now.hour && 
+                oc.hour[1] > now.hour && 
+                oc.area === currentSmallArea
+            );
+            
+            // 渲染OC卡片
+            if (filteredOC.length === 0) {
+                ocContainer.innerHTML = `<div class="empty">此刻这里没有OC</div>`;
+            } else {
+                ocContainer.innerHTML = filteredOC.map(oc => {
+                    // 获取随机动作文案
+                    const randomAction = oc.randomActions ? getRandomText(oc.randomActions) : oc.action;
+                    // 计算剩余时长
+                    const remainHour = oc.hour[1] - now.hour;
+                    const remainStr = remainHour > 0 ? `${remainHour}小时` : "即将离开";
+                    
+                    return `
+                        <div class="oc-card">
+                            <div class="oc-row">
+                                <img src="${oc.avatar}" class="oc-avatar" alt="${oc.name}">
+                                <div class="oc-info">
+                                    <div class="oc-name">${oc.name}</div>
+                                    <div class="oc-place">📍 ${oc.area}</div>
+                                </div>
+                            </div>
+                            <div class="oc-action">${randomAction}</div>
+                            <div class="oc-popup">
+                                <div>📅 停留至 ${oc.hour[1]}:00</div>
+                                <div>⏳ 还剩 ${remainStr}</div>
+                                <div><a href="${oc.link}" target="_blank">🔗 查看个人主页</a></div>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            }
+            
+            // 检查是否触发对话
+            checkChatTrigger(filteredOC, now);
+        }
+
+        // 10. 渲染地点主人栏
+        function renderOwnerSidebar() {
+            const ownerSidebar = document.getElementById("ownerSidebar");
+            const ownerContent = document.getElementById("ownerContent");
+            const now = getRealTime();
+            
+            // 获取当前小地点的主人信息
+            const areaInfo = areaData.find(item => item.smallArea === currentSmallArea);
+            if (!areaInfo || !areaInfo.owner || areaInfo.owner.length === 0) {
+                ownerSidebar.style.display = "none";
+                return;
+            }
+            
+            ownerSidebar.style.display = "block";
+            let ownerHtml = "";
+            
+            areaInfo.owner.forEach(ownerName => {
+                // 查找主人的OC信息
+                const ownerOC = ocData.find(oc => oc.name === ownerName);
+                if (!ownerOC) return;
+                
+                // 判断主人是否在场
+                const isPresent = ownerOC.week.includes(now.week) && 
+                                  ownerOC.hour[0] <= now.hour && 
+                                  ownerOC.hour[1] > now.hour && 
+                                  ownerOC.area === currentSmallArea;
+                
+                let status = "";
+                if (isPresent) {
+                    // 主人在场：随机动作
+                    status = ownerOC.randomActions ? getRandomText(ownerOC.randomActions) : ownerOC.action;
+                } else {
+                    // 主人不在：随机不在场文案
+                    status = getRandomText(randomData.absentText);
+                }
+                
+                ownerHtml += `
+                    <div class="owner-card">
+                        <img src="${ownerOC.avatar}" class="owner-avatar" alt="${ownerName}">
+                        <div class="owner-info">
+                            <div class="owner-name">${ownerName}</div>
+                            <div class="owner-status">${isPresent ? "✅ 正在此处" : "🔴 暂时离开"}：${status}</div>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            ownerContent.innerHTML = ownerHtml || `<div class="empty">暂无主人信息</div>`;
+        }
+
+        // 11. 检查是否触发指定对话
+        function checkChatTrigger(filteredOC, now) {
+            const chatWrap = document.getElementById("chatBubbleWrap");
+            // 获取当前地点的对话
+            const areaChats = chatData.filter(chat => chat.area === currentSmallArea);
+            
+            areaChats.forEach(chat => {
+                // 检查对话ID是否已触发
+                if (chatTriggered.has(chat.id)) return;
+                
+                // 检查是否所有参与人都在场
+                const allPresent = chat.characters.every(char => 
+                    filteredOC.some(oc => oc.name === char)
+                );
+                
+                if (allPresent) {
+                    // 标记为已触发
+                    chatTriggered.add(chat.id);
+                    // 随机选一段对话
+                    const randomChat = getRandomText(chat.dialogues);
+                    // 渲染聊天气泡
+                    renderChatBubble(randomChat, chat.characters);
+                }
+            });
+        }
+
+        // 12. 渲染聊天气泡
+        function renderChatBubble(dialogue, characters) {
+            const chatWrap = document.getElementById("chatBubbleWrap");
+            chatWrap.innerHTML = "";
+            
+            // 按顺序渲染对话
+            dialogue.forEach((msg, index) => {
+                const charOC = ocData.find(oc => oc.name === msg.character);
+                if (!charOC) return;
+                
+                const bubble = document.createElement("div");
+                bubble.className = "chat-bubble";
+                bubble.style.animationDelay = `${index * 0.3}s`;
+                bubble.innerHTML = `
+                    <img src="${charOC.avatar}" class="chat-avatar" alt="${msg.character}">
+                    <div class="chat-content">
+                        <div class="chat-name">${msg.character}</div>
+                        <div class="chat-text">${msg.text}</div>
+                    </div>
+                `;
+                chatWrap.appendChild(bubble);
+                
+                // 所有气泡显示完后，5秒后开始消失
+                if (index === dialogue.length - 1) {
+                    setTimeout(() => {
+                        document.querySelectorAll(".chat-bubble").forEach((b, i) => {
+                            setTimeout(() => {
+                                b.classList.add("fade-out");
+                                if (i === dialogue.length - 1) {
+                                    setTimeout(() => chatWrap.innerHTML = "", 300);
+                                }
+                            }, i * 200);
+                        });
+                    }, 5000);
+                }
+            });
+        }
+
+        // 初始化
+        loadAllData();
+    </script>
+</body>
+</html>
