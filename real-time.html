@@ -371,8 +371,9 @@
                     // 主人在场：随机动作
                     status = ownerOC.randomActions ? getRandomText(ownerOC.randomActions) : ownerOC.action;
                 } else {
-                    // 主人不在：随机不在场文案
-                    status = getRandomText(randomData.absentText);
+                   // 主人不在：优先读专属文案，没有就用默认
+                const charAbsentText = randomData.absentText[ownerName] || randomData.absentText.default;
+                status = getRandomText(charAbsentText);
                 }
                 
                 ownerHtml += `
