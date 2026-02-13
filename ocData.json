@@ -1,1 +1,77 @@
-
+[
+    {
+        "name": "杂鱼",
+        "avatar": "https://picsum.photos/seed/zayu/100/100.jpg",
+        "area": "居酒屋",
+        "week": [0,1,2,3,4,5,6],
+        "hour": [16,23],
+        "action": "在居酒屋备菜、整理食材",
+        "randomActions": [
+            "在认真洗菜、切葱，准备营业",
+            "正在擦盘子，被后厨热气熏得眯眼睛",
+            "低头核对今天的食材清单，怕不够用",
+            "哼着歌整理餐具，准备晚上的客人"
+        ],
+        "link": "https://erliangzayu.github.io/zayu.html"
+    },
+    {
+        "name": "肆",
+        "avatar": "https://picsum.photos/seed/si/100/100.jpg",
+        "area": "居酒屋",
+        "week": [6,0],
+        "hour": [18,21],
+        "action": "在居酒屋帮忙",
+        "randomActions": [
+            "乖乖坐在吧台帮忙擦杯子",
+            "被杂鱼催着去洗菜，慢吞吞起身",
+            "偷偷尝了一口刚做好的小菜",
+            "边帮忙边看书，一心二用"
+        ],
+        "link": "https://erliangzayu.github.io/si.html"
+    },
+    {
+        "name": "Sophia",
+        "avatar": "https://picsum.photos/seed/sophia/100/100.jpg",
+        "area": "livehouse",
+        "week": [1,2,3,4,5],
+        "hour": [18,22],
+        "action": "在livehouse准备商场演出",
+        "randomActions": [
+            "调试乐器，试弹了一段旋律",
+            "和Leona讨论演出流程，有点紧张",
+            "在后台化妆，整理演出服",
+            "喝口水润嗓子，准备彩排"
+        ],
+        "link": "https://erliangzayu.github.io/sophia.html"
+    },
+    {
+        "name": "Leona",
+        "avatar": "https://picsum.photos/seed/leona/100/100.jpg",
+        "area": "livehouse",
+        "week": [1,2,3,4,5],
+        "hour": [18,22],
+        "action": "在livehouse排练",
+        "randomActions": [
+            "调整音响设备，确保音质完美",
+            "和Sophia合练新歌，节奏超稳",
+            "检查乐器线材，怕演出出问题",
+            "给乐队成员递水，照顾大家"
+        ],
+        "link": "https://erliangzayu.github.io/leona.html"
+    },
+    {
+        "name": "OC5",
+        "avatar": "https://picsum.photos/seed/oc5/100/100.jpg",
+        "area": "公园",
+        "week": [6,0],
+        "hour": [10,13],
+        "action": "在公园散步喂猫",
+        "randomActions": [
+            "蹲在草坪上喂流浪猫，超温柔",
+            "带着小零食，逗小猫玩",
+            "坐在长椅上看风景，晒太阳",
+            "捡公园里的垃圾，爱护环境"
+        ],
+        "link": "https://erliangzayu.github.io/oc5.html"
+    }
+]
