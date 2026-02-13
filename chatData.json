@@ -1,1 +1,36 @@
-
+[
+    {
+        "id": "zayu-si-izakaya",
+        "area": "居酒屋",
+        "characters": ["杂鱼", "肆"],
+        "dialogues": [
+            [
+                {"character": "杂鱼", "text": "阿肆！去把那筐菜洗了，客人快到了！"},
+                {"character": "肆", "text": "知道了知道了，马上就去…"}
+            ],
+            [
+                {"character": "杂鱼", "text": "尝一口我刚做的味增汤，看看咸不咸？"},
+                {"character": "肆", "text": "嗯…有点淡，加点盐吧！"}
+            ],
+            [
+                {"character": "肆", "text": "鱼姐，今天能早点下班吗？我想看书"},
+                {"character": "杂鱼", "text": "不行！忙完再说，先干活！"}
+            ]
+        ]
+    },
+    {
+        "id": "sophia-leona-livehouse",
+        "area": "livehouse",
+        "characters": ["Sophia", "Leona"],
+        "dialogues": [
+            [
+                {"character": "Leona", "text": "Sophia，等下演出别紧张，按排练来就好"},
+                {"character": "Sophia", "text": "嗯嗯！有你在我就不怕～"}
+            ],
+            [
+                {"character": "Sophia", "text": "Leona姐，这个和弦是不是错了？"},
+                {"character": "Leona", "text": "是哦，改一下，这样更顺～"}
+            ]
+        ]
+    }
+]
