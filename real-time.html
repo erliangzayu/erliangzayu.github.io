@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🦁 Lionfish · OC实时行踪</title>
+    <title>🦁 Lionfish城 · OC实时行踪</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
         body { background: #0f1623; color: #e6edf3; padding: 20px; min-height: 100vh; overflow-x: hidden; }
@@ -17,17 +17,21 @@
         .tip-bar { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); background: #ff6b8b; color: #fff; padding: 8px 16px; border-radius: 20px; font-size: 14px; z-index: 999; opacity: 0; transition: opacity 0.3s ease; }
         .tip-bar.show { opacity: 1; }
         
-        /* 大区导航 */
-        .big-area-scroll { display: flex; gap: 10px; overflow-x: auto; padding: 8px 0; scrollbar-width: none; margin-bottom: 16px; }
-        .big-area-scroll::-webkit-scrollbar { display: none; }
-        .big-area-tab { white-space: nowrap; padding: 8px 16px; border: 2px solid #253450; border-radius: 20px; cursor: pointer; transition: 0.3s; color: #c2d0e7; }
-        .big-area-tab.active { background: #3a6ef0; color: #fff; border-color: #3a6ef0; }
+        /* 大区抽屉容器 */
+        .area-drawer-wrap { margin-bottom: 20px; }
+        .big-area-drawer { margin-bottom: 8px; }
+        .big-area-header { display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; background: #172135; border-radius: 12px; cursor: pointer; border: 2px solid #253450; }
+        .big-area-name { font-size: 16px; font-weight: 600; color: #c2d0e7; }
+        .drawer-icon { color: #8a9bb8; transition: transform 0.3s ease; }
+        .drawer-icon.active { transform: rotate(180deg); }
         
-        /* 小地点：网格布局+重要地点高亮 */
-        .small-area-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 20px; }
+        /* 小地点网格（抽屉内容） */
+        .small-area-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; padding: 12px 16px; background: #1b263b; border-radius: 0 0 12px 12px; margin-top: -2px; border: 2px solid #253450; border-top: none; display: none; }
+        .small-area-grid.show { display: grid; }
         @media (max-width: 768px) { .small-area-grid { grid-template-columns: repeat(2, 1fr); } }
         @media (max-width: 480px) { .small-area-grid { grid-template-columns: 1fr; } }
-        .small-area-card { padding: 12px 8px; border-radius: 12px; cursor: pointer; transition: 0.3s; text-align: center; color: #c2d0e7; background: #172135; border: 2px solid #253450; }
+        
+        .small-area-card { padding: 10px 6px; border-radius: 8px; cursor: pointer; transition: 0.3s; text-align: center; color: #c2d0e7; background: #172135; border: 1px solid #253450; }
         .small-area-card.active { background: #4d82f9; color: #fff; border-color: #4d82f9; }
         .small-area-card.important { background: #2d3b55; border-color: #ff6b8b; color: #ff6b8b; }
         .small-area-card.important.active { background: #ff6b8b; color: #fff; border-color: #ff6b8b; }
@@ -99,14 +103,11 @@
     <div class="header">
         <div class="title">🦁 Lionfish城 · OC实时行踪</div>
         <div class="real-clock" id="clock">加载系统时间…</div>
-        <div class="area-path" id="areaPath">1区 > 居酒屋</div>
+        <div class="area-path" id="areaPath">圣埃斯特罗区 > 九木酒屋</div>
     </div>
 
-    <!-- 大区导航 -->
-    <div class="big-area-scroll" id="bigAreaWrap"></div>
-
-    <!-- 小地点：网格布局 -->
-    <div class="small-area-grid" id="smallAreaGrid"></div>
+    <!-- 大区抽屉 + 小地点网格 -->
+    <div class="area-drawer-wrap" id="areaDrawerWrap"></div>
 
     <!-- 主体：OC卡片 + 主人栏 -->
     <div class="main-container">
@@ -132,7 +133,22 @@
         let currentSmallArea = "";
         let chatTriggered = new Set(); // 记录已触发的对话，防止重复
         
-        // 1. 加载所有JSON数据库
+        // 1. 解析时间段，判断当前时间是否在范围内
+        function isInTimeRange(currentTimeStr, timeRange) {
+            const [start, end] = timeRange.split("-");
+            const current = new Date(`2000-01-01 ${currentTimeStr}`);
+            const startDate = new Date(`2000-01-01 ${start}`);
+            const endDate = new Date(`2000-01-01 ${end}`);
+            return current >= startDate && current < endDate;
+        }
+
+        // 2. 读取地点专属随机action
+        function getLocationRandomAction(oc, area) {
+            const actions = oc.locationRandomActions[area] || [];
+            return actions.length > 0 ? getRandomText(actions) : "暂无状态";
+        }
+
+        // 3. 加载所有JSON数据库
         async function loadAllData() {
             try {
                 const [ocRes, areaRes, chatRes, randomRes] = await Promise.all([
@@ -148,7 +164,7 @@
                 chatData = await chatRes.json();
                 
                 // 初始化页面
-                initAreaNav();
+                initAreaDrawer();
                 updateRealTime();
                 renderOC();
                 // 每秒更新一次（精准到分钟）
@@ -159,89 +175,109 @@
             }
         }
 
-        // 2. 初始化大区/小地点导航
-        function initAreaNav() {
-            const bigAreaWrap = document.getElementById("bigAreaWrap");
-            const smallAreaGrid = document.getElementById("smallAreaGrid");
-            
-            // 渲染大区
-            const bigAreas = [...new Set(areaData.map(item => item.bigArea))];
-            bigAreaWrap.innerHTML = bigAreas.map(area => `
-                <div class="big-area-tab" data-area="${area}">${area}</div>
-            `).join('');
-            
-            // 默认选中第一个大区
-            currentBigArea = bigAreas[0];
-            document.querySelector(`.big-area-tab[data-area="${currentBigArea}"]`).classList.add("active");
-            
-            // 渲染当前大区的小地点（网格）
-            renderSmallArea(currentBigArea);
-            
-            // 大区切换事件
-            document.querySelectorAll(".big-area-tab").forEach(tab => {
-                tab.addEventListener("click", () => {
-                    document.querySelectorAll(".big-area-tab").forEach(t => t.classList.remove("active"));
-                    tab.classList.add("active");
-                    currentBigArea = tab.dataset.area;
-                    renderSmallArea(currentBigArea);
-                });
+        // 4. 初始化大区抽屉+小地点网格
+        function initAreaDrawer() {
+            const areaDrawerWrap = document.getElementById("areaDrawerWrap");
+            // 按大区分组小地点
+            const bigAreaGroups = {};
+            areaData.forEach(item => {
+                if (!bigAreaGroups[item.bigArea]) {
+                    bigAreaGroups[item.bigArea] = [];
+                }
+                bigAreaGroups[item.bigArea].push(item);
             });
-            
-            // 小地点点击事件
-            smallAreaGrid.addEventListener("click", (e) => {
-                const card = e.target.closest(".small-area-card");
-                if (!card) return;
-                document.querySelectorAll(".small-area-card").forEach(t => t.classList.remove("active"));
-                card.classList.add("active");
-                currentSmallArea = card.dataset.area;
-                updateAreaPath();
-                renderOC();
-                renderOwnerSidebar();
-            });
-        }
 
-        // 3. 渲染小地点（网格+重要地点高亮）
-        function renderSmallArea(bigArea) {
-            const smallAreaGrid = document.getElementById("smallAreaGrid");
-            const smallAreas = areaData.filter(item => item.bigArea === bigArea);
-            
-            smallAreaGrid.innerHTML = smallAreas.map(item => {
-                // 判断是否是重要地点
-                const isImportant = item.important ? "important" : "";
-                return `
-                    <div class="small-area-card ${isImportant}" data-area="${item.smallArea}">
-                        ${item.smallArea}
+            // 渲染大区抽屉
+            let drawerHtml = "";
+            const bigAreas = Object.keys(bigAreaGroups);
+            bigAreas.forEach((bigArea, index) => {
+                const smallAreas = bigAreaGroups[bigArea];
+                // 默认展开第一个大区
+                const isActive = index === 0 ? "show" : "";
+                const iconActive = index === 0 ? "active" : "";
+                
+                // 渲染小地点网格
+                let smallGridHtml = "";
+                smallAreas.forEach(smallArea => {
+                    const isImportant = smallArea.important ? "important" : "";
+                    // 默认选中第一个大区的第一个小地点
+                    const isSmallActive = (index === 0 && smallAreas.indexOf(smallArea) === 0) ? "active" : "";
+                    smallGridHtml += `
+                        <div class="small-area-card ${isImportant} ${isSmallActive}" data-big="${bigArea}" data-small="${smallArea.smallArea}">
+                            ${smallArea.smallArea}
+                        </div>
+                    `;
+                });
+
+                drawerHtml += `
+                    <div class="big-area-drawer">
+                        <div class="big-area-header" data-big="${bigArea}">
+                            <div class="big-area-name">${bigArea}</div>
+                            <div class="drawer-icon ${iconActive}">▼</div>
+                        </div>
+                        <div class="small-area-grid ${isActive}" id="smallGrid_${bigArea.replace(/\s/g, '')}">
+                            ${smallGridHtml}
+                        </div>
                     </div>
                 `;
-            }).join('');
-            
-            // 默认选中第一个小地点
-            currentSmallArea = smallAreas[0].smallArea;
-            document.querySelector(`.small-area-card[data-area="${currentSmallArea}"]`).classList.add("active");
-            updateAreaPath();
-            renderOwnerSidebar();
+            });
+            areaDrawerWrap.innerHTML = drawerHtml;
+
+            // 默认选中第一个大区和小地点
+            currentBigArea = bigAreas[0];
+            currentSmallArea = bigAreaGroups[currentBigArea][0].smallArea;
+
+            // 大区抽屉展开/收起事件
+            document.querySelectorAll(".big-area-header").forEach(header => {
+                header.addEventListener("click", () => {
+                    const bigArea = header.dataset.big;
+                    const gridId = `smallGrid_${bigArea.replace(/\s/g, '')}`;
+                    const grid = document.getElementById(gridId);
+                    const icon = header.querySelector(".drawer-icon");
+                    
+                    grid.classList.toggle("show");
+                    icon.classList.toggle("active");
+                });
+            });
+
+            // 小地点点击事件
+            document.querySelectorAll(".small-area-card").forEach(card => {
+                card.addEventListener("click", () => {
+                    // 取消所有小地点选中状态
+                    document.querySelectorAll(".small-area-card").forEach(t => t.classList.remove("active"));
+                    // 选中当前小地点
+                    card.classList.add("active");
+                    // 更新当前选中的大区/小地点
+                    currentBigArea = card.dataset.big;
+                    currentSmallArea = card.dataset.small;
+                    // 更新路径+渲染OC+渲染主人栏
+                    updateAreaPath();
+                    renderOC();
+                    renderOwnerSidebar();
+                });
+            });
         }
 
-        // 4. 更新当前路径（如：1区 > 居酒屋）
+        // 5. 更新当前路径
         function updateAreaPath() {
             const pathEl = document.getElementById("areaPath");
             pathEl.innerText = `${currentBigArea} > ${currentSmallArea}`;
             pathEl.classList.remove("random");
         }
 
-        // 5. 获取实时系统时间（精准到分钟）
+        // 6. 获取实时系统时间
         function getRealTime() {
             const d = new Date();
             return {
                 week: d.getDay(),       // 0=周日,1=周一...6=周六
                 hour: d.getHours(),     // 0-23
                 minute: d.getMinutes(), // 0-59
-                timeStr: `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`, // 08:01格式
+                timeStr: `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`,
                 str: `${["周日","周一","周二","周三","周四","周五","周六"][d.getDay()]} ${d.getHours()}:${String(d.getMinutes()).padStart(2,'0')}`
             };
         }
 
-        // 6. 显示随机事件提示
+        // 7. 显示随机事件提示
         function showRandomTip(text) {
             const tipBar = document.getElementById("tipBar");
             tipBar.innerText = text;
@@ -251,12 +287,12 @@
             }, 3000);
         }
 
-        // 7. 检查随机事件（核心：概率计算）
+        // 8. 检查随机事件
         function checkRandomEvent(oc, now) {
             if (!oc.randomEvents || oc.randomEvents.length === 0) {
-                // 无随机事件，返回基础行程
+                // 无随机事件，查基础行程
                 const baseSchedule = oc.baseSchedule.find(s => 
-                    s.week.includes(now.week) && s.time === now.timeStr
+                    s.week.includes(now.week) && isInTimeRange(now.timeStr, s.timeRange)
                 );
                 return {
                     isRandom: false,
@@ -264,15 +300,15 @@
                 };
             }
             
-            // 查找当前时间的随机事件
+            // 查当前时间的随机事件
             const randomEvent = oc.randomEvents.find(e => 
-                e.week.includes(now.week) && e.time === now.timeStr
+                e.week.includes(now.week) && isInTimeRange(now.timeStr, e.timeRange)
             );
             
             if (!randomEvent) {
-                // 无对应随机事件，返回基础行程
+                // 无随机事件，查基础行程
                 const baseSchedule = oc.baseSchedule.find(s => 
-                    s.week.includes(now.week) && s.time === now.timeStr
+                    s.week.includes(now.week) && isInTimeRange(now.timeStr, s.timeRange)
                 );
                 return {
                     isRandom: false,
@@ -280,7 +316,7 @@
                 };
             }
             
-            // 计算概率（0-100随机数）
+            // 计算概率
             const randomNum = Math.floor(Math.random() * 101);
             if (randomNum <= randomEvent.probability) {
                 // 触发随机事件
@@ -290,9 +326,9 @@
                     schedule: randomEvent
                 };
             } else {
-                // 未触发，返回基础行程
+                // 未触发，查基础行程
                 const baseSchedule = oc.baseSchedule.find(s => 
-                    s.week.includes(now.week) && s.time === now.timeStr
+                    s.week.includes(now.week) && isInTimeRange(now.timeStr, s.timeRange)
                 );
                 return {
                     isRandom: false,
@@ -301,29 +337,27 @@
             }
         }
 
-        // 8. 更新实时时间显示
+        // 9. 更新实时时间显示
         function updateRealTime() {
             const now = getRealTime();
             document.getElementById("clock").innerText = "当前 · " + now.str;
-            // 重新渲染OC（分钟变化可能导致OC状态变化）
             renderOC();
         }
 
-        // 9. 获取随机文案
+        // 10. 获取随机文案
         function getRandomText(arr) {
             return arr[Math.floor(Math.random() * arr.length)];
         }
 
-        // 10. 渲染OC卡片
+        // 11. 渲染OC卡片
         function renderOC() {
             const now = getRealTime();
             const ocContainer = document.getElementById("ocContainer");
             const pathEl = document.getElementById("areaPath");
             
-            // 清空随机路径样式
             pathEl.classList.remove("random");
             
-            // 筛选当前时间在当前小地点的OC
+            // 筛选当前地点的OC
             const filteredOC = [];
             ocData.forEach(oc => {
                 const { isRandom, schedule } = checkRandomEvent(oc, now);
@@ -336,7 +370,7 @@
                 }
             });
             
-            // 渲染OC卡片
+            // 渲染OC
             if (filteredOC.length === 0) {
                 ocContainer.innerHTML = `<div class="empty">此刻这里没有OC</div>`;
             } else {
@@ -345,13 +379,12 @@
                     const schedule = item.schedule;
                     const isRandom = item.isRandom;
                     
-                    // 随机动作
-                    const randomAction = oc.randomActions ? getRandomText(oc.randomActions) : schedule.action;
+                    // 读取地点专属随机action
+                    const randomAction = getLocationRandomAction(oc, schedule.area);
                     
                     // 随机事件标签
                     const randomTag = isRandom ? `<div class="oc-random-tag">✨ 随机事件</div>` : "";
                     
-                    // 路径栏加随机样式
                     if (isRandom) pathEl.classList.add("random");
                     
                     return `
@@ -366,7 +399,7 @@
                             </div>
                             <div class="oc-action">${randomAction}</div>
                             <div class="oc-popup">
-                                <div>📅 当前时段：${schedule.time}</div>
+                                <div>📅 当前时段：${schedule.timeRange || '实时'}</div>
                                 <div>⏳ 实时状态</div>
                                 <div><a href="${oc.link}" target="_blank">🔗 查看个人主页</a></div>
                             </div>
@@ -375,18 +408,17 @@
                 }).join('');
             }
             
-            // 检查是否触发对话
+            // 检查对话触发
             const ocNames = filteredOC.map(item => item.oc.name);
             checkChatTrigger(ocNames, now);
         }
 
-        // 11. 渲染地点主人栏
+        // 12. 渲染地点主人栏
         function renderOwnerSidebar() {
             const ownerSidebar = document.getElementById("ownerSidebar");
             const ownerContent = document.getElementById("ownerContent");
             const now = getRealTime();
             
-            // 获取当前小地点的主人信息
             const areaInfo = areaData.find(item => item.smallArea === currentSmallArea);
             if (!areaInfo || !areaInfo.owner || areaInfo.owner.length === 0) {
                 ownerSidebar.style.display = "none";
@@ -397,20 +429,17 @@
             let ownerHtml = "";
             
             areaInfo.owner.forEach(ownerName => {
-                // 查找主人的OC信息
                 const ownerOC = ocData.find(oc => oc.name === ownerName);
                 if (!ownerOC) return;
                 
-                // 检查主人当前状态（含随机事件）
                 const { isRandom, schedule } = checkRandomEvent(ownerOC, now);
                 let status = "暂无状态";
                 
                 if (schedule) {
                     status = isRandom ? 
                         `✅ 随机事件：${schedule.action}` : 
-                        `✅ 正在此处：${schedule.action}`;
+                        `✅ 正在此处：${getLocationRandomAction(ownerOC, schedule.area)}`;
                 } else {
-                    // 主人不在：随机不在场文案
                     const charAbsentText = randomData.absentText[ownerName] || randomData.absentText.default;
                     status = `🔴 暂时离开：${getRandomText(charAbsentText)}`;
                 }
@@ -429,38 +458,31 @@
             ownerContent.innerHTML = ownerHtml || `<div class="empty">暂无主人信息</div>`;
         }
 
-        // 12. 检查是否触发指定对话
+        // 13. 检查对话触发
         function checkChatTrigger(ocNames, now) {
             const chatWrap = document.getElementById("chatBubbleWrap");
-            // 获取当前地点的对话
             const areaChats = chatData.filter(chat => chat.area === currentSmallArea);
             
             areaChats.forEach(chat => {
-                // 检查对话ID是否已触发
                 if (chatTriggered.has(chat.id)) return;
                 
-                // 检查是否所有参与人都在场
                 const allPresent = chat.characters.every(char => 
                     ocNames.includes(char)
                 );
                 
                 if (allPresent) {
-                    // 标记为已触发
                     chatTriggered.add(chat.id);
-                    // 随机选一段对话
                     const randomChat = getRandomText(chat.dialogues);
-                    // 渲染聊天气泡
                     renderChatBubble(randomChat, chat.characters);
                 }
             });
         }
 
-        // 13. 渲染聊天气泡
+        // 14. 渲染聊天气泡
         function renderChatBubble(dialogue, characters) {
             const chatWrap = document.getElementById("chatBubbleWrap");
             chatWrap.innerHTML = "";
             
-            // 按顺序渲染对话
             dialogue.forEach((msg, index) => {
                 const charOC = ocData.find(oc => oc.name === msg.character);
                 if (!charOC) return;
@@ -477,7 +499,6 @@
                 `;
                 chatWrap.appendChild(bubble);
                 
-                // 所有气泡显示完后，5秒后开始消失
                 if (index === dialogue.length - 1) {
                     setTimeout(() => {
                         document.querySelectorAll(".chat-bubble").forEach((b, i) => {
