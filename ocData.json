@@ -1,77 +1,159 @@
 [
-    {
-        "name": "杂鱼",
-        "avatar": "https://picsum.photos/seed/zayu/100/100.jpg",
-        "area": "居酒屋",
-        "week": [0,1,2,3,4,5,6],
-        "hour": [16,23],
-        "action": "在居酒屋备菜、整理食材",
-        "randomActions": [
-            "在认真洗菜、切葱，准备营业",
-            "正在擦盘子，被后厨热气熏得眯眼睛",
-            "低头核对今天的食材清单，怕不够用",
-            "哼着歌整理餐具，准备晚上的客人"
-        ],
-        "link": "https://erliangzayu.github.io/zayu.html"
-    },
-    {
-        "name": "肆",
-        "avatar": "https://picsum.photos/seed/si/100/100.jpg",
-        "area": "居酒屋",
-        "week": [6,0],
-        "hour": [18,21],
-        "action": "在居酒屋帮忙",
-        "randomActions": [
-            "乖乖坐在吧台帮忙擦杯子",
-            "被杂鱼催着去洗菜，慢吞吞起身",
-            "偷偷尝了一口刚做好的小菜",
-            "边帮忙边看书，一心二用"
-        ],
-        "link": "https://erliangzayu.github.io/si.html"
-    },
-    {
-        "name": "Sophia",
-        "avatar": "https://picsum.photos/seed/sophia/100/100.jpg",
-        "area": "livehouse",
-        "week": [1,2,3,4,5],
-        "hour": [18,22],
-        "action": "在livehouse准备商场演出",
-        "randomActions": [
-            "调试乐器，试弹了一段旋律",
-            "和Leona讨论演出流程，有点紧张",
-            "在后台化妆，整理演出服",
-            "喝口水润嗓子，准备彩排"
-        ],
-        "link": "https://erliangzayu.github.io/sophia.html"
-    },
-    {
-        "name": "Leona",
-        "avatar": "https://picsum.photos/seed/leona/100/100.jpg",
-        "area": "livehouse",
-        "week": [1,2,3,4,5],
-        "hour": [18,22],
-        "action": "在livehouse排练",
-        "randomActions": [
-            "调整音响设备，确保音质完美",
-            "和Sophia合练新歌，节奏超稳",
-            "检查乐器线材，怕演出出问题",
-            "给乐队成员递水，照顾大家"
-        ],
-        "link": "https://erliangzayu.github.io/leona.html"
-    },
-    {
-        "name": "OC5",
-        "avatar": "https://picsum.photos/seed/oc5/100/100.jpg",
-        "area": "公园",
-        "week": [6,0],
-        "hour": [10,13],
-        "action": "在公园散步喂猫",
-        "randomActions": [
-            "蹲在草坪上喂流浪猫，超温柔",
-            "带着小零食，逗小猫玩",
-            "坐在长椅上看风景，晒太阳",
-            "捡公园里的垃圾，爱护环境"
-        ],
-        "link": "https://erliangzayu.github.io/oc5.html"
-    }
+  {
+    "name": "杂鱼",
+    "avatar": "https://picsum.photos/seed/zayu/100/100.jpg",
+    "baseSchedule": [
+      // 【默认规则】：未列出的15分钟节点，自动显示“九木酒屋”
+      
+      // 周一（1）：仅保留地点变化的15分钟节点
+      {"week":[1],"time":"08:00","area":"查理斯菜市场","action":"采购一周食材（新鲜蔬菜、肉类）"},
+      {"week":[1],"time":"08:15","area":"查理斯菜市场","action":"挑选新鲜青菜和海鲜"},
+      {"week":[1],"time":"08:30","area":"查理斯菜市场","action":"和摊主砍价买五花肉"},
+      {"week":[1],"time":"08:45","area":"查理斯菜市场","action":"采购完毕，整理食材袋"},
+      {"week":[1],"time":"09:00","area":"九木酒屋","action":"返回酒屋，开始整理采购的食材"},
+      {"week":[1],"time":"14:00","area":"福源堂诊所","action":"找Marcel拿调理身体的药"},
+      {"week":[1],"time":"14:15","area":"福源堂诊所","action":"和Marcel聊最近的睡眠情况"},
+      {"week":[1],"time":"14:30","area":"福源堂诊所","action":"Marcel给杂鱼量血压、把脉"},
+      {"week":[1],"time":"14:45","area":"福源堂诊所","action":"拿完药，和Marcel道别"},
+      {"week":[1],"time":"15:00","area":"九木酒屋","action":"返回酒屋，准备下午的营业"},
+      
+      // 周二（2）：仅保留地点变化的15分钟节点
+      {"week":[2],"time":"15:00","area":"海边柏油路","action":"找Adriana聊天，等她的渔船靠岸"},
+      {"week":[2],"time":"15:15","area":"海边柏油路","action":"眺望大海，吹海风"},
+      {"week":[2],"time":"15:30","area":"海边柏油路","action":"Adriana的渔船靠岸，迎上去"},
+      {"week":[2],"time":"15:45","area":"海边柏油路","action":"看Adriana卸新鲜海产"},
+      {"week":[2],"time":"16:00","area":"海边柏油路","action":"和Adriana分享零食，聊海上趣事"},
+      {"week":[2],"time":"16:15","area":"海边柏油路","action":"一起坐在路边看日落"},
+      {"week":[2],"time":"16:30","area":"海边柏油路","action":"帮Adriana整理渔获"},
+      {"week":[2],"time":"16:45","area":"海边柏油路","action":"和Adriana道别"},
+      {"week":[2],"time":"17:00","area":"九木酒屋","action":"返回酒屋，准备晚上的营业"},
+      
+      // 周三（3）：仅保留地点变化的15分钟节点
+      {"week":[3],"time":"16:00","area":"幻日排练厅","action":"给乐队送自制的章鱼足小吃"},
+      {"week":[3],"time":"16:15","area":"幻日排练厅","action":"看Sophia调试吉他"},
+      {"week":[3],"time":"16:30","area":"幻日排练厅","action":"和Leona讨论演出的小吃搭配"},
+      {"week":[3],"time":"16:45","area":"幻日排练厅","action":"听乐队排练新歌，给出建议"},
+      {"week":[3],"time":"17:00","area":"幻日排练厅","action":"在译弗楼天台吹风（基础节点）"},
+      {"week":[3],"time":"17:15","area":"幻日排练厅","action":"和乐队成员闲聊"},
+      {"week":[3],"time":"17:30","area":"幻日排练厅","action":"帮忙收拾排练室"},
+      {"week":[3],"time":"17:45","area":"幻日排练厅","action":"和乐队道别"},
+      {"week":[3],"time":"18:00","area":"九木酒屋","action":"返回酒屋，准备营业"},
+      
+      // 周四（4）：仅保留地点变化的15分钟节点
+      {"week":[4],"time":"10:00","area":"警署","action":"找北原真辉咨询暂住证政策"},
+      {"week":[4],"time":"10:15","area":"警署","action":"和北原真辉聊最近的治安情况"},
+      {"week":[4],"time":"10:30","area":"警署","action":"给北原真辉递咖啡，继续聊天"},
+      {"week":[4],"time":"10:45","area":"警署","action":"咨询完毕，感谢北原"},
+      {"week":[4],"time":"11:00","area":"九木酒屋","action":"返回酒屋，整理营业台账"},
+      {"week":[4],"time":"14:30","area":"商业街","action":"找小林哲也算一卦"},
+      {"week":[4],"time":"14:45","area":"商业街","action":"小林哲也给杂鱼算财运"},
+      {"week":[4],"time":"15:00","area":"商业街","action":"听小林哲也讲江湖趣事（基础节点）"},
+      {"week":[4],"time":"15:15","area":"商业街","action":"和小林哲也闲聊居酒屋生意"},
+      {"week":[4],"time":"15:30","area":"九木酒屋","action":"返回酒屋，准备晚餐时段"},
+      
+      // 周五（5）：仅保留地点变化的15分钟节点
+      {"week":[5],"time":"14:00","area":"8-11","action":"找松本悠真买点零食，送晚饭"},
+      {"week":[5],"time":"14:15","area":"8-11","action":"看悠真整理货架，递便当"},
+      {"week":[5],"time":"14:30","area":"8-11","action":"和悠真聊便利店的趣事"},
+      {"week":[5],"time":"14:45","area":"8-11","action":"帮悠真补货饮料"},
+      {"week":[5],"time":"15:00","area":"8-11","action":"提醒悠真按时吃饭"},
+      {"week":[5],"time":"15:15","area":"8-11","action":"和悠真道别"},
+      {"week":[5],"time":"15:30","area":"九木酒屋","action":"返回酒屋，切备料"},
+      {"week":[5],"time":"16:30","area":"极速网吧","action":"给Noo送吃的，看他打游戏"},
+      {"week":[5],"time":"16:45","area":"极速网吧","action":"提醒Noo别逃课太多"},
+      {"week":[5],"time":"17:00","area":"极速网吧","action":"看Noo打游戏，偶尔指导"},
+      {"week":[5],"time":"17:15","area":"极速网吧","action":"催Noo早点回学校"},
+      {"week":[5],"time":"17:30","area":"九木酒屋","action":"返回酒屋，开始备餐"},
+      
+      // 周六（6）：仅保留地点变化的15分钟节点
+      {"week":[6],"time":"09:00","area":"中央公园","action":"散步放松，坐在长椅上发呆"},
+      {"week":[6],"time":"09:15","area":"中央公园","action":"看居民遛狗，喂流浪猫"},
+      {"week":[6],"time":"09:30","area":"中央公园","action":"在公园长椅上看报纸"},
+      {"week":[6],"time":"09:45","area":"中央公园","action":"继续散步，绕公园一圈"},
+      {"week":[6],"time":"10:00","area":"中央公园","action":"坐在喷泉边休息"},
+      {"week":[6],"time":"10:15","area":"中央公园","action":"准备离开公园"},
+      {"week":[6],"time":"10:30","area":"九木酒屋","action":"返回酒屋，打扫卫生"},
+      {"week":[6],"time":"15:00","area":"瓦尔蒙特百货","action":"逛街，看新到的餐具"},
+      {"week":[6],"time":"15:15","area":"瓦尔蒙特百货","action":"在餐具区挑选日式碗碟"},
+      {"week":[6],"time":"15:30","area":"瓦尔蒙特百货","action":"在百货店逛装饰品区（基础节点）"},
+      {"week":[6],"time":"15:45","area":"瓦尔蒙特百货","action":"结账，拎着购物袋"},
+      {"week":[6],"time":"16:00","area":"九木酒屋","action":"返回酒屋，摆放新餐具"},
+      
+      // 周日（0）：仅保留地点变化的15分钟节点
+      {"week":[0],"time":"13:00","area":"欧客隆","action":"找Olivia聊天，帮她看店"},
+      {"week":[0],"time":"13:15","area":"欧客隆","action":"听大爷们胡侃世界局势"},
+      {"week":[0],"time":"13:30","area":"欧客隆","action":"帮Olivia整理货架"},
+      {"week":[0],"time":"13:45","area":"欧客隆","action":"给大爷们倒热水"},
+      {"week":[0],"time":"14:00","area":"欧客隆","action":"和Olivia闲聊（基础节点）"},
+      {"week":[0],"time":"14:15","area":"欧客隆","action":"继续帮Olivia看店"},
+      {"week":[0],"time":"14:30","area":"九木酒屋","action":"返回酒屋，准备食材"},
+      {"week":[0],"time":"17:00","area":"海滨沙滩","action":"独自散步，踩海水"},
+      {"week":[0],"time":"17:15","area":"海滨沙滩","action":"看荧光水母，心情平静"},
+      {"week":[0],"time":"17:30","area":"海滨沙滩","action":"遇到Marcel捡蛤蜊，打招呼"},
+      {"week":[0],"time":"17:45","area":"海滨沙滩","action":"和Marcel聊几句，继续散步"},
+      {"week":[0],"time":"18:00","area":"九木酒屋","action":"返回酒屋，准备营业"},
+      
+      // 营业时段（全周固定15分钟节点）
+      {"week":[0,1,2,3,4,5,6],"time":"19:30","area":"九木酒屋","action":"居酒屋开始营业，招呼客人"},
+      {"week":[0,1,2,3,4,5,6],"time":"20:00","area":"九木酒屋","action":"制作关东煮和烤串"},
+      {"week":[0,1,2,3,4,5,6],"time":"21:00","area":"九木酒屋","action":"招待熟客，推荐新品"},
+      {"week":[0,1,2,3,4,5,6],"time":"22:00","area":"九木酒屋","action":"忙完一波，稍作休息"},
+      {"week":[0,1,2,3,4,5,6],"time":"23:00","area":"九木酒屋","action":"收拾餐桌，准备打烊"},
+      {"week":[0,1,2,3,4,5,6],"time":"00:00","area":"九木酒屋","action":"居酒屋打烊，打扫卫生"},
+      {"week":[0,1,2,3,4,5,6],"time":"01:00","area":"九木酒屋","action":"整理后厨，清洗厨具"},
+      {"week":[0,1,2,3,4,5,6],"time":"02:00","area":"九木酒屋","action":"休息，喝杯梅子酒"},
+      {"week":[0,1,2,3,4,5,6],"time":"03:00","area":"九木酒屋","action":"在店内睡觉，闭店中"},
+      {"week":[0,1,2,3,4,5,6],"time":"04:00","area":"九木酒屋","action":"继续睡觉，等待天亮"}
+    ],
+    "randomEvents": [
+      {"week":[2],"time":"15:30","probability":15,"area":"旧港码头","action":"看Adriana卸货，帮忙搬新鲜海产","tip":"✨ 杂鱼临时改道去旧港码头啦！帮Adriana搬海产～"},
+      {"week":[4],"time":"15:00","probability":15,"area":"瓦尔蒙特百货","action":"被小林哲也拉去喝咖啡，聊最近的生意","tip":"✨ 杂鱼被小林哲也拉去瓦尔蒙特百货喝咖啡啦！"},
+      {"week":[0],"time":"14:00","probability":15,"area":"警署","action":"遇到北原真辉，一起聊最近的治安情况","tip":"✨ 杂鱼在小卖店遇到北原真辉，一起去警署啦！"},
+      {"week":[3],"time":"17:00","probability":15,"area":"译弗楼","action":"在译弗楼天台吹风，听乐队排练的声音","tip":"✨ 杂鱼去译弗楼天台啦！听乐队排练新歌～"},
+      {"week":[6],"time":"15:30","probability":15,"area":"瓦尔蒙特百货","action":"在商场门口帮居酒屋发传单，招揽客人","tip":"✨ 杂鱼在瓦尔蒙特百货门口发传单啦！快来九木酒屋～"}
+    ],
+    "randomActions": [
+      "在九木酒屋认真洗菜、切葱，准备营业",
+      "正在擦盘子，被后厨热气熏得眯眼睛",
+      "低头核对今天的食材清单，怕不够用",
+      "哼着歌整理餐具，准备晚上的客人",
+      "给熟客递上刚做好的烤串，笑着聊天",
+      "在后厨翻炒关东煮汤底，香味飘满整个店",
+      "靠在吧台休息，喝一口自己酿的梅子酒",
+      "整理酒柜，把清酒和啤酒摆得整整齐齐",
+      "和熟客聊最近的趣事，氛围轻松",
+      "切章鱼足，准备做招牌小吃",
+      "擦拭居酒屋的木质吧台，保持干净",
+      "检查冰箱温度，确保食材新鲜"
+    ],
+    "link": "https://erliangzayu.github.io/zayu.html"
+  },
+  {
+    "name": "Sophia",
+    "avatar": "https://picsum.photos/seed/sophia/100/100.jpg",
+    "baseSchedule": [
+      {"week":[1,2,3,4,5],"time":"18:00","area":"幻日排练厅","action":"排练演出曲目"},
+      {"week":[1,2,3,4,5],"time":"18:15","area":"幻日排练厅","action":"调试吉他，试弹旋律"},
+      {"week":[1,2,3,4,5],"time":"18:30","area":"幻日排练厅","action":"和Leona合练新歌"},
+      {"week":[1,2,3,4,5],"time":"18:45","area":"幻日排练厅","action":"休息，喝口水润嗓子"},
+      {"week":[1,2,3,4,5],"time":"19:00","area":"幻日排练厅","action":"继续排练，调整节奏"},
+      {"week":[0,6],"time":"18:00","area":"圣埃斯特罗广场","action":"和Leona逛街，放松心情"},
+      {"week":[0,6],"time":"18:15","area":"圣埃斯特罗广场","action":"在广场买冰淇淋，边走边聊"},
+      {"week":[0,6],"time":"18:30","area":"圣埃斯特罗广场","action":"看街头艺人表演，驻足欣赏"}
+    ],
+    "randomEvents": [
+      {"week":[2,4],"time":"18:00","probability":10,"area":"瓦尔蒙特百货","action":"先买奶茶，再去排练","tip":"✨ Sophia去瓦尔蒙特百货买奶茶啦！"}
+    ],
+    "randomActions": [
+      "调试乐器，试弹了一段旋律",
+      "和Leona讨论演出流程，有点紧张",
+      "在后台化妆，整理演出服",
+      "喝口水润嗓子，准备彩排",
+      "练习新歌的高音部分，反复调整",
+      "和乐队成员讨论编曲细节",
+      "给吉他换弦，确保演出不出错",
+      "听Leona的建议，修改演唱方式"
+    ],
+    "link": "https://erliangzayu.github.io/sophia.html"
+  }
 ]
