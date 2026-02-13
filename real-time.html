@@ -23,22 +23,75 @@
         .big-area-tab { white-space: nowrap; padding: 8px 16px; border: 2px solid #253450; border-radius: 20px; cursor: pointer; transition: 0.3s; color: #c2d0e7; }
         .big-area-tab.active { background: #3a6ef0; color: #fff; border-color: #3a6ef0; }
         
-        /* 小地点抽屉样式 */
-        .small-area-drawer-wrap { background: #172135; border-radius: 12px; margin-bottom: 20px; overflow: hidden; }
-        .small-area-drawer-header { padding: 12px 16px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; border-bottom: 1px solid #253450; }
-        .small-area-drawer-title { font-size: 15px; color: #edf2ff; font-weight: 600; }
-        .small-area-drawer-arrow { color: #8a9bb8; transition: transform 0.3s ease; }
-        .small-area-drawer-arrow.active { transform: rotate(180deg); }
-        .small-area-drawer-content { max-height: 0; overflow: hidden; transition: max-height 0.3s ease; }
-        .small-area-drawer-content.show { max-height: 500px; padding: 8px 0; }
+        /* 小地点抽屉样式【核心修改】：宽度适配页面，展开后固定高度可滚动，不占满屏 */
+        .small-area-drawer-wrap { 
+            background: #172135; 
+            border-radius: 12px; 
+            margin-bottom: 20px; 
+            overflow: hidden;
+            width: 100%; /* 抽屉宽度适配页面，不再是小角 */
+            max-width: 100%; /* 限制最大宽度 */
+        }
+        .small-area-drawer-header { 
+            padding: 12px 16px; 
+            display: flex; 
+            align-items: center; 
+            justify-content: space-between; 
+            cursor: pointer; 
+            border-bottom: 1px solid #253450;
+        }
+        .small-area-drawer-title { 
+            font-size: 15px; 
+            color: #edf2ff; 
+            font-weight: 600; 
+        }
+        .small-area-drawer-arrow { 
+            color: #8a9bb8; 
+            transition: transform 0.3s ease; 
+        }
+        .small-area-drawer-arrow.active { 
+            transform: rotate(180deg); 
+        }
+        .small-area-drawer-content { 
+            max-height: 0; 
+            overflow: hidden; 
+            transition: max-height 0.3s ease;
+        }
+        .small-area-drawer-content.show { 
+            max-height: 200px; /* 展开后固定高度200px，不占满屏 */
+            padding: 8px 0;
+            overflow-y: auto; /* 内容超出时滚动，不影响页面 */
+        }
         
         /* 小地点列表（抽屉内） */
-        .small-area-list { padding: 0 8px; }
-        .small-area-item { padding: 10px 16px; border-radius: 8px; cursor: pointer; transition: 0.3s; margin: 4px 0; color: #c2d0e7; }
-        .small-area-item.important { background: #2d3b55; border-left: 4px solid #ff6b8b; color: #ff6b8b; }
-        .small-area-item.active { background: #4d82f9; color: #fff; }
-        .small-area-item.important.active { background: #ff6b8b; color: #fff; border-left-color: #fff; }
-        .small-area-item:hover { background: #253450; }
+        .small-area-list { 
+            padding: 0 8px; 
+        }
+        .small-area-item { 
+            padding: 10px 16px; 
+            border-radius: 8px; 
+            cursor: pointer; 
+            transition: 0.3s; 
+            margin: 4px 0; 
+            color: #c2d0e7;
+        }
+        .small-area-item.important { 
+            background: #2d3b55; 
+            border-left: 4px solid #ff6b8b; 
+            color: #ff6b8b; 
+        }
+        .small-area-item.active { 
+            background: #4d82f9; 
+            color: #fff; 
+        }
+        .small-area-item.important.active { 
+            background: #ff6b8b; 
+            color: #fff; 
+            border-left-color: #fff; 
+        }
+        .small-area-item:hover { 
+            background: #253450; 
+        }
         
         /* 主体容器：OC卡片 + 主人栏 */
         .main-container { display: flex; gap: 20px; margin-top: 20px; }
@@ -97,6 +150,7 @@
             .owner-sidebar { width: 100%; display: none; margin-top: 20px; }
             .oc-grid { grid-template-columns: 1fr; }
             .chat-bubble-wrap { bottom: 20px; max-width: 90%; }
+            .small-area-drawer-content.show { max-height: 150px; /* 移动端展开高度更小 */ }
         }
     </style>
 </head>
@@ -286,13 +340,21 @@
             }, 3000);
         }
 
-        // 7. 解析时间段，判断当前时间是否在范围内
+        // 7. 解析时间段（修复跨天bug！核心修改）
         function isInTimeRange(currentTimeStr, timeRange) {
             const [start, end] = timeRange.split("-");
             const current = new Date(`2000-01-01 ${currentTimeStr}`);
             const startDate = new Date(`2000-01-01 ${start}`);
             const endDate = new Date(`2000-01-01 ${end}`);
-            return current >= startDate && current < endDate;
+            
+            // 处理跨天情况（比如19:30-04:00）
+            if (endDate < startDate) {
+                // 跨天：当前时间 >= start 或 当前时间 < end
+                return current >= startDate || current < endDate;
+            } else {
+                // 非跨天：当前时间 >= start 且 < end
+                return current >= startDate && current < endDate;
+            }
         }
 
         // 8. 读取地点专属随机action
@@ -390,7 +452,8 @@
             if (filteredOC.length === 0) {
                 ocContainer.innerHTML = `<div class="empty">此刻这里没有OC</div>`;
             } else {
-                ocContainer.innerHTML = filteredOC.map(item => {
+                // 修复OC卡片网格渲染（之前漏了oc-grid容器）
+                ocContainer.innerHTML = `<div class="oc-grid">` + filteredOC.map(item => {
                     const oc = item.oc;
                     const schedule = item.schedule;
                     const isRandom = item.isRandom;
@@ -422,7 +485,7 @@
                             </div>
                         </div>
                     `;
-                }).join('');
+                }).join('') + `</div>`;
             }
             
             // 检查是否触发对话
