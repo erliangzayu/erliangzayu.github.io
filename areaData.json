@@ -1,5 +1,4 @@
 [
-  // 1. 圣埃斯特罗区（1区）
   {"bigArea":"圣埃斯特罗区","smallArea":"圣埃斯特罗广场","owner":[],"important":false},
   {"bigArea":"圣埃斯特罗区","smallArea":"九木酒屋","owner":["杂鱼"],"important":true},
   {"bigArea":"圣埃斯特罗区","smallArea":"瓦尔蒙特百货","owner":[],"important":true},
@@ -11,7 +10,6 @@
   {"bigArea":"圣埃斯特罗区","smallArea":"极速网吧","owner":[],"important":false},
   {"bigArea":"圣埃斯特罗区","smallArea":"电车站","owner":[],"important":false},
 
-  // 2. 查理斯区（5区）
   {"bigArea":"查理斯区","smallArea":"查理斯火车站","owner":[],"important":false},
   {"bigArea":"查理斯区","smallArea":"福源堂诊所","owner":["Marcel"],"important":true},
   {"bigArea":"查理斯区","smallArea":"LF师范大学附属中学","owner":[],"important":false},
@@ -21,36 +19,28 @@
   {"bigArea":"查理斯区","smallArea":"中央公园","owner":[],"important":false},
   {"bigArea":"查理斯区","smallArea":"居民区街道","owner":[],"important":false},
 
-  // 3. 政府区（10区）
   {"bigArea":"政府区","smallArea":"特区政府大楼","owner":[],"important":false},
   {"bigArea":"政府区","smallArea":"警署","owner":["北原真辉"],"important":true},
   {"bigArea":"政府区","smallArea":"异管局","owner":[],"important":false},
 
-  // 4. 旧港区
   {"bigArea":"旧港区","smallArea":"旧港码头","owner":["Adriana"],"important":true},
   {"bigArea":"旧港区","smallArea":"集装箱区（第三泊位集装箱区）","owner":[],"important":false},
   {"bigArea":"旧港区","smallArea":"Adriana的房车","owner":["Adriana"],"important":true},
 
-  // 5. 雾港区
   {"bigArea":"雾港区","smallArea":"雾港仓库","owner":[],"important":false},
   {"bigArea":"雾港区","smallArea":"废弃工业区","owner":[],"important":false},
 
-  // 6. 大学城区
   {"bigArea":"大学城区","smallArea":"LF师范大学","owner":[],"important":false},
   {"bigArea":"大学城区","smallArea":"学生宿舍","owner":[],"important":false},
   {"bigArea":"大学城区","smallArea":"大学图书馆","owner":[],"important":false},
 
-  // 7. 工业区
   {"bigArea":"工业区","smallArea":"废弃工厂","owner":[],"important":false},
   {"bigArea":"工业区","smallArea":"非法拳场","owner":[],"important":false},
-
-  // 8. 海滨区
+  
   {"bigArea":"海滨区","smallArea":"海滨沙滩","owner":[],"important":false},
   {"bigArea":"海滨区","smallArea":"海边步道","owner":[],"important":false},
   {"bigArea":"海滨区","smallArea":"礁石区","owner":[],"important":false},
   {"bigArea":"海滨区","smallArea":"海边柏油路","owner":[],"important":false},
 
-  // 9. 兽人聚居地
-  {"bigArea":"兽人聚居地","smallArea":"兽人村落","owner":[],"important":false},
-  {"bigArea":"兽人聚居地","smallArea":"森林","owner":[],"important":false}
+  {"bigArea":"未开发区","smallArea":"森林","owner":[],"important":false}
 ]
