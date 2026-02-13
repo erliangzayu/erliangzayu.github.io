@@ -23,14 +23,14 @@
         .big-area-tab { white-space: nowrap; padding: 8px 16px; border: 2px solid #253450; border-radius: 20px; cursor: pointer; transition: 0.3s; color: #c2d0e7; }
         .big-area-tab.active { background: #3a6ef0; color: #fff; border-color: #3a6ef0; }
         
-        /* 小地点抽屉样式【核心修改】：宽度适配页面，展开后固定高度可滚动，不占满屏 */
+        /* 小地点抽屉样式 */
         .small-area-drawer-wrap { 
             background: #172135; 
             border-radius: 12px; 
             margin-bottom: 20px; 
             overflow: hidden;
-            width: 100%; /* 抽屉宽度适配页面，不再是小角 */
-            max-width: 100%; /* 限制最大宽度 */
+            width: 100%; 
+            max-width: 100%; 
         }
         .small-area-drawer-header { 
             padding: 12px 16px; 
@@ -58,9 +58,9 @@
             transition: max-height 0.3s ease;
         }
         .small-area-drawer-content.show { 
-            max-height: 200px; /* 展开后固定高度200px，不占满屏 */
+            max-height: 200px; 
             padding: 8px 0;
-            overflow-y: auto; /* 内容超出时滚动，不影响页面 */
+            overflow-y: auto; 
         }
         
         /* 小地点列表（抽屉内） */
@@ -150,7 +150,7 @@
             .owner-sidebar { width: 100%; display: none; margin-top: 20px; }
             .oc-grid { grid-template-columns: 1fr; }
             .chat-bubble-wrap { bottom: 20px; max-width: 90%; }
-            .small-area-drawer-content.show { max-height: 150px; /* 移动端展开高度更小 */ }
+            .small-area-drawer-content.show { max-height: 150px; }
         }
     </style>
 </head>
@@ -200,7 +200,8 @@
         let randomData = [];
         let currentBigArea = "";
         let currentSmallArea = "";
-        let chatTriggered = new Set(); // 记录已触发的对话，防止重复
+        let chatTriggered = new Set(); 
+        let ocActionCache = {}; // 核心：缓存每个OC在对应地点的随机action，同次浏览不变化
         
         // 1. 加载所有JSON数据库
         async function loadAllData() {
@@ -219,10 +220,10 @@
                 
                 // 初始化页面
                 initAreaNav();
-                updateRealTime();
-                renderOC();
-                // 每秒更新一次（精准到分钟）
-                setInterval(updateRealTime, 1000);
+                updateRealTime(); // 仅更新时间显示
+                renderOC(); // 首次渲染OC，生成并缓存action
+                // 仅更新时间显示，不再每秒重新渲染OC
+                setInterval(updateRealTimeOnly, 1000);
             } catch (err) {
                 console.error("加载数据失败：", err);
                 document.getElementById("ocContainer").innerHTML = `<div class="empty">数据加载失败，请检查JSON文件</div>`;
@@ -256,6 +257,9 @@
                     tab.classList.add("active");
                     currentBigArea = tab.dataset.area;
                     renderSmallArea(currentBigArea);
+                    // 切换大区后重新渲染OC（复用缓存的action）
+                    renderOC();
+                    renderOwnerSidebar();
                 });
             });
             
@@ -274,6 +278,7 @@
                 item.classList.add("active");
                 currentSmallArea = item.dataset.area;
                 updateAreaPath();
+                // 切换小地点后重新渲染OC（复用缓存的action）
                 renderOC();
                 renderOwnerSidebar();
             });
@@ -340,7 +345,7 @@
             }, 3000);
         }
 
-        // 7. 解析时间段（修复跨天bug！核心修改）
+        // 7. 解析时间段（修复跨天bug）
         function isInTimeRange(currentTimeStr, timeRange) {
             const [start, end] = timeRange.split("-");
             const current = new Date(`2000-01-01 ${currentTimeStr}`);
@@ -357,10 +362,24 @@
             }
         }
 
-        // 8. 读取地点专属随机action
-        function getLocationRandomAction(oc, area) {
+        // 8. 读取地点专属随机action（核心修改：缓存机制）
+        function getLocationRandomAction(ocName, area) {
+            // 生成缓存key：OC名称+地点，确保唯一
+            const cacheKey = `${ocName}_${area}`;
+            // 如果缓存中已有，直接返回；没有则生成并缓存
+            if (ocActionCache[cacheKey]) {
+                return ocActionCache[cacheKey];
+            }
+            
+            // 查找OC数据
+            const oc = ocData.find(item => item.name === ocName);
+            if (!oc) return "暂无状态";
+            
             const actions = oc.locationRandomActions[area] || [];
-            return actions.length > 0 ? getRandomText(actions) : "暂无状态";
+            const randomAction = actions.length > 0 ? getRandomText(actions) : "暂无状态";
+            // 缓存该action，同次浏览不再变化
+            ocActionCache[cacheKey] = randomAction;
+            return randomAction;
         }
 
         // 9. 检查随机事件（核心：概率计算）
@@ -413,20 +432,25 @@
             }
         }
 
-        // 10. 更新实时时间显示
+        // 10. 仅更新时间显示，不重新渲染OC（核心修改）
+        function updateRealTimeOnly() {
+            const now = getRealTime();
+            document.getElementById("clock").innerText = "当前 · " + now.str;
+            // 移除每秒重新渲染OC的逻辑
+        }
+
+        // 11. 首次加载时更新时间+渲染OC
         function updateRealTime() {
             const now = getRealTime();
             document.getElementById("clock").innerText = "当前 · " + now.str;
-            // 重新渲染OC（分钟变化可能导致OC状态变化）
-            renderOC();
         }
 
-        // 11. 获取随机文案
+        // 12. 获取随机文案
         function getRandomText(arr) {
             return arr[Math.floor(Math.random() * arr.length)];
         }
 
-        // 12. 渲染OC卡片
+        // 13. 渲染OC卡片
         function renderOC() {
             const now = getRealTime();
             const ocContainer = document.getElementById("ocContainer");
@@ -452,14 +476,13 @@
             if (filteredOC.length === 0) {
                 ocContainer.innerHTML = `<div class="empty">此刻这里没有OC</div>`;
             } else {
-                // 修复OC卡片网格渲染（之前漏了oc-grid容器）
                 ocContainer.innerHTML = `<div class="oc-grid">` + filteredOC.map(item => {
                     const oc = item.oc;
                     const schedule = item.schedule;
                     const isRandom = item.isRandom;
                     
-                    // 地点专属随机动作
-                    const randomAction = getLocationRandomAction(oc, schedule.area);
+                    // 调用带缓存的随机action函数
+                    const randomAction = getLocationRandomAction(oc.name, schedule.area);
                     
                     // 随机事件标签
                     const randomTag = isRandom ? `<div class="oc-random-tag">✨ 随机事件</div>` : "";
@@ -493,7 +516,7 @@
             checkChatTrigger(ocNames, now);
         }
 
-        // 13. 渲染地点主人栏
+        // 14. 渲染地点主人栏
         function renderOwnerSidebar() {
             const ownerSidebar = document.getElementById("ownerSidebar");
             const ownerContent = document.getElementById("ownerContent");
@@ -519,15 +542,19 @@
                 let status = "暂无状态";
                 
                 if (schedule) {
-                    // 地点专属随机动作
-                    const randomAction = getLocationRandomAction(ownerOC, schedule.area);
+                    // 调用带缓存的随机action函数
+                    const randomAction = getLocationRandomAction(ownerOC.name, schedule.area);
                     status = isRandom ? 
                         `✅ 随机事件：${randomAction}` : 
                         `✅ 正在此处：${randomAction}`;
                 } else {
-                    // 主人不在：随机不在场文案
-                    const charAbsentText = randomData.absentText[ownerName] || randomData.absentText.default;
-                    status = `🔴 暂时离开：${getRandomText(charAbsentText)}`;
+                    // 主人不在：随机不在场文案（仅首次生成，缓存）
+                    const cacheKey = `${ownerName}_absent`;
+                    if (!ocActionCache[cacheKey]) {
+                        const charAbsentText = randomData.absentText[ownerName] || randomData.absentText.default;
+                        ocActionCache[cacheKey] = getRandomText(charAbsentText);
+                    }
+                    status = `🔴 暂时离开：${ocActionCache[cacheKey]}`;
                 }
                 
                 ownerHtml += `
@@ -544,7 +571,7 @@
             ownerContent.innerHTML = ownerHtml || `<div class="empty">暂无主人信息</div>`;
         }
 
-        // 14. 检查是否触发指定对话
+        // 15. 检查是否触发指定对话
         function checkChatTrigger(ocNames, now) {
             const chatWrap = document.getElementById("chatBubbleWrap");
             // 获取当前地点的对话
@@ -570,7 +597,7 @@
             });
         }
 
-        // 15. 渲染聊天气泡
+        // 16. 渲染聊天气泡
         function renderChatBubble(dialogue, characters) {
             const chatWrap = document.getElementById("chatBubbleWrap");
             chatWrap.innerHTML = "";
