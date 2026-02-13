@@ -1,1 +1,47 @@
-
+[
+    {
+        "bigArea": "1区",
+        "smallArea": "居酒屋",
+        "owner": ["杂鱼"]
+    },
+    {
+        "bigArea": "1区",
+        "smallArea": "livehouse",
+        "owner": ["Sophia", "Leona"]
+    },
+    {
+        "bigArea": "1区",
+        "smallArea": "商场",
+        "owner": []
+    },
+    {
+        "bigArea": "1区",
+        "smallArea": "广场",
+        "owner": []
+    },
+    {
+        "bigArea": "2区",
+        "smallArea": "学校",
+        "owner": []
+    },
+    {
+        "bigArea": "2区",
+        "smallArea": "住宅区",
+        "owner": []
+    },
+    {
+        "bigArea": "3区",
+        "smallArea": "商业街",
+        "owner": []
+    },
+    {
+        "bigArea": "3区",
+        "smallArea": "公园",
+        "owner": []
+    },
+    {
+        "bigArea": "3区",
+        "smallArea": "办公区",
+        "owner": []
+    }
+]
