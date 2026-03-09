@@ -1,46 +1,351 @@
 [
-  {"bigArea":"圣埃斯特罗区","smallArea":"圣埃斯特罗广场","owner":[],"important":false},
-  {"bigArea":"圣埃斯特罗区","smallArea":"九木酒屋","owner":["杂鱼"],"important":true},
-  {"bigArea":"圣埃斯特罗区","smallArea":"瓦尔蒙特百货","owner":[],"important":true},
-  {"bigArea":"圣埃斯特罗区","smallArea":"商业街","owner":[],"important":false},
-  {"bigArea":"圣埃斯特罗区","smallArea":"华夏糕点店","owner":[],"important":false},
-  {"bigArea":"圣埃斯特罗区","smallArea":"晨曦咖啡馆","owner":[],"important":false},
-  {"bigArea":"圣埃斯特罗区","smallArea":"译弗楼","owner":[],"important":false},
-  {"bigArea":"圣埃斯特罗区","smallArea":"幻日排练厅","owner":["Sophia","Leona"],"important":true},
-  {"bigArea":"圣埃斯特罗区","smallArea":"极速网吧","owner":[],"important":false},
-  {"bigArea":"圣埃斯特罗区","smallArea":"电车站","owner":[],"important":false},
-
-  {"bigArea":"查理斯区","smallArea":"查理斯火车站","owner":[],"important":false},
-  {"bigArea":"查理斯区","smallArea":"福源堂诊所","owner":["Marcel"],"important":true},
-  {"bigArea":"查理斯区","smallArea":"LF师范大学附属中学","owner":[],"important":false},
-  {"bigArea":"查理斯区","smallArea":"8-11","owner":["松本悠真"],"important":true},
-  {"bigArea":"查理斯区","smallArea":"欧客隆","owner":["Olivia"],"important":true},
-  {"bigArea":"查理斯区","smallArea":"查理斯菜市场","owner":[],"important":false},
-  {"bigArea":"查理斯区","smallArea":"中央公园","owner":[],"important":false},
-  {"bigArea":"查理斯区","smallArea":"居民区街道","owner":[],"important":false},
-
-  {"bigArea":"政府区","smallArea":"特区政府大楼","owner":[],"important":false},
-  {"bigArea":"政府区","smallArea":"警署","owner":["北原真辉"],"important":true},
-  {"bigArea":"政府区","smallArea":"异管局","owner":[],"important":false},
-
-  {"bigArea":"旧港区","smallArea":"旧港码头","owner":["Adriana"],"important":true},
-  {"bigArea":"旧港区","smallArea":"集装箱区（第三泊位集装箱区）","owner":[],"important":false},
-  {"bigArea":"旧港区","smallArea":"Adriana的房车","owner":["Adriana"],"important":true},
-
-  {"bigArea":"雾港区","smallArea":"雾港仓库","owner":[],"important":false},
-  {"bigArea":"雾港区","smallArea":"废弃工业区","owner":[],"important":false},
-
-  {"bigArea":"大学城区","smallArea":"LF师范大学","owner":[],"important":false},
-  {"bigArea":"大学城区","smallArea":"学生宿舍","owner":[],"important":false},
-  {"bigArea":"大学城区","smallArea":"大学图书馆","owner":[],"important":false},
-
-  {"bigArea":"工业区","smallArea":"废弃工厂","owner":[],"important":false},
-  {"bigArea":"工业区","smallArea":"非法拳场","owner":[],"important":false},
-  
-  {"bigArea":"海滨区","smallArea":"海滨沙滩","owner":[],"important":false},
-  {"bigArea":"海滨区","smallArea":"海边步道","owner":[],"important":false},
-  {"bigArea":"海滨区","smallArea":"礁石区","owner":[],"important":false},
-  {"bigArea":"海滨区","smallArea":"海边柏油路","owner":[],"important":false},
-
-  {"bigArea":"未开发区","smallArea":"森林","owner":[],"important":false}
-]
+  {
+    "bigArea": "1区·老城区",
+    "smallArea": "福源堂",
+    "owner": [
+      "Sasa",
+      "Marcel"
+    ],
+    "important": false,
+    "areaIntro": "老城区的传统诊所，由Sasa经营，同时也是Sasa和Marcel的住所，提供中西医结合服务，后门常接待特殊访客。",
+    "areaCode": "1_01"
+  },
+  {
+    "bigArea": "1区·老城区",
+    "smallArea": "九木酒屋",
+    "owner": [
+      "杂鱼"
+    ],
+    "important": true,
+    "areaIntro": "老城区人气酒屋，杂鱼的住所兼经营场所，主打手工调酒和家常小食，是角色们聚会休闲的核心地点。",
+    "areaCode": "1_02"
+  },
+  {
+    "bigArea": "1区·老城区",
+    "smallArea": "摸鱼网咖",
+    "owner": [],
+    "important": false,
+    "areaIntro": "老城区的娱乐场所，提供高速网络和游戏设备，年轻人聚集，氛围轻松自在。",
+    "areaCode": "1_03"
+  },
+  {
+    "bigArea": "1区·老城区",
+    "smallArea": "LF一中",
+    "owner": [
+      "肆",
+      "凌",
+      "Sophia",
+      "Wesley"
+    ],
+    "important": false,
+    "areaIntro": "知名中学，肆、Wesley就读，Sophia、晴南、凌、悠真毕业，校园环境优美，隐藏特殊能力学生。",
+    "areaCode": "1_04"
+  },
+  {
+    "bigArea": "1区·老城区",
+    "smallArea": "肆的家",
+    "owner": [],
+    "important": false,
+    "areaIntro": "肆的私人住所，位于老城区小巷，装修简约，是肆休息学习的空间。",
+    "areaCode": "1_05"
+  },
+  {
+    "bigArea": "2区·城市CBD",
+    "smallArea": "艺术街区",
+    "owner": [],
+    "important": false,
+    "areaIntro": "CBD文化区域，画廊、工作室聚集，悠真在此做小时工，周末有露天市集和艺术活动。",
+    "areaCode": "2_06"
+  },
+  {
+    "bigArea": "2区·城市CBD",
+    "smallArea": "Valmont Plaza 购物中心",
+    "owner": [],
+    "important": false,
+    "areaIntro": "高端购物中心，集购物、餐饮、娱乐于一体，设备奢华，市民消费热门地。",
+    "areaCode": "2_07"
+  },
+  {
+    "bigArea": "2区·城市CBD",
+    "smallArea": "白日 Livehouse",
+    "owner": [],
+    "important": false,
+    "areaIntro": "CBD内的音乐演出场所，音响专业，常举办各类音乐会，吸引音乐爱好者。",
+    "areaCode": "2_08"
+  },
+  {
+    "bigArea": "3区·旧港区",
+    "smallArea": "警署",
+    "owner": [],
+    "important": false,
+    "areaIntro": "旧港区治安机构，负责区域安全，大厅繁忙，监控系统完善，审讯室隔音较差。",
+    "areaCode": "3_09"
+  },
+  {
+    "bigArea": "3区·旧港区",
+    "smallArea": "旧港码头",
+    "owner": [],
+    "important": false,
+    "areaIntro": "旧港区核心设施，曾为货运码头，现部分改造为观光区，可欣赏海景，充满怀旧感。",
+    "areaCode": "3_10"
+  },
+  {
+    "bigArea": "3区·旧港区",
+    "smallArea": "旧港集市",
+    "owner": [],
+    "important": false,
+    "areaIntro": "传统集市，售卖海鲜、小吃和手工艺品，价格实惠，市井气息浓厚。",
+    "areaCode": "3_11"
+  },
+  {
+    "bigArea": "3区·旧港区",
+    "smallArea": "小林的算命摊",
+    "owner": [],
+    "important": false,
+    "areaIntro": "小林哲也的占卜摊位，位于旧港集市附近，占卜精准，顾客络绎不绝。",
+    "areaCode": "3_12"
+  },
+  {
+    "bigArea": "3区·旧港区",
+    "smallArea": "八爪胡同",
+    "owner": [],
+    "important": false,
+    "areaIntro": "旧港区特色小巷，形似八爪鱼，两侧为老建筑和小店，适合漫步探索。",
+    "areaCode": "3_13"
+  },
+  {
+    "bigArea": "3区·旧港区",
+    "smallArea": "真辉的公寓",
+    "owner": [],
+    "important": false,
+    "areaIntro": "北原真辉的住所，位于旧港区高层，视野开阔，装修现代，是真辉的私人空间。",
+    "areaCode": "3_14"
+  },
+  {
+    "bigArea": "3区·旧港区",
+    "smallArea": "小林的阁楼",
+    "owner": [],
+    "important": false,
+    "areaIntro": "小林哲也的住所，老建筑阁楼，布置温馨，充满占卜相关物品，氛围神秘。",
+    "areaCode": "3_15"
+  },
+  {
+    "bigArea": "4区·新建居民区",
+    "smallArea": "融大附中",
+    "owner": [
+      "Leona",
+      "Noo"
+    ],
+    "important": false,
+    "areaIntro": "新建居民区的优质中学，Noo就读，Leona毕业，设施现代化，注重融合教育。",
+    "areaCode": "4_16"
+  },
+  {
+    "bigArea": "4区·新建居民区",
+    "smallArea": "市民公园",
+    "owner": [],
+    "important": false,
+    "areaIntro": "新建居民区的公共公园，有草坪、健身设施和儿童区，环境优美，适合休闲。",
+    "areaCode": "4_17"
+  },
+  {
+    "bigArea": "4区·新建居民区",
+    "smallArea": "晴南的家",
+    "owner": [],
+    "important": false,
+    "areaIntro": "渡边晴南的住所，位于高档小区，户型宽敞，常招待朋友举办聚会。",
+    "areaCode": "4_18"
+  },
+  {
+    "bigArea": "5区·高密度居民区",
+    "smallArea": "6-11便利店",
+    "owner": [],
+    "important": false,
+    "areaIntro": "高密度居民区的24小时便利店，悠真在此做夜班，售卖日常用品和快餐，方便居民。",
+    "areaCode": "5_19"
+  },
+  {
+    "bigArea": "5区·高密度居民区",
+    "smallArea": "幻日乐队排练室",
+    "owner": [
+      "Sophia",
+      "Leona"
+    ],
+    "important": false,
+    "areaIntro": "幻日乐队的专属排练空间，设备齐全，隔音好，成员常在此创作排练。",
+    "areaCode": "5_20"
+  },
+  {
+    "bigArea": "5区·高密度居民区",
+    "smallArea": "Wesley的家",
+    "owner": [],
+    "important": false,
+    "areaIntro": "Wesley的住所，装修时尚，充满科技和音乐元素，是Wesley研究爱好的场所。",
+    "areaCode": "5_21"
+  },
+  {
+    "bigArea": "5区·高密度居民区",
+    "smallArea": "奶奶的杂货铺",
+    "owner": [
+      "Olivia"
+    ],
+    "important": false,
+    "areaIntro": "老牌杂货铺，老奶奶经营，售卖日用品，价格亲民，是居民的便民小站。",
+    "areaCode": "5_22"
+  },
+  {
+    "bigArea": "6区·生态居民区",
+    "smallArea": "雾港仓库",
+    "owner": [
+      "竹本律"
+    ],
+    "important": false,
+    "areaIntro": "生态居民区的仓库，Olivia工作地，竹本律的住所，改造后为安全屋，用于竹本会会议。",
+    "areaCode": "6_23"
+  },
+  {
+    "bigArea": "6区·生态居民区",
+    "smallArea": "Berlon家老宅",
+    "owner": [
+      "Leona",
+      "Lee",
+      "Noo"
+    ],
+    "important": false,
+    "areaIntro": "Berlon家族的老房子，位于生态区僻静处，建筑复古，周围绿植环绕，充满自然气息。",
+    "areaCode": "6_24"
+  },
+  {
+    "bigArea": "6区·生态居民区",
+    "smallArea": "渔场",
+    "owner": [],
+    "important": false,
+    "areaIntro": "生态区的淡水渔场，饲养各类鱼，提供新鲜水产，也可供市民垂钓休闲。",
+    "areaCode": "6_25"
+  },
+  {
+    "bigArea": "6区·生态居民区",
+    "smallArea": "LF体育场",
+    "owner": [],
+    "important": false,
+    "areaIntro": "城市边缘的大型场馆，举办体育赛事和活动，设施完善，容量大，市民健身好去处。",
+    "areaCode": "6_26"
+  },
+  {
+    "bigArea": "7区·城市边缘",
+    "smallArea": "地下拳场",
+    "owner": [],
+    "important": false,
+    "areaIntro": "城市边缘的隐蔽拳赛场所，位于废弃钢铁厂地下，氛围紧张，只对熟人开放。",
+    "areaCode": "7_27"
+  },
+  {
+    "bigArea": "7区·城市边缘",
+    "smallArea": "能乐町",
+    "owner": [],
+    "important": false,
+    "areaIntro": "日本风格街区，有日式餐厅和工艺品店，建筑独特，充满异国风情。",
+    "areaCode": "7_28"
+  },
+  {
+    "bigArea": "7区·城市边缘",
+    "smallArea": "悠真的出租屋",
+    "owner": [],
+    "important": false,
+    "areaIntro": "松本悠真的出租房，租金实惠，布置整洁，是悠真在城市打拼的居所。",
+    "areaCode": "7_29"
+  },
+  {
+    "bigArea": "7区·城市边缘",
+    "smallArea": "Olivia的出租屋",
+    "owner": [],
+    "important": false,
+    "areaIntro": "Olivia的住所，靠近雾港仓库，装修简约环保，符合其生活理念。",
+    "areaCode": "7_30"
+  },
+  {
+    "bigArea": "8区·海角",
+    "smallArea": "深蓝海岸",
+    "owner": [],
+    "important": false,
+    "areaIntro": "海角的美丽海岸，海水湛蓝，沙滩细腻，适合度假，可欣赏日出日落，周末人流大。",
+    "areaCode": "8_31"
+  },
+  {
+    "bigArea": "8区·海角",
+    "smallArea": "Adriana的房车",
+    "owner": [],
+    "important": false,
+    "areaIntro": "Adriana的移动住所，停放在海角露营地，内部舒适，是她的临时落脚点。",
+    "areaCode": "8_32"
+  },
+  {
+    "bigArea": "9区·危险封闭区",
+    "smallArea": "水怪出没区",
+    "owner": [],
+    "important": false,
+    "areaIntro": "海角神秘海域，传说有水怪，吸引探险者，氛围神秘，较少有人涉足。",
+    "areaCode": "9_33"
+  },
+  {
+    "bigArea": "9区·危险封闭区",
+    "smallArea": "Felix的住所",
+    "owner": [
+      "Felix"
+    ],
+    "important": false,
+    "areaIntro": "Felix在危险封闭区的住所，区域有安全隐患，住所经过加固，环境荒凉。",
+    "areaCode": "9_34"
+  },
+  {
+    "bigArea": "10区·自然保护区",
+    "smallArea": "猎人小屋",
+    "owner": [],
+    "important": false,
+    "areaIntro": "自然保护区的废弃木屋，周围是松林，屋内有草药和狩猎装备，店主为沉默老人。",
+    "areaCode": "10_35"
+  },
+  {
+    "bigArea": "11区·大学城",
+    "smallArea": "Valmont's 会员商店",
+    "owner": [],
+    "important": false,
+    "areaIntro": "高端会员制超市，位于自然保护区附近，售卖有机食品和户外装备，注重环保。",
+    "areaCode": "11_36"
+  },
+  {
+    "bigArea": "11区·大学城",
+    "smallArea": "CULF/LF大学城",
+    "owner": [],
+    "important": false,
+    "areaIntro": "高等教育核心区域，多所大学和科研机构聚集，学术氛围浓厚，校园优美。",
+    "areaCode": "11_37"
+  },
+  {
+    "bigArea": "11区·大学城",
+    "smallArea": "凌的单人公寓",
+    "owner": [
+      "凌"
+    ],
+    "important": false,
+    "areaIntro": "凌在大学城的公寓，靠近学校，装修简洁，充满学术气息，是其学习生活空间。",
+    "areaCode": "11_38"
+  },
+  {
+    "bigArea": "在地铁上",
+    "smallArea": "在地铁上",
+    "owner": [],
+    "important": false,
+    "areaIntro": "Lionfish城的地铁系统，仅两条线路但覆盖主要区域，车厢整洁，播放各类广告，是角色日常通勤的重要工具，无人时不显示在地点列表中。",
+    "areaCode": "0_39"
+  },
+  {
+    "bigArea": "魔鬼鱼号",
+    "smallArea": "魔鬼鱼号",
+    "owner": [
+      "Adriana"
+    ],
+    "important": false,
+    "areaIntro": "Adriana的私人改装机帆商船，船艏雕刻魔鬼鱼图案，外表复古却配备现代化设备（卫星定位、液压绞盘等），兼具航行功能和移动工作室属性，是Adriana在海上活动的核心场所。",
+    "areaCode": "0_40"
+  }
