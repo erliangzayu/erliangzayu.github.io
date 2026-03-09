@@ -63,7 +63,7 @@
             overflow-y: auto; 
         }
         
-        /* 小地点列表（抽屉内）- 新增高亮/常驻样式 */
+        /* 小地点列表（抽屉内）- 优化高亮样式 */
         .small-area-list { 
             padding: 0 8px; 
         }
@@ -75,40 +75,20 @@
             margin: 4px 0; 
             color: #c2d0e7;
             position: relative;
+            background: transparent; /* 重置背景 */
+            border-left: 4px solid transparent; /* 默认透明边框 */
         }
-        /* 地点描述栏 - 新增 */
-        .small-area-intro {
-            margin-top: 8px;
-            font-size: 12px;
-            color: #8a9bb8;
-            line-height: 1.4;
-            display: none;
-            padding-top: 8px;
-            border-top: 1px dashed #253450;
-        }
-        .small-area-item:hover .small-area-intro {
-            display: block;
-        }
-        /* 重要地点基础样式（兼容原有） */
-        .small-area-item.important { 
-            border-left: 4px solid #ff6b8b; 
-            color: #ff6b8b; 
-        }
-        /* 高亮规则样式 - 新增 */
-        .small-area-item.is-important { /* 重要地区（未点击、无人）：蓝色 */
-            background: #2b6cb0;
-            color: #fff;
+        /* 高亮样式优化：仅侧边颜色，无背景 */
+        .small-area-item.is-important { /* 重要地区（未点击、无人）：蓝色侧边 */
             border-left-color: #3182ce;
+            color: #c2d0e7;
         }
-        .small-area-item.has-oc { /* 有人地区（未点击、非重要）：黄色 */
-            background: #d69e2e;
-            color: #1a202c;
+        .small-area-item.has-oc { /* 有人地区（未点击、非重要）：黄色侧边 */
             border-left-color: #f6e05e;
+            color: #c2d0e7;
             font-weight: 500;
         }
-        .small-area-item.is-important.has-oc { /* 重要+有人：优先黄色 */
-            background: #d69e2e;
-            color: #1a202c;
+        .small-area-item.is-important.has-oc { /* 重要+有人：优先黄色侧边 */
             border-left-color: #f6e05e;
         }
         .small-area-item.active { /* 点击后：默认样式 */
@@ -116,19 +96,42 @@
             color: #fff; 
             border-left-color: #4d82f9;
         }
-        .small-area-item.is-important.inactive { /* 重要地区切换后：红色 */
-            background: #c53030;
-            color: #fff;
-            border-left-color: #e53e3e;
+        .small-area-item.is-important.inactive { /* 重要地区切换后：柔和红色侧边 */
+            border-left-color: #e57373; /* 柔和红 */
+            color: #c2d0e7;
         }
         .small-area-item.not-permanent { /* 非常驻地区默认隐藏 */
             display: none;
         }
         .small-area-item:hover { 
-            filter: brightness(1.1);
+            background: #253450;
         }
         
-        /* 主体容器：OC卡片 + 主人栏 */
+        /* 新增：地点信息栏（主人栏旁边） */
+        .area-info-sidebar {
+            width: 280px;
+            background: #172135;
+            border-radius: 18px;
+            padding: 16px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            flex-shrink: 0;
+            margin-left: 10px;
+        }
+        .area-info-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #edf2ff;
+            margin-bottom: 12px;
+            border-bottom: 1px solid #253450;
+            padding-bottom: 8px;
+        }
+        .area-info-content {
+            font-size: 14px;
+            color: #c2d0e7;
+            line-height: 1.6;
+        }
+        
+        /* 主体容器：OC卡片 + 主人栏 + 地点信息栏 */
         .main-container { display: flex; gap: 20px; margin-top: 20px; }
         .oc-container { flex: 1; }
         .owner-sidebar { width: 280px; background: #172135; border-radius: 18px; padding: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.3); flex-shrink: 0; display: none; }
@@ -182,7 +185,7 @@
         /* 移动端适配 */
         @media (max-width: 768px) {
             .main-container { flex-direction: column; }
-            .owner-sidebar { width: 100%; display: none; margin-top: 20px; }
+            .owner-sidebar, .area-info-sidebar { width: 100%; display: none; margin-top: 20px; margin-left: 0; }
             .oc-grid { grid-template-columns: 1fr; }
             .chat-bubble-wrap { bottom: 20px; max-width: 90%; }
             .small-area-drawer-content.show { max-height: 150px; }
@@ -213,7 +216,7 @@
         </div>
     </div>
 
-    <!-- 主体：OC卡片 + 主人栏 -->
+    <!-- 主体：OC卡片 + 主人栏 + 地点信息栏 -->
     <div class="main-container">
         <div class="oc-container" id="ocContainer">
             <div class="empty">加载中...</div>
@@ -221,6 +224,11 @@
         <div class="owner-sidebar" id="ownerSidebar">
             <div class="owner-title">📍 地点主人</div>
             <div id="ownerContent"></div>
+        </div>
+        <!-- 新增：地点信息栏 -->
+        <div class="area-info-sidebar" id="areaInfoSidebar">
+            <div class="area-info-title">📝 地点介绍</div>
+            <div class="area-info-content" id="areaInfoContent">加载地点信息中...</div>
         </div>
     </div>
 
@@ -264,6 +272,8 @@
                 setInterval(async () => {
                     const currentOcAreas = await getCurrentOcAreas();
                     await setAreaHighlight(currentOcAreas);
+                    // 同步更新主人状态
+                    renderOwnerSidebar();
                 }, 60 * 1000);
             } catch (err) {
                 console.error("加载数据失败：", err);
@@ -281,7 +291,7 @@
                 if (schedule) {
                     // 找到对应地区的Code
                     const areaInfo = areaData.find(item => 
-                        item.smallArea === schedule.area && item.bigArea === currentBigArea
+                        item.smallArea === schedule.area
                     );
                     if (areaInfo && areaInfo.areaCode) {
                         ocAreas.add(areaInfo.areaCode);
@@ -322,6 +332,7 @@
                     // 切换大区后重新渲染OC（复用缓存的action）
                     renderOC();
                     renderOwnerSidebar();
+                    renderAreaInfoSidebar(); // 新增：更新地点信息
                 });
             });
             
@@ -346,13 +357,14 @@
                 // 切换小地点后重新渲染OC（复用缓存的action）
                 renderOC();
                 renderOwnerSidebar();
+                renderAreaInfoSidebar(); // 新增：更新地点信息
                 // 重新设置高亮
                 const currentOcAreas = await getCurrentOcAreas();
                 await setAreaHighlight(currentOcAreas);
             });
         }
 
-        // 3. 渲染小地点（抽屉内+重要地点置顶+常驻/非常驻+地点描述）
+        // 3. 渲染小地点（抽屉内+重要地点置顶+常驻/非常驻）
         async function renderSmallArea(bigArea) {
             const smallAreaList = document.getElementById("smallAreaList");
             const smallAreas = areaData.filter(item => item.bigArea === bigArea);
@@ -379,8 +391,6 @@
                          data-areaCode="${item.areaCode || ''}"
                          data-isImportant="${isImportant}">
                         ${item.smallArea}
-                        <!-- 新增：地点描述栏 -->
-                        <div class="small-area-intro">${item.areaIntro || '暂无描述'}</div>
                     </div>
                 `;
             }).join('');
@@ -394,6 +404,7 @@
             }
             updateAreaPath();
             renderOwnerSidebar();
+            renderAreaInfoSidebar(); // 新增：初始化地点信息
             
             // 默认展开抽屉
             document.getElementById("drawerContent").classList.add("show");
@@ -402,6 +413,24 @@
             
             // 设置初始高亮
             await setAreaHighlight(currentOcAreas);
+        }
+
+        // 新增：渲染地点信息栏
+        function renderAreaInfoSidebar() {
+            const areaInfoSidebar = document.getElementById("areaInfoSidebar");
+            const areaInfoContent = document.getElementById("areaInfoContent");
+            
+            // 获取当前小地点的信息
+            const areaInfo = areaData.find(item => item.smallArea === currentSmallArea && item.bigArea === currentBigArea);
+            if (!areaInfo) {
+                areaInfoContent.innerHTML = "暂无地点信息";
+                areaInfoSidebar.style.display = "none";
+                return;
+            }
+            
+            // 显示地点信息栏
+            areaInfoSidebar.style.display = "block";
+            areaInfoContent.innerHTML = areaInfo.areaIntro || "暂无地点描述";
         }
 
         // 新增：设置地区高亮规则
@@ -425,16 +454,16 @@
                 if (isImportant) {
                     // 重要地区：判断是否有人+是否点击过
                     if (hasOc) {
-                        // 重要+有人：黄色高亮
+                        // 重要+有人：黄色侧边
                         item.classList.add("has-oc");
                     } else {
-                        // 重要+无人：切换后显示红色
+                        // 重要+无人：切换后显示柔和红色侧边
                         if (activeAreaCode && activeAreaCode !== areaCode) {
                             item.classList.add("inactive");
                         }
                     }
                 } else {
-                    // 普通地区：有人则黄色，无人则默认
+                    // 普通地区：有人则黄色侧边，无人则默认
                     if (hasOc) {
                         item.classList.add("has-oc");
                     }
@@ -639,14 +668,14 @@
             checkChatTrigger(ocNames, now);
         }
 
-        // 14. 渲染地点主人栏
+        // 14. 渲染地点主人栏（修复主人状态显示错误）
         function renderOwnerSidebar() {
             const ownerSidebar = document.getElementById("ownerSidebar");
             const ownerContent = document.getElementById("ownerContent");
             const now = getRealTime();
             
             // 获取当前小地点的主人信息
-            const areaInfo = areaData.find(item => item.smallArea === currentSmallArea);
+            const areaInfo = areaData.find(item => item.smallArea === currentSmallArea && item.bigArea === currentBigArea);
             if (!areaInfo || !areaInfo.owner || areaInfo.owner.length === 0) {
                 ownerSidebar.style.display = "none";
                 return;
@@ -665,13 +694,24 @@
                 let status = "暂无状态";
                 
                 if (schedule) {
-                    // 调用带缓存的随机action函数
-                    const randomAction = getLocationRandomAction(ownerOC.name, schedule.area);
-                    status = isRandom ? 
-                        `✅ 随机事件：${randomAction}` : 
-                        `✅ 正在此处：${randomAction}`;
+                    // 关键修复：判断主人是否真的在当前地点
+                    if (schedule.area === currentSmallArea) {
+                        // 主人确实在当前地点
+                        const randomAction = getLocationRandomAction(ownerOC.name, schedule.area);
+                        status = isRandom ? 
+                            `✅ 随机事件：${randomAction}` : 
+                            `✅ 正在此处：${randomAction}`;
+                    } else {
+                        // 主人不在当前地点（修复核心）
+                        const cacheKey = `${ownerName}_absent`;
+                        if (!ocActionCache[cacheKey]) {
+                            const charAbsentText = randomData.absentText[ownerName] || randomData.absentText.default;
+                            ocActionCache[cacheKey] = getRandomText(charAbsentText);
+                        }
+                        status = `🔴 暂时离开：${ocActionCache[cacheKey]}`;
+                    }
                 } else {
-                    // 主人不在：随机不在场文案（仅首次生成，缓存）
+                    // 主人无行程：随机不在场文案
                     const cacheKey = `${ownerName}_absent`;
                     if (!ocActionCache[cacheKey]) {
                         const charAbsentText = randomData.absentText[ownerName] || randomData.absentText.default;
