@@ -28,7 +28,7 @@
             background: #172135; 
             border-radius: 12px; 
             margin-bottom: 20px; 
-            overflow: hidden;
+            overflow: hidden; 
             width: 100%; 
             max-width: 100%; 
         }
@@ -63,7 +63,7 @@
             overflow-y: auto; 
         }
         
-        /* 小地点列表（抽屉内） */
+        /* 小地点列表（抽屉内）- 新增高亮/常驻样式 */
         .small-area-list { 
             padding: 0 8px; 
         }
@@ -74,23 +74,58 @@
             transition: 0.3s; 
             margin: 4px 0; 
             color: #c2d0e7;
+            position: relative;
         }
+        /* 地点描述栏 - 新增 */
+        .small-area-intro {
+            margin-top: 8px;
+            font-size: 12px;
+            color: #8a9bb8;
+            line-height: 1.4;
+            display: none;
+            padding-top: 8px;
+            border-top: 1px dashed #253450;
+        }
+        .small-area-item:hover .small-area-intro {
+            display: block;
+        }
+        /* 重要地点基础样式（兼容原有） */
         .small-area-item.important { 
-            background: #2d3b55; 
             border-left: 4px solid #ff6b8b; 
             color: #ff6b8b; 
         }
-        .small-area-item.active { 
+        /* 高亮规则样式 - 新增 */
+        .small-area-item.is-important { /* 重要地区（未点击、无人）：蓝色 */
+            background: #2b6cb0;
+            color: #fff;
+            border-left-color: #3182ce;
+        }
+        .small-area-item.has-oc { /* 有人地区（未点击、非重要）：黄色 */
+            background: #d69e2e;
+            color: #1a202c;
+            border-left-color: #f6e05e;
+            font-weight: 500;
+        }
+        .small-area-item.is-important.has-oc { /* 重要+有人：优先黄色 */
+            background: #d69e2e;
+            color: #1a202c;
+            border-left-color: #f6e05e;
+        }
+        .small-area-item.active { /* 点击后：默认样式 */
             background: #4d82f9; 
             color: #fff; 
+            border-left-color: #4d82f9;
         }
-        .small-area-item.important.active { 
-            background: #ff6b8b; 
-            color: #fff; 
-            border-left-color: #fff; 
+        .small-area-item.is-important.inactive { /* 重要地区切换后：红色 */
+            background: #c53030;
+            color: #fff;
+            border-left-color: #e53e3e;
+        }
+        .small-area-item.not-permanent { /* 非常驻地区默认隐藏 */
+            display: none;
         }
         .small-area-item:hover { 
-            background: #253450; 
+            filter: brightness(1.1);
         }
         
         /* 主体容器：OC卡片 + 主人栏 */
@@ -202,6 +237,7 @@
         let currentSmallArea = "";
         let chatTriggered = new Set(); 
         let ocActionCache = {}; // 核心：缓存每个OC在对应地点的随机action，同次浏览不变化
+        let activeAreaCode = null; // 新增：记录当前点击的地区Code
         
         // 1. 加载所有JSON数据库
         async function loadAllData() {
@@ -224,10 +260,36 @@
                 renderOC(); // 首次渲染OC，生成并缓存action
                 // 仅更新时间显示，不再每秒重新渲染OC
                 setInterval(updateRealTimeOnly, 1000);
+                // 定时刷新地区显示和高亮（1分钟一次）
+                setInterval(async () => {
+                    const currentOcAreas = await getCurrentOcAreas();
+                    await setAreaHighlight(currentOcAreas);
+                }, 60 * 1000);
             } catch (err) {
                 console.error("加载数据失败：", err);
                 document.getElementById("ocContainer").innerHTML = `<div class="empty">数据加载失败，请检查JSON文件</div>`;
             }
+        }
+
+        // 新增：获取当前有OC的地区Code列表
+        async function getCurrentOcAreas() {
+            const now = getRealTime();
+            const ocAreas = new Set();
+            
+            ocData.forEach(oc => {
+                const { isRandom, schedule } = checkRandomEvent(oc, now);
+                if (schedule) {
+                    // 找到对应地区的Code
+                    const areaInfo = areaData.find(item => 
+                        item.smallArea === schedule.area && item.bigArea === currentBigArea
+                    );
+                    if (areaInfo && areaInfo.areaCode) {
+                        ocAreas.add(areaInfo.areaCode);
+                    }
+                }
+            });
+            
+            return Array.from(ocAreas);
         }
 
         // 2. 初始化大区/小地点导航
@@ -252,11 +314,11 @@
             
             // 大区切换事件
             document.querySelectorAll(".big-area-tab").forEach(tab => {
-                tab.addEventListener("click", () => {
+                tab.addEventListener("click", async () => {
                     document.querySelectorAll(".big-area-tab").forEach(t => t.classList.remove("active"));
                     tab.classList.add("active");
                     currentBigArea = tab.dataset.area;
-                    renderSmallArea(currentBigArea);
+                    await renderSmallArea(currentBigArea); // 新增await
                     // 切换大区后重新渲染OC（复用缓存的action）
                     renderOC();
                     renderOwnerSidebar();
@@ -270,10 +332,13 @@
                 drawerArrow.innerText = drawerContent.classList.contains("show") ? "▲" : "▼";
             });
             
-            // 小地点点击事件
-            document.getElementById("smallAreaList").addEventListener("click", (e) => {
+            // 小地点点击事件 - 新增高亮逻辑
+            document.getElementById("smallAreaList").addEventListener("click", async (e) => {
                 const item = e.target.closest(".small-area-item");
                 if (!item) return;
+                // 记录当前激活的地区Code
+                activeAreaCode = item.dataset.areaCode;
+                // 移除所有active类
                 document.querySelectorAll(".small-area-item").forEach(t => t.classList.remove("active"));
                 item.classList.add("active");
                 currentSmallArea = item.dataset.area;
@@ -281,32 +346,52 @@
                 // 切换小地点后重新渲染OC（复用缓存的action）
                 renderOC();
                 renderOwnerSidebar();
+                // 重新设置高亮
+                const currentOcAreas = await getCurrentOcAreas();
+                await setAreaHighlight(currentOcAreas);
             });
         }
 
-        // 3. 渲染小地点（抽屉内+重要地点置顶）
-        function renderSmallArea(bigArea) {
+        // 3. 渲染小地点（抽屉内+重要地点置顶+常驻/非常驻+地点描述）
+        async function renderSmallArea(bigArea) {
             const smallAreaList = document.getElementById("smallAreaList");
             const smallAreas = areaData.filter(item => item.bigArea === bigArea);
+            const currentOcAreas = await getCurrentOcAreas(); // 新增：获取当前有OC的地区
             
             // 分离重要地点和普通地点，重要地点置顶
-            const importantAreas = smallAreas.filter(item => item.important);
-            const normalAreas = smallAreas.filter(item => !item.important);
+            const importantAreas = smallAreas.filter(item => item.important || item.isImportant); // 兼容原有important和新isImportant
+            const normalAreas = smallAreas.filter(item => !(item.important || item.isImportant));
             const sortedAreas = [...importantAreas, ...normalAreas];
             
             smallAreaList.innerHTML = sortedAreas.map(item => {
-                // 判断是否是重要地点
-                const isImportant = item.important ? "important" : "";
+                // 兼容原有important字段和新isImportant字段
+                const isImportant = item.important || item.isImportant;
+                // 判断是否常驻
+                const isPermanent = item.isPermanent !== false; // 默认常驻
+                // 判断是否有OC
+                const hasOc = currentOcAreas.includes(item.areaCode);
+                // 非常驻地区：有OC才显示
+                const displayClass = !isPermanent && !hasOc ? "not-permanent" : "";
+                
                 return `
-                    <div class="small-area-item ${isImportant}" data-area="${item.smallArea}">
+                    <div class="small-area-item ${isImportant ? 'is-important' : ''} ${displayClass}" 
+                         data-area="${item.smallArea}" 
+                         data-areaCode="${item.areaCode || ''}"
+                         data-isImportant="${isImportant}">
                         ${item.smallArea}
+                        <!-- 新增：地点描述栏 -->
+                        <div class="small-area-intro">${item.areaIntro || '暂无描述'}</div>
                     </div>
                 `;
             }).join('');
             
             // 默认选中第一个小地点
             currentSmallArea = sortedAreas[0].smallArea;
-            document.querySelector(`.small-area-item[data-area="${currentSmallArea}"]`).classList.add("active");
+            activeAreaCode = sortedAreas[0].areaCode; // 初始化激活的地区Code
+            const firstItem = document.querySelector(`.small-area-item[data-area="${currentSmallArea}"]`);
+            if (firstItem) {
+                firstItem.classList.add("active");
+            }
             updateAreaPath();
             renderOwnerSidebar();
             
@@ -314,6 +399,47 @@
             document.getElementById("drawerContent").classList.add("show");
             document.getElementById("drawerArrow").classList.add("active");
             document.getElementById("drawerArrow").innerText = "▲";
+            
+            // 设置初始高亮
+            await setAreaHighlight(currentOcAreas);
+        }
+
+        // 新增：设置地区高亮规则
+        async function setAreaHighlight(currentOcAreas) {
+            const areaItems = document.querySelectorAll(".small-area-item");
+            
+            areaItems.forEach(item => {
+                const areaCode = item.dataset.areacode;
+                const isImportant = item.dataset.isimportant === "true";
+                const hasOc = currentOcAreas.includes(areaCode);
+
+                // 清空所有高亮类（保留原有important兼容）
+                item.classList.remove("has-oc", "inactive");
+                
+                // 场景1：当前点击的地区（active）：默认样式
+                if (areaCode === activeAreaCode) {
+                    return;
+                }
+
+                // 场景2：非当前点击的地区
+                if (isImportant) {
+                    // 重要地区：判断是否有人+是否点击过
+                    if (hasOc) {
+                        // 重要+有人：黄色高亮
+                        item.classList.add("has-oc");
+                    } else {
+                        // 重要+无人：切换后显示红色
+                        if (activeAreaCode && activeAreaCode !== areaCode) {
+                            item.classList.add("inactive");
+                        }
+                    }
+                } else {
+                    // 普通地区：有人则黄色，无人则默认
+                    if (hasOc) {
+                        item.classList.add("has-oc");
+                    }
+                }
+            });
         }
 
         // 4. 更新当前路径（如：1区 > 居酒屋）
