@@ -259,6 +259,7 @@
         "timeRange": "13:00-14:00",
         "probability": 40,
         "area": "九木酒屋",
+        "type": "eat",
         "action": "在九木酒屋吃饭",
         "isMandatory": true
       },
