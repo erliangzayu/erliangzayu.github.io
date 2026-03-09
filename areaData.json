@@ -5,8 +5,9 @@
     "owner": [
       "Marcel"
     ],
-    "important": false,
-    "areaIntro": "老城区的传统诊所，由Sasa经营，同时也是Sasa和Marcel的住所，提供中西医结合服务，后门常接待特殊访客。",
+    "isImportant": true,
+    "isPermanent": true,
+    "areaIntro": "白墙绿漆，挂号窗口贴着医保定点机构的标识。推门进去能闻到消毒水味，诊室的水草缸里养着金鱼。中西医结合是招牌，“结合”的是人类医学和某种更古老的生存智慧。——诊所的后门开在巷子深处，夜里常有黑影闪入，带着说不清来源的伤。",
     "areaCode": "1_01"
   },
   {
@@ -15,147 +16,164 @@
     "owner": [
       "杂鱼"
     ],
-    "important": true,
-    "areaIntro": "老城区人气酒屋，杂鱼的住所兼经营场所，主打手工调酒和家常小食，是角色们聚会休闲的核心地点。",
+    "isImportant": true,
+    "isPermanent": true,
+    "areaIntro": "九木酒屋没有菜单，进门先看黑板——尽力写好的粉笔字每天更新，内容是杂鱼凌晨去市场抢到的尖货。后厨备菜区摆满塑料筐，食客想吃什么可以自己点。酒柜靠墙，摆着本地产的烧酒、扶桑清酒、几瓶落灰的洋酒。大部分人来拧开瓶盖直接倒，调酒偶尔有人点——兑得潦草但不难喝。",
     "areaCode": "1_02"
   },
   {
     "bigArea": "1区·老城区",
     "smallArea": "摸鱼网咖",
     "owner": [],
-    "important": false,
-    "areaIntro": "老城区的娱乐场所，提供高速网络和游戏设备，年轻人聚集，氛围轻松自在。",
+    "isImportant": false,
+    "isPermanent": false,
+    "areaIntro": "网咖一楼是喧闹的竞技区，最响的青轴键盘伴着屏幕闪光永不入眠；二楼则更昏暗，隔间里有人躺着看动画，有人对着代码发呆到天亮。",
     "areaCode": "1_03"
   },
   {
     "bigArea": "1区·老城区",
     "smallArea": "LF一中",
     "owner": [],
-    "important": false,
-    "areaIntro": "知名中学，肆、Wesley就读，Sophia、晴南、凌、悠真毕业，校园环境优美，隐藏特殊能力学生。",
+    "isImportant": false,
+    "isPermanent": false,
+    "areaIntro": "灰砖砌成的老牌名校，校门上的铜字已经有些斑驳。走廊里贴着历年升学榜，玻璃柜里陈列着奥赛奖杯。",
     "areaCode": "1_04"
   },
   {
     "bigArea": "1区·老城区",
     "smallArea": "肆的家",
     "owner": [],
-    "important": false,
-    "areaIntro": "肆的私人住所，位于老城区小巷，装修简约，是肆休息学习的空间。",
+    "isImportant": false,
+    "isPermanent": true,
+    "areaIntro": "筒子楼三层的老房子，楼廊里充斥着腌菜缸的气味。十字锁芯门内是老旧到凹陷的木地板。扇形的黄色木柜是这栋楼的标配，肆的姥姥在沙发旁搓花生，姥爷守着大头电视机泡着脚看新闻。",
     "areaCode": "1_05"
   },
   {
     "bigArea": "2区·城市CBD",
     "smallArea": "艺术街区",
     "owner": [],
-    "important": false,
-    "areaIntro": "CBD文化区域，画廊、工作室聚集，悠真在此做小时工，周末有露天市集和艺术活动。",
+    "isImportant": false,
+    "isPermanent": false,
+    "areaIntro": "玻璃幕墙和红砖老厂房混搭的区域，墙上画着巨幅涂鸦。画廊、设计工作室、独立书店挤在一起，周末有露天市集，卖手作皮具和黑胶唱片。",
     "areaCode": "2_06"
   },
   {
     "bigArea": "2区·城市CBD",
     "smallArea": "Valmont Plaza 购物中心",
     "owner": [],
-    "important": false,
-    "areaIntro": "高端购物中心，集购物、餐饮、娱乐于一体，设备奢华，市民消费热门地。",
+   "isImportant": false,
+    "isPermanent": true,
+    "areaIntro": "LF最大的综合型商超，裸眼3D的外屏日夜不熄。从奢侈品到平价品牌一应俱全。中庭常年办展览，顶层有电影院和游戏厅。周末人潮涌动，手扶电梯上站满了拎着购物袋的游客。",
     "areaCode": "2_07"
   },
   {
     "bigArea": "2区·城市CBD",
     "smallArea": "白日 Livehouse",
     "owner": [],
-    "important": false,
-    "areaIntro": "CBD内的音乐演出场所，音响专业，常举办各类音乐会，吸引音乐爱好者。",
+    "isImportant": false,
+    "isPermanent": false,
+    "areaIntro": "藏在购物中心背面，入口只有一盏霓虹灯管写着“白日”。酒吧吧台占了半面墙，酒单是手写的，老板兼调酒师是个扶桑中年男人。场地不大，舞台离第一排观众只有两米。没演出的时候，灯光只开几盏，有人在角落写谱，有人窝在沙发里发呆到深夜。",
     "areaCode": "2_08"
   },
   {
     "bigArea": "3区·旧港区",
     "smallArea": "警署",
     "owner": [],
-    "important": false,
-    "areaIntro": "旧港区治安机构，负责区域安全，大厅繁忙，监控系统完善，审讯室隔音较差。",
+    "isImportant": false,
+    "isPermanent": false,
+    "areaIntro": "三层灰楼，大厅的警铃没有休息的时候。一楼接待大厅永远排着队——办身份证的、报失的、调解邻里纠纷的。二楼有着满墙的监控大屏，摄像头的设立还在紧锣密鼓地进行着。审讯室的隔音不好，隔壁的谈话声偶尔飘过来，却也听不真切。",
     "areaCode": "3_09"
   },
   {
     "bigArea": "3区·旧港区",
     "smallArea": "旧港码头",
     "owner": [],
-    "important": false,
-    "areaIntro": "旧港区核心设施，曾为货运码头，现部分改造为观光区，可欣赏海景，充满怀旧感。",
+    "isImportant": false,
+    "isPermanent": false,
+    "areaIntro": "渔船和货轮并泊的地方，空气中是海水和柴油混合的气味。防波堤上的灯柱锈成褐色，夜里亮起昏黄的光。",
     "areaCode": "3_10"
   },
   {
     "bigArea": "3区·旧港区",
     "smallArea": "旧港集市",
     "owner": [],
-    "important": false,
-    "areaIntro": "传统集市，售卖海鲜、小吃和手工艺品，价格实惠，市井气息浓厚。",
+   "isImportant": false,
+    "isPermanent": true,
+    "areaIntro": "沿着码头展开的集市，天还没亮透就已经热闹起来。带着碎冰的摊位上摆着刚靠岸的鱼获，旁边的蔬菜摊码着剥开一半的玉米和成捆的小葱。",
     "areaCode": "3_11"
   },
   {
     "bigArea": "3区·旧港区",
     "smallArea": "小林的算命摊",
-    "owner": [],
-    "important": false,
-    "areaIntro": "小林哲也的占卜摊位，位于旧港集市附近，占卜精准，顾客络绎不绝。",
+    "owner": [
+      "小林哲也"
+    ],
+    "isImportant": false,
+    "isPermanent": true,
+    "areaIntro": "支在巷口消防栓旁边，一面褪色的幡旗，一张折叠桌铺着粗布，签筒压着卦钱。小林就坐在那里，见人路过便笑着点点头，像等一位早该碰面的老友，若有所思的神情，总让路过的人忍不住停下脚步。",
     "areaCode": "3_12"
   },
   {
     "bigArea": "3区·旧港区",
     "smallArea": "八爪胡同",
     "owner": [],
-    "important": false,
-    "areaIntro": "旧港区特色小巷，形似八爪鱼，两侧为老建筑和小店，适合漫步探索。",
+    "isImportant": false,
+    "isPermanent": false,
+    "areaIntro": "旧港区最深的巷子，电线将两侧的唐楼紧紧绑在一起。霓虹招牌晃得人头晕，杂货、牙医、二手电器、法律咨询，招牌上的字混着华文和扶桑语，有的已经亮了十几年没灭过。巷子深处被夜宵摊和闲散人士占据，小心胃肠的同时手机钱包也要揣紧。",
     "areaCode": "3_13"
   },
   {
     "bigArea": "3区·旧港区",
     "smallArea": "真辉的公寓",
     "owner": [],
-    "important": false,
-    "areaIntro": "北原真辉的住所，位于旧港区高层，视野开阔，装修现代，是真辉的私人空间。",
+    "isImportant": false,
+    "isPermanent": true,
+    "areaIntro": "政府的公租房，位于六层老楼的顶层。面积大，两室一厅，但没电梯。卧室窗户对着隔壁楼的墙，白天也要开灯。书架上层是刑侦手册，下层是漫画，中间塞着没拆封的戒烟贴。冰箱里常空，只有啤酒和过期的速食味噌汤。唯一像样的东西是上任租客留下的绿萝，垂到楼下邻居的晾衣架上了。",
     "areaCode": "3_14"
   },
   {
     "bigArea": "3区·旧港区",
     "smallArea": "小林的阁楼",
     "owner": [],
-    "important": false,
-    "areaIntro": "小林哲也的住所，老建筑阁楼，布置温馨，充满占卜相关物品，氛围神秘。",
+    "isImportant": false,
+    "isPermanent": true,
+    "areaIntro": "算命摊上方的老阁楼，顺着菜市场后门铁楼梯往上爬四层。斜顶，天窗正对床铺。一张床、一张桌、一把椅子，几乎没什么生活痕迹。",
     "areaCode": "3_15"
   },
   {
     "bigArea": "4区·新建居民区",
     "smallArea": "融大附中",
-    "owner": [
-      "Leona",
-      "Noo"
-    ],
-    "important": false,
-    "areaIntro": "新建居民区的优质中学，Noo就读，Leona毕业，设施现代化，注重融合教育。",
+    "owner": [],
+    "isImportant": false,
+    "isPermanent": false,
+    "areaIntro": "校门是新的，石狮子旁挂着“融合教育实验校”的铜牌。教学楼窗户装着遮光帘，体育课的吼声从体育馆传出来，偶尔墙会震一下——但没人提这事。下课铃响，穿校服的学生涌向小卖部，和普通高中生没什么两样。只是其中某个低着头快步走的，可能正在用能力把可乐瓶里的汽水冰成沙冰。",
     "areaCode": "4_16"
   },
   {
     "bigArea": "4区·新建居民区",
     "smallArea": "市民公园",
     "owner": [],
-    "important": false,
-    "areaIntro": "新建居民区的公共公园，有草坪、健身设施和儿童区，环境优美，适合休闲。",
+    "isImportant": false,
+    "isPermanent": true,
+    "areaIntro": "新建居民区的中心公园，有慢跑道、儿童游乐区、一小片人工湖。傍晚常有老人在湖边打太极，年轻人戴着耳机慢跑。",
     "areaCode": "4_17"
   },
   {
     "bigArea": "4区·新建居民区",
     "smallArea": "晴南的家",
     "owner": [],
-    "important": false,
-    "areaIntro": "渡边晴南的住所，位于高档小区，户型宽敞，常招待朋友举办聚会。",
+    "isImportant": false,
+    "isPermanent": true,
+    "areaIntro": "老居民楼里的长租房，厨房窗口正对着楼下的公园。晴南和父亲住在这里，堆放着各种鱼竿，知名乐队周边和其他小玩意儿。墙上贴着她小时候画的画，已经泛黄了。",
     "areaCode": "4_18"
   },
   {
     "bigArea": "5区·高密度居民区",
     "smallArea": "6-11便利店",
     "owner": [],
-    "important": false,
-    "areaIntro": "高密度居民区的24小时便利店，悠真在此做夜班，售卖日常用品和快餐，方便居民。",
+    "isImportant": false,
+    "isPermanent": false,
+    "areaIntro": "24小时营业的连锁便利店，门前的灯箱永远亮着，播音乐的门铃灵敏得恼人。货架间的过道很窄，摆满了便当、饭团、关东煮，鸡肉丸。",
     "areaCode": "5_19"
   },
   {
@@ -164,26 +182,27 @@
     "owner": [
       "Sophia"
     ],
-    "important": false,
-    "areaIntro": "幻日乐队的专属排练空间，设备齐全，隔音好，成员常在此创作排练。",
+    "isImportant": true,
+    "isPermanent": true,
+    "areaIntro": "一栋有些老旧的自建房，隔街有着方便买酒的杂货铺。入门挂着个无人问津的打卡器，客厅做了挑空，二楼的发财树枯叶因此有时飘到一层。排练室被隔音棉包成黑色，贴演出海报的透明胶泛着光。",
     "areaCode": "5_20"
   },
   {
     "bigArea": "5区·高密度居民区",
     "smallArea": "Wesley的家",
     "owner": [],
-    "important": false,
-    "areaIntro": "Wesley的住所，装修时尚，充满科技和音乐元素，是Wesley研究爱好的场所。",
+    "isImportant": false,
+    "isPermanent": true,
+    "areaIntro": "和奶奶一起住的房子，不大但很温暖。他的房间塞满了电子设备——旧电脑、显示屏、各种叫不上名字的机器。窗帘永远拉着，显示器蓝光照亮他的脸，像一个小型情报中心。",
     "areaCode": "5_21"
   },
   {
     "bigArea": "5区·高密度居民区",
     "smallArea": "奶奶的杂货铺",
-    "owner": [
-      "Olivia"
-    ],
-    "important": false,
-    "areaIntro": "老牌杂货铺，老奶奶经营，售卖日用品，价格亲民，是居民的便民小站。",
+    "owner": [ ],
+    "isImportant": false,
+    "isPermanent": true,
+    "areaIntro": "临街的小卖部，门面窄得只够摆两个货架。放学时间最忙，小学生涌进来买五毛钱的辣条。奶奶算账慢，但从来不差钱，最近奶奶把看店的活儿交给了个年轻的生面孔。二楼木板嘎吱响，是乐队在排练，她习惯了，有时候跟着节奏哼两句。",
     "areaCode": "5_22"
   },
   {
@@ -192,88 +211,90 @@
     "owner": [
       "竹本律"
     ],
-    "important": false,
-    "areaIntro": "生态居民区的仓库，Olivia工作地，竹本律的住所，改造后为安全屋，用于竹本会会议。",
+    "isImportant": true,
+    "isPermanent": true,
+    "areaIntro": "靠近码头的尽头，招牌写着“雾港钓具”，字迹被海风吹得斑驳。货架上摆着鱼竿和饵料，地下室入口藏在仓库最里面，推开货架才能看见楼梯。向下两层，墙壁是加厚的，有独立的新风和供电系统，像个从末日电影里搬出来的安全屋。竹本会的会议就在这儿开，桌上永远摆着外卖盒和没喝完的咖啡。",
     "areaCode": "6_23"
   },
   {
     "bigArea": "6区·生态居民区",
     "smallArea": "Berlon家老宅",
     "owner": [],
-    "important": false,
-    "areaIntro": "Berlon家族的老房子，位于生态区僻静处，建筑复古，周围绿植环绕，充满自然气息。",
+    "isImportant": false,
+    "isPermanent": true,
+    "areaIntro": "湖泊旁的跃层小洋房。白色的外墙有些斑驳，不算大的院里有着几乎不使用的充气泳池，旁边停着Noo的旧自行车。客厅的沙发被猫挠出了线头，楼梯拐角堆着乐谱和漫画。",
     "areaCode": "6_24"
   },
   {
     "bigArea": "6区·生态居民区",
     "smallArea": "渔场",
     "owner": [],
-    "important": false,
-    "areaIntro": "生态区的淡水渔场，饲养各类鱼，提供新鲜水产，也可供市民垂钓休闲。",
+    "isImportant": false,
+    "isPermanent": false,
+    "areaIntro": "淡水渔场，养着写鲤鱼与各类鲢。栈桥尽头有个铁皮小屋，晴南父亲在这里守着渔场，冬天生炉子，夏天开着门吹风。岸边的棚子里可以租钓竿、买鱼食，钓鱼体验票价低廉，大部分人就是来图个乐子。",
     "areaCode": "6_25"
-  },
-  {
-    "bigArea": "6区·生态居民区",
-    "smallArea": "LF体育场",
-    "owner": [],
-    "important": false,
-    "areaIntro": "城市边缘的大型场馆，举办体育赛事和活动，设施完善，容量大，市民健身好去处。",
-    "areaCode": "6_26"
   },
   {
     "bigArea": "7区·城市边缘",
     "smallArea": "地下拳场",
     "owner": [],
-    "important": false,
-    "areaIntro": "城市边缘的隐蔽拳赛场所，位于废弃钢铁厂地下，氛围紧张，只对熟人开放。",
+    "isImportant": false,
+    "isPermanent": false,
+    "areaIntro": "藏在废弃钢铁厂的地下一层，入口要穿过生锈的传送带和野草丛。场地不大，中央是一个铁笼围起来的拳台，四周是水泥看台。灯光惨白，照得每个人脸色发青。最近似乎换了新老板，但空气里的铁锈味永远不会变。",
     "areaCode": "7_27"
   },
   {
     "bigArea": "7区·城市边缘",
     "smallArea": "能乐町",
     "owner": [],
-    "important": false,
-    "areaIntro": "日本风格街区，有日式餐厅和工艺品店，建筑独特，充满异国风情。",
+    "isImportant": false,
+    "isPermanent": false,
+    "areaIntro": "沿着废弃铁轨延伸的一片街区，夜幕降临时霓虹灯牌才会亮起来。招牌上写着看不懂的店名，拉开的门帘里透出暧昧的红光。街头站着揽客的人，说话声音不大，但眼神直白。正经居民很少来这里，但凌晨时分，总有出租车停在这条街的巷口。",
     "areaCode": "7_28"
   },
   {
     "bigArea": "7区·城市边缘",
     "smallArea": "悠真的出租屋",
     "owner": [],
-    "important": false,
-    "areaIntro": "松本悠真的出租房，租金实惠，布置整洁，是悠真在城市打拼的居所。",
+    "isImportant": false,
+    "isPermanent": true,
+    "areaIntro": "钢铁厂旁边旧公房的顶层，月租便宜得离谱。房间不大，但收拾得很干净。窗外的风景是废弃的冷却塔和烟囱，冬天暖气烧得烫手，夏天闷热得像蒸笼。",
     "areaCode": "7_29"
   },
   {
     "bigArea": "7区·城市边缘",
     "smallArea": "Olivia的出租屋",
     "owner": [],
-    "important": false,
-    "areaIntro": "Olivia的住所，靠近雾港仓库，装修简约环保，符合其生活理念。",
+    "isImportant": false,
+    "isPermanent": true,
+    "areaIntro": "能乐町边缘的一栋旧公房，隔壁总是源源不断传来些不堪入耳的杂音。她睡不着时会坐在窗边，看着那条街的灯光一盏一盏熄灭。",
     "areaCode": "7_30"
   },
   {
     "bigArea": "8区·海角",
     "smallArea": "深蓝海岸",
     "owner": [],
-    "important": false,
-    "areaIntro": "海角的美丽海岸，海水湛蓝，沙滩细腻，适合度假，可欣赏日出日落，周末人流大。",
+    "isImportant": false,
+    "isPermanent": false,
+    "areaIntro": "石灰岩悬崖环抱着的一片狭长海湾，海水蓝得像油画。沙滩要徒步才能到达，所以游客不多。沿着悬崖有徒步小径，走累了可以坐在松林里看海。冬天的海浪特别大，拍在礁石上溅起白色的水雾。",
     "areaCode": "8_31"
   },
   {
     "bigArea": "8区·海角",
     "smallArea": "Adriana的房车",
     "owner": [],
-    "important": false,
-    "areaIntro": "Adriana的移动住所，停放在海角露营地，内部舒适，是她的临时落脚点。",
+    "isImportant": false,
+    "isPermanent": true,
+    "areaIntro": "停在离海岸不远的一条柏油路边，是和船舱风格差不多的老式房车。车里收拾得整洁，小床上的抱枕让这里比船长室多了几分温馨与俏皮。",
     "areaCode": "8_32"
   },
   {
     "bigArea": "9区·危险封闭区",
     "smallArea": "水怪出没区",
     "owner": [],
-    "important": false,
-    "areaIntro": "海角神秘海域，传说有水怪，吸引探险者，氛围神秘，较少有人涉足。",
+    "isImportant": false,
+    "isPermanent": false,
+    "areaIntro": "禁区的水面永远笼罩着薄雾，偶尔有幽蓝的水团一闪而过。赏金猎人的快艇划破寂静，枪声惊起一群海鸟。岸边的礁石上刻着“禁止进入”，字迹被海风蚀得模糊。",
     "areaCode": "9_33"
   },
   {
@@ -282,32 +303,36 @@
     "owner": [
       "Felix"
     ],
-    "important": false,
-    "areaIntro": "Felix在危险封闭区的住所，区域有安全隐患，住所经过加固，环境荒凉。",
+    "isImportant": false,
+    "isPermanent": true,
+    "areaIntro": "九区边缘的豪华洋房，项目在水怪禁区划定后近乎烂尾。LF成为试验区后这里再次被开发，通了水电却也几乎没人敢住。但总有人不怕这个。",
     "areaCode": "9_34"
   },
   {
     "bigArea": "10区·自然保护区",
     "smallArea": "猎人小屋",
     "owner": [],
-    "important": false,
-    "areaIntro": "自然保护区的废弃木屋，周围是松林，屋内有草药和狩猎装备，店主为沉默老人。",
+    "isImportant": false,
+    "isPermanent": false,
+    "areaIntro": "森林深处的一座木屋，周围是落叶松和野草丛。屋外挂着晒干的皮毛和草药，空气里是松脂和烟熏的苦香。屋里光线昏暗，木架上摆着瓶瓶罐罐——里面装着叫不上名字的植物根茎、动物的骨骼。店主是个沉默的老人，坐在摇椅上慢慢地抽烟斗。",
     "areaCode": "10_35"
   },
   {
     "bigArea": "11区·大学城",
     "smallArea": "Valmont's 会员商店",
     "owner": [],
-    "important": false,
-    "areaIntro": "高端会员制超市，位于自然保护区附近，售卖有机食品和户外装备，注重环保。",
+    "isImportant": false,
+    "isPermanent": false,
+    "areaIntro": "巨大的仓储式超市，层高惊人，货架像森林一样排列。推着比别处大一倍的购物车穿行其间，会有一种富足感。周末的家庭采购日，购物车里堆满了大包装的卫生纸、成箱的饮料、超大份的零食。",
     "areaCode": "11_36"
   },
   {
     "bigArea": "11区·大学城",
     "smallArea": "CULF/LF大学城",
     "owner": [],
-    "important": false,
-    "areaIntro": "高等教育核心区域，多所大学和科研机构聚集，学术氛围浓厚，校园优美。",
+    "isImportant": false,
+    "isPermanent": false,
+    "areaIntro": "高等教育的集中区，没有围墙，教学楼和街区的界限模糊。图书馆24小时开放，咖啡馆里的学生在讨论课题。阳光好的时候，草坪上坐着看书的学生，有人抱着吉他唱歌。",
     "areaCode": "11_37"
   },
   {
@@ -316,16 +341,18 @@
     "owner": [
       "凌"
     ],
-    "important": false,
-    "areaIntro": "凌在大学城的公寓，靠近学校，装修简洁，充满学术气息，是其学习生活空间。",
+   "isImportant": false,
+    "isPermanent": true,
+    "areaIntro": "大学城边缘的公寓楼，20分钟地铁直达排练室。房间不大，桌面支着办公电脑。厨房台面上摆着各种调料，冰箱里永远囤着食材。凌喜欢在家做饭，然后邀请朋友来玩。",
     "areaCode": "11_38"
   },
   {
     "bigArea": "在地铁上",
     "smallArea": "在地铁上",
     "owner": [],
-    "important": false,
-    "areaIntro": "Lionfish城的地铁系统，仅两条线路但覆盖主要区域，车厢整洁，播放各类广告，是角色日常通勤的重要工具，无人时不显示在地点列表中。",
+    "isImportant": false,
+    "isPermanent": false,
+    "areaIntro": "LF的地铁不算发达，严格来讲只有两条线，但足够连接主要区域。车厢里贴着各种广告——补习班、房产中介、火锅烧烤。下一站还要多久？不知道，但总会到的。",
     "areaCode": "0_39"
   },
   {
@@ -334,8 +361,9 @@
     "owner": [
       "Adriana"
     ],
-    "important": false,
-    "areaIntro": "Adriana的私人改装机帆商船，船艏雕刻魔鬼鱼图案，外表复古却配备现代化设备（卫星定位、液压绞盘等），兼具航行功能和移动工作室属性，是Adriana在海上活动的核心场所。",
+    "isImportant": false,
+    "isPermanent": false,
+    "areaIntro": "一艘现代化改装的机帆商船，远看上去像从几百年前的海战画里驶出来的幽灵。三根桅杆耸立，船艏雕着张开的魔鬼鱼。原始外表下，黑色涂装的船壳是复合金属，甲板下的货舱装着卫星定位和液压绞盘。",
     "areaCode": "0_40"
   }
 ]
