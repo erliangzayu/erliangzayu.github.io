@@ -5,32 +5,93 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>🦁 Lionfish城 · OC实时行踪</title>
     <style>
+        /* 基础样式 - 变量定义 */
+        :root {
+            /* 夜间模式默认值 */
+            --bg-primary: #0f1623;
+            --bg-secondary: #172135;
+            --bg-tertiary: #1b263b;
+            --bg-hover: #253450;
+            --text-primary: #e6edf3;
+            --text-secondary: #c2d0e7;
+            --text-tertiary: #8a9bb8;
+            --text-highlight: #d7e4ff;
+            --border-color: #253450;
+            --primary-color: #4d82f9;
+            --accent-color: #ff6b8b;
+            --warning-color: #f6e05e;
+            --warning-text: #FFC461;
+            --shadow: 0 4px 12px rgba(0,0,0,0.3);
+        }
+
+        /* 日间模式变量 */
+        .light-mode {
+            --bg-primary: #ffffff;
+            --bg-secondary: #f8fafc;
+            --bg-tertiary: #f1f5f9;
+            --bg-hover: #e2e8f0;
+            --text-primary: #0f172a;
+            --text-secondary: #334155;
+            --text-tertiary: #64748b;
+            --text-highlight: #1e40af;
+            --border-color: #e2e8f0;
+            --primary-color: #3b82f6;
+            --accent-color: #ef4444;
+            --warning-color: #f59e0b;
+            --warning-text: #92400e;
+            --shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
-        body { background: #0f1623; color: #e6edf3; padding: 20px; min-height: 100vh; overflow-x: hidden; }
+        body { background: var(--bg-primary); color: var(--text-primary); padding: 20px; min-height: 100vh; overflow-x: hidden; transition: background-color 0.3s ease, color 0.3s ease; }
+        
+        /* 模式切换按钮 */
+        .mode-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 998;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            color: var(--text-secondary);
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .mode-toggle:hover {
+            background: var(--bg-hover);
+            transform: scale(1.05);
+        }
         
         /* 顶部时间+路径+提示 */
         .header { text-align: center; margin-bottom: 24px; }
-        .title { font-size: 24px; font-weight: 600; color: #d7e4ff; margin-bottom: 8px; }
-        .real-clock { display: inline-block; background: #1b263b; padding: 8px 16px; border-radius: 30px; color: #a9b8d4; font-size: 15px; }
-        .area-path { margin-top: 8px; font-size: 14px; color: #8a9bb8; }
-        .area-path.random { color: #ff6b8b; font-weight: 600; }
-        .tip-bar { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); background: #ff6b8b; color: #fff; padding: 8px 16px; border-radius: 20px; font-size: 14px; z-index: 999; opacity: 0; transition: opacity 0.3s ease; }
+        .title { font-size: 24px; font-weight: 600; color: var(--text-highlight); margin-bottom: 8px; }
+        .real-clock { display: inline-block; background: var(--bg-tertiary); padding: 8px 16px; border-radius: 30px; color: var(--text-tertiary); font-size: 15px; }
+        .area-path { margin-top: 8px; font-size: 14px; color: var(--text-tertiary); }
+        .area-path.random { color: var(--accent-color); font-weight: 600; }
+        .tip-bar { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); background: var(--accent-color); color: #fff; padding: 8px 16px; border-radius: 20px; font-size: 14px; z-index: 999; opacity: 0; transition: opacity 0.3s ease; }
         .tip-bar.show { opacity: 1; }
         
         /* 大区导航 */
         .big-area-scroll { display: flex; gap: 10px; overflow-x: auto; padding: 8px 0; scrollbar-width: none; margin-bottom: 16px; }
         .big-area-scroll::-webkit-scrollbar { display: none; }
-        .big-area-tab { white-space: nowrap; padding: 8px 16px; border: 2px solid #253450; border-radius: 20px; cursor: pointer; transition: 0.3s; color: #c2d0e7; }
-        .big-area-tab.active { background: #3a6ef0; color: #fff; border-color: #3a6ef0; }
+        .big-area-tab { white-space: nowrap; padding: 8px 16px; border: 2px solid var(--border-color); border-radius: 20px; cursor: pointer; transition: 0.3s; color: var(--text-secondary); background: var(--bg-primary); }
+        .big-area-tab.active { background: var(--primary-color); color: #fff; border-color: var(--primary-color); }
         
         /* 小地点抽屉样式 */
         .small-area-drawer-wrap { 
-            background: #172135; 
+            background: var(--bg-secondary); 
             border-radius: 12px; 
             margin-bottom: 20px; 
             overflow: hidden; 
             width: 100%; 
             max-width: 100%; 
+            box-shadow: var(--shadow);
         }
         .small-area-drawer-header { 
             padding: 12px 16px; 
@@ -38,15 +99,15 @@
             align-items: center; 
             justify-content: space-between; 
             cursor: pointer; 
-            border-bottom: 1px solid #253450; 
+            border-bottom: 1px solid var(--border-color); 
         }
         .small-area-drawer-title { 
             font-size: 15px; 
-            color: #edf2ff; 
+            color: var(--text-highlight); 
             font-weight: 600; 
         }
         .small-area-drawer-arrow { 
-            color: #8a9bb8; 
+            color: var(--text-tertiary); 
             transition: transform 0.3s ease; 
         }
         .small-area-drawer-arrow.active { 
@@ -73,76 +134,76 @@
             cursor: pointer; 
             transition: 0.3s; 
             margin: 4px 0; 
-            color: #c2d0e7;
+            color: var(--text-secondary);
             position: relative;
             background: transparent; 
             border-left: 4px solid transparent; /* 默认透明边框 */
         }
         /* 仅保留：有人地区（未点击）黄色侧边 */
         .small-area-item.has-oc { 
-            border-left-color: #f6e05e;
-            color: #FFC461;
+            border-left-color: var(--warning-color);
+            color: var(--warning-text);
             font-weight: 500;
         }
         .small-area-item.active { /* 点击后：默认样式 */
-            background: #4d82f9; 
+            background: var(--primary-color); 
             color: #fff; 
-            border-left-color: #4d82f9;
+            border-left-color: var(--primary-color);
         }
         .small-area-item.not-permanent { /* 非常驻地区默认隐藏 */
             display: none;
         }
         .small-area-item:hover { 
-            background: #253450;
+            background: var(--bg-hover);
         }
         
         /* 地点信息栏 */
         .area-info-sidebar {
             width: 280px;
-            background: #172135;
+            background: var(--bg-secondary);
             border-radius: 18px;
             padding: 16px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            box-shadow: var(--shadow);
             flex-shrink: 0;
             margin-left: 10px;
         }
         .area-info-title {
             font-size: 16px;
             font-weight: 600;
-            color: #edf2ff;
+            color: var(--text-highlight);
             margin-bottom: 12px;
-            border-bottom: 1px solid #253450;
+            border-bottom: 1px solid var(--border-color);
             padding-bottom: 8px;
         }
         .area-info-content {
             font-size: 14px;
-            color: #c2d0e7;
+            color: var(--text-secondary);
             line-height: 1.6;
         }
         
         /* 主体容器：OC卡片 + 主人栏 + 地点信息栏 */
         .main-container { display: flex; gap: 20px; margin-top: 20px; }
         .oc-container { flex: 1; }
-        .owner-sidebar { width: 280px; background: #172135; border-radius: 18px; padding: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.3); flex-shrink: 0; display: none; }
-        .owner-title { font-size: 16px; font-weight: 600; color: #edf2ff; margin-bottom: 12px; border-bottom: 1px solid #253450; padding-bottom: 8px; }
+        .owner-sidebar { width: 280px; background: var(--bg-secondary); border-radius: 18px; padding: 16px; box-shadow: var(--shadow); flex-shrink: 0; display: none; }
+        .owner-title { font-size: 16px; font-weight: 600; color: var(--text-highlight); margin-bottom: 12px; border-bottom: 1px solid var(--border-color); padding-bottom: 8px; }
         .owner-card { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
         .owner-avatar { width: 40px; height: 40px; border-radius: 10px; object-fit: cover; }
         .owner-info { flex: 1; }
-        .owner-name { font-size: 15px; font-weight: 600; color: #edf2ff; }
-        .owner-status { font-size: 12px; color: #9cb8e7; }
+        .owner-name { font-size: 15px; font-weight: 600; color: var(--text-highlight); }
+        .owner-status { font-size: 12px; color: var(--primary-color); }
         
         /* OC卡片网格 */
         .oc-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
-        .oc-card { position: relative; background: #172135; border-radius: 18px; padding: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.3); border-left: 4px solid #4d82f9; cursor: pointer; transition: 0.3s; }
-        .oc-card.random { border-left-color: #ff6b8b; }
+        .oc-card { position: relative; background: var(--bg-secondary); border-radius: 18px; padding: 16px; box-shadow: var(--shadow); border-left: 4px solid var(--primary-color); cursor: pointer; transition: 0.3s; }
+        .oc-card.random { border-left-color: var(--accent-color); }
         .oc-card:hover { transform: translateY(-4px); box-shadow: 0 8px 20px rgba(77,130,249,0.25); }
-        .oc-random-tag { position: absolute; top: 10px; right: 10px; background: #ff6b8b; color: #fff; font-size: 10px; padding: 2px 6px; border-radius: 6px; }
+        .oc-random-tag { position: absolute; top: 10px; right: 10px; background: var(--accent-color); color: #fff; font-size: 10px; padding: 2px 6px; border-radius: 6px; }
         .oc-avatar { width: 50px; height: 50px; border-radius: 12px; object-fit: cover; margin-right: 12px; }
         .oc-row { display: flex; align-items: center; }
         .oc-info { flex: 1; }
-        .oc-name { font-size: 16px; font-weight: 600; color: #edf2ff; margin-bottom: 4px; }
-        .oc-place { font-size: 12px; color: #9cb8e7; }
-        .oc-action { font-size: 14px; color: #c2d0e7; margin-top: 6px; line-height: 1.4; }
+        .oc-name { font-size: 16px; font-weight: 600; color: var(--text-highlight); margin-bottom: 4px; }
+        .oc-place { font-size: 12px; color: var(--primary-color); }
+        .oc-action { font-size: 14px; color: var(--text-secondary); margin-top: 6px; line-height: 1.4; }
         
         /* 悬浮弹窗 */
         .oc-popup { 
@@ -151,8 +212,8 @@
             left: 50%; 
             transform: translateX(-50%); 
             width: 220px; 
-            background: #1e2a44; 
-            color: #e6edf3; 
+            background: var(--bg-tertiary); 
+            color: var(--text-primary); 
             padding: 12px; 
             border-radius: 12px; 
             box-shadow: 0 5px 15px rgba(0,0,0,0.4); 
@@ -170,11 +231,11 @@
             transform: translateX(-50%) translateY(0);
         }
         .oc-popup p { margin: 4px 0; }
-        .oc-popup .popup-type { color: #ff9eac; font-weight: 500; }
-        .oc-popup .popup-time { color: #5f9fff; }
+        .oc-popup .popup-type { color: var(--accent-color); font-weight: 500; }
+        .oc-popup .popup-time { color: var(--primary-color); }
         
         /* 空状态 */
-        .empty { grid-column: span 2; text-align: center; padding: 60px 0; color: #6b7fa5; }
+        .empty { grid-column: span 2; text-align: center; padding: 60px 0; color: var(--text-tertiary); }
         
         /* 动画 */
         @keyframes fadeOut {
@@ -190,10 +251,21 @@
             .oc-grid { grid-template-columns: 1fr; }
             .small-area-drawer-content.show { max-height: 150px; }
             .oc-popup { width: 180px; font-size: 12px; }
+            .mode-toggle {
+                width: 36px;
+                height: 36px;
+                top: 15px;
+                right: 15px;
+            }
         }
     </style>
 </head>
 <body>
+    <!-- 模式切换按钮 -->
+    <div class="mode-toggle" id="modeToggle">
+        <span id="modeIcon">🌙</span>
+    </div>
+
     <!-- 随机事件提示条 -->
     <div class="tip-bar" id="tipBar"></div>
 
@@ -209,7 +281,7 @@
     <!-- 小地点抽屉 -->
     <div class="small-area-drawer-wrap">
         <div class="small-area-drawer-header" id="drawerHeader">
-            <div class="small-area-drawer-title">小地点列表</div>
+            <div class="small-area-drawer-title" id="drawerTitle">点击更改目前地点·居酒屋</div>
             <div class="small-area-drawer-arrow" id="drawerArrow">▼</div>
         </div>
         <div class="small-area-drawer-content" id="drawerContent">
@@ -240,6 +312,8 @@
         let currentSmallArea = "";
         let ocActionCache = {}; 
         let activeAreaCode = null;
+        // 模式切换相关变量
+        let isDarkMode = true;
 
         // 初始化：加载所有JSON数据（删除了chatRes请求）
         async function init() {
@@ -261,10 +335,58 @@
                     await setAreaHighlight(currentOcAreas);
                     renderOwnerSidebar();
                 }, 60 * 1000);
+                
+                // 初始化模式切换
+                initModeToggle();
             } catch (err) {
                 console.error("数据加载失败：", err);
                 document.getElementById("ocContainer").innerHTML = `<div class="empty">数据加载失败，请刷新重试</div>`;
             }
+        }
+
+        // 初始化模式切换功能
+        function initModeToggle() {
+            const modeToggle = document.getElementById('modeToggle');
+            const modeIcon = document.getElementById('modeIcon');
+            
+            // 检查本地存储的模式偏好
+            const savedMode = localStorage.getItem('themeMode');
+            if (savedMode === 'light') {
+                switchToLightMode();
+            } else {
+                switchToDarkMode();
+            }
+            
+            // 绑定切换事件
+            modeToggle.addEventListener('click', () => {
+                if (isDarkMode) {
+                    switchToLightMode();
+                } else {
+                    switchToDarkMode();
+                }
+                // 保存到本地存储
+                localStorage.setItem('themeMode', isDarkMode ? 'dark' : 'light');
+            });
+        }
+
+        // 切换到日间模式
+        function switchToLightMode() {
+            document.body.classList.add('light-mode');
+            document.getElementById('modeIcon').textContent = '☀️';
+            isDarkMode = false;
+        }
+
+        // 切换到夜间模式
+        function switchToDarkMode() {
+            document.body.classList.remove('light-mode');
+            document.getElementById('modeIcon').textContent = '🌙';
+            isDarkMode = true;
+        }
+
+        // 更新抽屉标题
+        function updateDrawerTitle() {
+            const drawerTitle = document.getElementById('drawerTitle');
+            drawerTitle.textContent = `点击更改目前地点·${currentSmallArea}`;
         }
 
         // 获取当前有OC的地区Code列表
@@ -360,6 +482,8 @@
             if (firstItem) firstItem.classList.add("active");
 
             updateAreaPath();
+            // 更新抽屉标题
+            updateDrawerTitle();
             renderOwnerSidebar(); 
             renderAreaInfoSidebar();
             await setAreaHighlight(currentOcAreas);
@@ -372,6 +496,8 @@
                     currentSmallArea = e.target.dataset.area;
                     activeAreaCode = e.target.dataset.areaCode;
                     updateAreaPath();
+                    // 更新抽屉标题
+                    updateDrawerTitle();
                     renderOC();
                     renderOwnerSidebar(); 
                     renderAreaInfoSidebar();
