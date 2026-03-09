@@ -259,7 +259,8 @@
         "timeRange": "13:00-14:00",
         "probability": 40,
         "area": "九木酒屋",
-        "action": "在九木酒屋吃饭"
+        "action": "在九木酒屋吃饭",
+        "isMandatory": true
       },
       {
         "week": [0,1,2,3,4,5,6],
@@ -267,20 +268,23 @@
         "probability": 40,
         "area": "旧港集市",
         "type":"eat",
-        "action": "在旧港集市吃饭"
+        "action": "在旧港集市吃饭",
+        "isMandatory": true
       },
       {
         "week": [0,1,2,3,4,5,6],
         "timeRange": "13:00-14:00",
         "probability": 20,
         "area": "小林的算命摊",
-        "action": "被小林拉到算命摊一起吃饭"
+        "action": "被小林拉到算命摊一起吃饭",
+        "isMandatory": true
       },
       {
         "week": [0,1,2,3,4,5,6],
         "timeRange": "14:00-15:00",
         "probability": 30,
         "area": "市民公园",
+        "isMandatory": true,
         "action": "在市民公园遛弯儿"
       },
       {
@@ -288,6 +292,7 @@
         "timeRange": "14:00-15:00",
         "probability": 20,
         "area": "艺术街区",
+        "isMandatory": true,
         "action": "在艺术街区看瓷碗"
       },
       {
@@ -295,6 +300,7 @@
         "timeRange": "14:00-15:00",
         "probability": 20,
         "area": "大学城",
+        "isMandatory": true,
         "action": "在大学城图书馆"
       },
       {
@@ -302,6 +308,7 @@
         "timeRange": "14:00-15:00",
         "probability": 30,
         "area": "旧港码头",
+        "isMandatory": true,
         "action": "在旧港码头看渔船"
       }
     ]
