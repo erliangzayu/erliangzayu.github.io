@@ -5,7 +5,7 @@
     "baseSchedule": [
 
       {"week":[1],"timeRange":"08:00-09:00","area":"查理斯菜市场","action":"采购一周食材"},
-      {"week":[1],"timeRange":"14:00-18:00","area":"福源堂诊所","action":"找Marcel拿调理身体的药"},
+      {"week":[1],"timeRange":"14:00-18:00","area":"福源堂","action":"找Marcel拿调理身体的药"},
       {"week":[2],"timeRange":"15:00-17:00","area":"海边柏油路","action":"找Adriana聊天、看日落"},
       {"week":[3],"timeRange":"16:00-18:00","area":"幻日排练厅","action":"给乐队送小吃、看排练"},
       {"week":[4],"timeRange":"10:00-11:00","area":"警署","action":"找北原真辉咨询暂住证政策"},
