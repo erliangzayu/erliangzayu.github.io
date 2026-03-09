@@ -5,10 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>🦁 Lionfish城 · OC实时行踪</title>
     <style>
-        /* 原有样式完全保留，仅新增睡觉状态的样式标识（可选） */
-        .oc-action.sleep { color: #a0c4ff; font-style: italic; } /* 睡觉文案加斜体+浅蓝 */
-        .owner-status.sleep { color: #ff9eac; } /* 主人睡觉状态文字变色 */
-        /* 其他样式不变 */
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
         body { background: #0f1623; color: #e6edf3; padding: 20px; min-height: 100vh; overflow-x: hidden; }
         
@@ -151,7 +147,7 @@
         .oc-card { position: relative; background: #172135; border-radius: 18px; padding: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.3); border-left: 4px solid #4d82f9; cursor: pointer; transition: 0.3s; }
         .oc-card.random { border-left-color: #ff6b8b; }
         .oc-card:hover { transform: translateY(-4px); box-shadow: 0 8px 20px rgba(77,130,249,0.25); }
-        .oc-random-tag { position: absolute; top: 10px; right: 10px; background: #ff6b8b; color: #fff; font-size: 10px; padding: 16px; border-radius: 6px; }
+        .oc-random-tag { position: absolute; top: 10px; right: 10px; background: #ff6b8b; color: #fff; font-size: 10px; padding: 2px 6px; border-radius: 6px; }
         .oc-avatar { width: 50px; height: 50px; border-radius: 12px; object-fit: cover; margin-right: 12px; }
         .oc-row { display: flex; align-items: center; }
         .oc-info { flex: 1; }
@@ -160,10 +156,34 @@
         .oc-action { font-size: 14px; color: #c2d0e7; margin-top: 6px; line-height: 1.4; }
         .oc-link { font-size: 12px; color: #3182ce; margin-top: 4px; cursor: pointer; text-decoration: underline; }
         
-        /* 悬浮弹窗 */
-        .oc-popup { position: absolute; bottom: calc(100% + 10px); left: 50%; transform: translateX(-50%); width: 200px; background: #1e2a44; color: #e6edf3; padding: 12px; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.4); font-size: 14px; line-height: 1.5; z-index: 10; opacity: 0; pointer-events: none; transition: opacity 0.2s; }
-        .oc-card:hover .oc-popup { opacity: 1; pointer-events: all; }
-        .oc-popup a { color: #5f9fff; text-decoration: underline; }
+        /* 悬浮弹窗（核心恢复+优化） */
+        .oc-popup { 
+            position: absolute; 
+            bottom: calc(100% + 10px); 
+            left: 50%; 
+            transform: translateX(-50%); 
+            width: 220px; 
+            background: #1e2a44; 
+            color: #e6edf3; 
+            padding: 12px; 
+            border-radius: 12px; 
+            box-shadow: 0 5px 15px rgba(0,0,0,0.4); 
+            font-size: 13px; 
+            line-height: 1.5; 
+            z-index: 10; 
+            opacity: 0; 
+            pointer-events: none; 
+            transition: opacity 0.2s, transform 0.2s;
+            transform: translateX(-50%) translateY(5px);
+        }
+        .oc-card:hover .oc-popup { 
+            opacity: 1; 
+            pointer-events: all; 
+            transform: translateX(-50%) translateY(0);
+        }
+        .oc-popup p { margin: 4px 0; }
+        .oc-popup .popup-type { color: #ff9eac; font-weight: 500; }
+        .oc-popup .popup-time { color: #5f9fff; }
         
         /* 聊天气泡 */
         .chat-bubble-wrap { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); z-index: 999; display: flex; flex-direction: column; gap: 8px; max-width: 80%; }
@@ -194,6 +214,7 @@
             .oc-grid { grid-template-columns: 1fr; }
             .chat-bubble-wrap { bottom: 20px; max-width: 90%; }
             .small-area-drawer-content.show { max-height: 150px; }
+            .oc-popup { width: 180px; font-size: 12px; }
         }
     </style>
 </head>
@@ -497,12 +518,33 @@
                     // 返回行程+默认type（无type则为work）
                     return {
                         ...schedule,
-                        type: schedule.type || "work"
+                        type: schedule.type || "work",
+                        endTimeStr: getEndTimeDisplay(start, end, now) // 新增：结束时间显示文本
                     };
                 }
             }
             
             return null;
+        }
+
+        // 核心新增：计算结束时间显示文本（处理跨天）
+        function getEndTimeDisplay(start, end, now) {
+            const [startH] = start.split(":").map(Number);
+            const [endH, endM] = end.split(":").map(Number);
+            const endTimeStr = `${String(endH).padStart(2, '0')}:${String(endM).padStart(2, '0')}`;
+            
+            // 跨天判断：结束时间小时 < 开始时间小时 → 显示“次日X点”
+            if (endH < startH) {
+                return `次日 ${endTimeStr}`;
+            } 
+            // 当天但已过午夜（比如00:00-04:00）→ 显示“当天X点”
+            else if (now.hour < startH) {
+                return `当天 ${endTimeStr}`;
+            } 
+            // 普通当天 → 直接显示时间
+            else {
+                return endTimeStr;
+            }
         }
 
         // 随机事件判断（保留会话级缓存和互斥逻辑）
@@ -579,7 +621,7 @@
             }, 5000);
         }
 
-        // 核心修改：按时段类型获取状态文案
+        // 按时段类型获取状态文案
         function getLocationRandomAction(oc, area, scheduleType) {
             // 默认type为work
             const type = scheduleType || "work";
@@ -604,7 +646,7 @@
             return ocActionCache[cacheKey];
         }
 
-        // 渲染OC卡片（适配时段类型）
+        // 渲染OC卡片（恢复悬浮窗+显示结束时间）
         function renderOC() {
             const ocContainer = document.getElementById("ocContainer");
             const now = getRealTime();
@@ -620,7 +662,8 @@
                         oc, 
                         finalSchedule, 
                         isRandom,
-                        scheduleType: finalSchedule.type || "work" // 传递时段类型
+                        scheduleType: finalSchedule.type || "work",
+                        endTimeStr: finalSchedule.endTimeStr || "未知" // 结束时间显示文本
                     });
                 }
             });
@@ -630,18 +673,28 @@
                 return;
             }
 
+            // 修复：OC卡片里恢复悬浮窗HTML
             ocContainer.innerHTML = `
                 <div class="oc-grid">
-                    ${filteredOC.map(({ oc, finalSchedule, isRandom, scheduleType }) => {
+                    ${filteredOC.map(({ oc, finalSchedule, isRandom, scheduleType, endTimeStr }) => {
                         const action = getLocationRandomAction(oc, currentSmallArea, scheduleType);
                         const isRandomClass = isRandom ? "random" : "";
-                        const sleepClass = scheduleType === "sleep" ? "sleep" : ""; // 睡觉样式类
+                        const sleepClass = scheduleType === "sleep" ? "sleep" : ""; 
                         const randomTag = isRandom ? `<div class="oc-random-tag">随机事件</div>` : "";
                         const linkHtml = oc.link ? `<div class="oc-link" onclick="window.open('${oc.link}', '_blank')">查看详情</div>` : "";
+                        
+                        // 悬浮窗内容：状态类型+停留结束时间
+                        const popupContent = `
+                            <p><span class="popup-type">当前状态：</span>${getTypeDisplayName(scheduleType)}</p>
+                            <p><span class="popup-time">停留至：</span>${endTimeStr}</p>
+                            <p><span class="popup-type">行程描述：</span>${finalSchedule.action || "无"}</p>
+                        `;
 
                         return `
                             <div class="oc-card ${isRandomClass}">
                                 ${randomTag}
+                                <!-- 悬浮窗 -->
+                                <div class="oc-popup">${popupContent}</div>
                                 <div class="oc-row">
                                     <img src="${oc.avatar}" alt="${oc.name}" class="oc-avatar">
                                     <div class="oc-info">
@@ -662,6 +715,20 @@
                 name: item.oc.name,
                 scheduleType: item.scheduleType
             })), now);
+        }
+
+        // 辅助函数：将type转为友好显示名（如sleep→睡觉，prepare_food→准备食材）
+        function getTypeDisplayName(type) {
+            const typeMap = {
+                "work": "营业/活动",
+                "sleep": "睡觉休息",
+                "prepare_food": "准备食材",
+                "clean": "打扫卫生",
+                "rest": "休息中",
+                "buy": "采购物资"
+                // 新增type时，这里加一行映射即可（可选，不加则显示原type名）
+            };
+            return typeMap[type] || type;
         }
 
         // 修复主人栏渲染逻辑（适配时段类型）
@@ -688,7 +755,7 @@
 
                 const ownerSchedule = getOwnerCurrentSchedule(ownerOC, now);
                 let status = "";
-                let sleepClass = ""; // 睡觉样式类
+                let sleepClass = ""; 
 
                 if (ownerSchedule) {
                     const scheduleType = ownerSchedule.type || "work";
@@ -738,7 +805,7 @@
             ownerContent.innerHTML = ownerHtml || `<div class="empty">暂无主人信息</div>`;
         }
 
-        // 核心修改：睡觉时段屏蔽聊天气泡
+        // 睡觉时段屏蔽聊天气泡
         function checkChatTrigger(ocList, now) {
             const chatWrap = document.getElementById("chatBubbleWrap");
             
