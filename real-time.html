@@ -63,7 +63,7 @@
             overflow-y: auto; 
         }
         
-        /* 小地点列表（抽屉内）- 优化高亮样式 */
+        /* 小地点列表（仅保留有人黄色高亮） */
         .small-area-list { 
             padding: 0 8px; 
         }
@@ -75,30 +75,19 @@
             margin: 4px 0; 
             color: #c2d0e7;
             position: relative;
-            background: transparent; /* 重置背景 */
+            background: transparent; 
             border-left: 4px solid transparent; /* 默认透明边框 */
         }
-        /* 高亮样式优化：仅侧边颜色，无背景 */
-        .small-area-item.is-important { /* 重要地区（未点击、无人）：蓝色侧边 */
-            border-left-color: #3182ce;
-            color: #c2d0e7;
-        }
-        .small-area-item.has-oc { /* 有人地区（未点击、非重要）：黄色侧边 */
+        /* 仅保留：有人地区（未点击）黄色侧边 */
+        .small-area-item.has-oc { 
             border-left-color: #f6e05e;
             color: #c2d0e7;
             font-weight: 500;
-        }
-        .small-area-item.is-important.has-oc { /* 重要+有人：优先黄色侧边 */
-            border-left-color: #f6e05e;
         }
         .small-area-item.active { /* 点击后：默认样式 */
             background: #4d82f9; 
             color: #fff; 
             border-left-color: #4d82f9;
-        }
-        .small-area-item.is-important.inactive { /* 重要地区切换后：柔和红色侧边 */
-            border-left-color: #e57373; /* 柔和红 */
-            color: #c2d0e7;
         }
         .small-area-item.not-permanent { /* 非常驻地区默认隐藏 */
             display: none;
@@ -107,7 +96,7 @@
             background: #253450;
         }
         
-        /* 新增：地点信息栏（主人栏旁边） */
+        /* 地点信息栏（不变） */
         .area-info-sidebar {
             width: 280px;
             background: #172135;
@@ -142,7 +131,7 @@
         .owner-name { font-size: 15px; font-weight: 600; color: #edf2ff; }
         .owner-status { font-size: 12px; color: #9cb8e7; }
         
-        /* OC卡片网格 */
+        /* OC卡片网格（删除link相关） */
         .oc-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
         .oc-card { position: relative; background: #172135; border-radius: 18px; padding: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.3); border-left: 4px solid #4d82f9; cursor: pointer; transition: 0.3s; }
         .oc-card.random { border-left-color: #ff6b8b; }
@@ -154,9 +143,8 @@
         .oc-name { font-size: 16px; font-weight: 600; color: #edf2ff; margin-bottom: 4px; }
         .oc-place { font-size: 12px; color: #9cb8e7; }
         .oc-action { font-size: 14px; color: #c2d0e7; margin-top: 6px; line-height: 1.4; }
-        .oc-link { font-size: 12px; color: #3182ce; margin-top: 4px; cursor: pointer; text-decoration: underline; }
         
-        /* 悬浮弹窗（核心恢复+优化） */
+        /* 悬浮弹窗（删除行程描述） */
         .oc-popup { 
             position: absolute; 
             bottom: calc(100% + 10px); 
@@ -251,7 +239,6 @@
             <div class="owner-title">📍 地点主人</div>
             <div id="ownerContent"></div>
         </div>
-        <!-- 新增：地点信息栏 -->
         <div class="area-info-sidebar" id="areaInfoSidebar">
             <div class="area-info-title">📝 地点介绍</div>
             <div class="area-info-content" id="areaInfoContent">加载地点信息中...</div>
@@ -292,7 +279,6 @@
                 renderOC();
                 renderOwnerSidebar(); 
                 setInterval(updateRealTimeOnly, 1000);
-                // 定时刷新地区高亮和主人状态
                 setInterval(async () => {
                     const currentOcAreas = await getCurrentOcAreas();
                     await setAreaHighlight(currentOcAreas);
@@ -322,7 +308,7 @@
             return Array.from(ocAreas);
         }
 
-        // 初始化大区/小地点导航
+        // 初始化大区/小地点导航（删除important相关逻辑）
         function initAreaNav() {
             const bigAreaWrap = document.getElementById("bigAreaWrap");
             const drawerHeader = document.getElementById("drawerHeader");
@@ -363,28 +349,25 @@
             renderSmallArea(currentBigArea);
         }
 
-        // 渲染小地点列表
+        // 渲染小地点列表（删除important相关类）
         async function renderSmallArea(bigArea) {
             const smallAreaList = document.getElementById("smallAreaList");
             const smallAreas = areaData.filter(item => item.bigArea === bigArea);
             const currentOcAreas = await getCurrentOcAreas();
 
-            // 分离重要地点和普通地点
-            const importantAreas = smallAreas.filter(item => item.important || false);
-            const normalAreas = smallAreas.filter(item => !item.important);
-            const sortedAreas = [...importantAreas, ...normalAreas];
+            // 不再按important排序，按原有顺序展示
+            const sortedAreas = smallAreas;
 
             smallAreaList.innerHTML = sortedAreas.map(item => {
-                const isImportant = item.important || false;
                 const isPermanent = item.isPermanent !== false;
                 const hasOc = currentOcAreas.includes(item.areaCode);
                 const displayClass = !isPermanent && !hasOc ? "not-permanent" : "";
+                const hasOcClass = hasOc ? "has-oc" : "";
 
                 return `
-                    <div class="small-area-item ${isImportant ? 'is-important' : ''} ${displayClass}" 
+                    <div class="small-area-item ${hasOcClass} ${displayClass}" 
                          data-area="${item.smallArea}" 
-                         data-areaCode="${item.areaCode || ''}"
-                         data-isImportant="${isImportant}">
+                         data-areaCode="${item.areaCode || ''}">
                         ${item.smallArea}
                     </div>
                 `;
@@ -418,7 +401,7 @@
             });
         }
 
-        // 渲染地点信息栏
+        // 渲染地点信息栏（不变）
         function renderAreaInfoSidebar() {
             const areaInfoSidebar = document.getElementById("areaInfoSidebar");
             const areaInfoContent = document.getElementById("areaInfoContent");
@@ -434,37 +417,30 @@
             areaInfoContent.innerHTML = areaInfo.areaIntro || "暂无地点描述";
         }
 
-        // 设置地区高亮
+        // 设置地区高亮（仅保留有人黄色高亮）
         async function setAreaHighlight(currentOcAreas) {
             const areaItems = document.querySelectorAll(".small-area-item");
             
             areaItems.forEach(item => {
                 const areaCode = item.dataset.areacode;
-                const isImportant = item.dataset.isimportant === "true";
                 const hasOc = currentOcAreas.includes(areaCode);
 
-                item.classList.remove("has-oc", "inactive");
+                item.classList.remove("has-oc");
                 
                 if (areaCode === activeAreaCode) return;
 
-                if (isImportant) {
-                    if (hasOc) {
-                        item.classList.add("has-oc");
-                    } else {
-                        item.classList.add("inactive");
-                    }
-                } else if (hasOc) {
+                if (hasOc) {
                     item.classList.add("has-oc");
                 }
             });
         }
 
-        // 更新当前路径
+        // 更新当前路径（不变）
         function updateAreaPath() {
             document.getElementById("areaPath").innerText = `${currentBigArea} > ${currentSmallArea}`;
         }
 
-        // 获取实时时间对象
+        // 获取实时时间对象（不变）
         function getRealTime() {
             const now = new Date();
             return {
@@ -476,19 +452,19 @@
             };
         }
 
-        // 更新实时时间显示
+        // 更新实时时间显示（不变）
         function updateRealTime() {
             const now = getRealTime();
             document.getElementById("clock").innerText = `当前时间 · ${now.str}`;
         }
 
-        // 仅更新时间显示
+        // 仅更新时间显示（不变）
         function updateRealTimeOnly() {
             const now = getRealTime();
             document.getElementById("clock").innerText = `当前时间 · ${now.str}`;
         }
 
-        // 专门用于主人的行程获取（返回行程+时段类型）
+        // 专门用于主人的行程获取（不变）
         function getOwnerCurrentSchedule(oc, now) {
             if (!oc.baseSchedule || oc.baseSchedule.length === 0) return null;
             
@@ -519,7 +495,7 @@
                     return {
                         ...schedule,
                         type: schedule.type || "work",
-                        endTimeStr: getEndTimeDisplay(start, end, now) // 新增：结束时间显示文本
+                        endTimeStr: getEndTimeDisplay(start, end, now)
                     };
                 }
             }
@@ -527,7 +503,7 @@
             return null;
         }
 
-        // 核心新增：计算结束时间显示文本（处理跨天）
+        // 计算结束时间显示文本（不变）
         function getEndTimeDisplay(start, end, now) {
             const [startH] = start.split(":").map(Number);
             const [endH, endM] = end.split(":").map(Number);
@@ -547,7 +523,7 @@
             }
         }
 
-        // 随机事件判断（保留会话级缓存和互斥逻辑）
+        // 随机事件判断（不变）
         function checkRandomEvent(oc, now) {
             if (!oc.randomEvents || oc.randomEvents.length === 0) {
                 return { isRandom: false, schedule: null };
@@ -611,7 +587,7 @@
             return result;
         }
 
-        // 显示随机事件提示条
+        // 显示随机事件提示条（不变）
         function showTip(text) {
             const tipBar = document.getElementById("tipBar");
             tipBar.innerText = text;
@@ -621,7 +597,7 @@
             }, 5000);
         }
 
-        // 按时段类型获取状态文案
+        // 按时段类型获取状态文案（不变）
         function getLocationRandomAction(oc, area, scheduleType) {
             // 默认type为work
             const type = scheduleType || "work";
@@ -639,14 +615,14 @@
                 return type === "sleep" ? "正在睡觉，请勿打扰" : "暂无状态";
             }
 
-            const cacheKey = `oc_action_${oc.name}_${area}_${type}`; // 缓存Key加type，避免不同时段复用文案
+            const cacheKey = `oc_action_${oc.name}_${area}_${type}`;
             if (!ocActionCache[cacheKey]) {
                 ocActionCache[cacheKey] = actions[Math.floor(Math.random() * actions.length)];
             }
             return ocActionCache[cacheKey];
         }
 
-        // 渲染OC卡片（恢复悬浮窗+显示结束时间）
+        // 渲染OC卡片（删除link，简化悬浮窗）
         function renderOC() {
             const ocContainer = document.getElementById("ocContainer");
             const now = getRealTime();
@@ -663,7 +639,7 @@
                         finalSchedule, 
                         isRandom,
                         scheduleType: finalSchedule.type || "work",
-                        endTimeStr: finalSchedule.endTimeStr || "未知" // 结束时间显示文本
+                        endTimeStr: finalSchedule.endTimeStr || "未知"
                     });
                 }
             });
@@ -673,7 +649,7 @@
                 return;
             }
 
-            // 修复：OC卡片里恢复悬浮窗HTML
+            // 渲染OC卡片（删除link相关代码）
             ocContainer.innerHTML = `
                 <div class="oc-grid">
                     ${filteredOC.map(({ oc, finalSchedule, isRandom, scheduleType, endTimeStr }) => {
@@ -681,13 +657,11 @@
                         const isRandomClass = isRandom ? "random" : "";
                         const sleepClass = scheduleType === "sleep" ? "sleep" : ""; 
                         const randomTag = isRandom ? `<div class="oc-random-tag">随机事件</div>` : "";
-                        const linkHtml = oc.link ? `<div class="oc-link" onclick="window.open('${oc.link}', '_blank')">查看详情</div>` : "";
                         
-                        // 悬浮窗内容：状态类型+停留结束时间
+                        // 悬浮窗：仅保留当前状态+停留至（删除行程描述）
                         const popupContent = `
                             <p><span class="popup-type">当前状态：</span>${getTypeDisplayName(scheduleType)}</p>
                             <p><span class="popup-time">停留至：</span>${endTimeStr}</p>
-                            <p><span class="popup-type">行程描述：</span>${finalSchedule.action || "无"}</p>
                         `;
 
                         return `
@@ -703,21 +677,20 @@
                                     </div>
                                 </div>
                                 <div class="oc-action ${sleepClass}">${action}</div>
-                                ${linkHtml}
                             </div>
                         `;
                     }).join('')}
                 </div>
             `;
 
-            // 检查聊天气泡触发（传入OC列表+时段类型）
+            // 检查聊天气泡触发
             checkChatTrigger(filteredOC.map(item => ({
                 name: item.oc.name,
                 scheduleType: item.scheduleType
             })), now);
         }
 
-        // 辅助函数：将type转为友好显示名（如sleep→睡觉，prepare_food→准备食材）
+        // 辅助函数：将type转为友好显示名（不变）
         function getTypeDisplayName(type) {
             const typeMap = {
                 "work": "营业/活动",
@@ -726,12 +699,11 @@
                 "clean": "打扫卫生",
                 "rest": "休息中",
                 "buy": "采购物资"
-                // 新增type时，这里加一行映射即可（可选，不加则显示原type名）
             };
             return typeMap[type] || type;
         }
 
-        // 修复主人栏渲染逻辑（适配时段类型）
+        // 主人卡片简化：固定显示状态
         function renderOwnerSidebar() {
             const ownerSidebar = document.getElementById("ownerSidebar");
             const ownerContent = document.getElementById("ownerContent");
@@ -755,40 +727,13 @@
 
                 const ownerSchedule = getOwnerCurrentSchedule(ownerOC, now);
                 let status = "";
-                let sleepClass = ""; 
 
-                if (ownerSchedule) {
-                    const scheduleType = ownerSchedule.type || "work";
-                    if (ownerSchedule.area === currentSmallArea) {
-                        // 主人在当前地点，按type显示状态
-                        const action = getLocationRandomAction(ownerOC, currentSmallArea, scheduleType);
-                        sleepClass = scheduleType === "sleep" ? "sleep" : "";
-                        if (scheduleType === "sleep") {
-                            status = `😴 正在睡觉：${action}`;
-                        } else {
-                            status = `✅ 正在此处：${action}`;
-                        }
-                    } else {
-                        // 主人在其他地点
-                        const cacheKey = `${ownerName}_absent`;
-                        if (!ocActionCache[cacheKey]) {
-                            const charAbsentText = randomData.absentText?.[ownerName] || 
-                                                  randomData.absentText?.default || 
-                                                  ["暂时外出办事，稍后回来", "去附近逛逛，很快返回"];
-                            ocActionCache[cacheKey] = charAbsentText[Math.floor(Math.random() * charAbsentText.length)];
-                        }
-                        status = `🔴 暂时离开：${ocActionCache[cacheKey]}`;
-                    }
+                if (ownerSchedule && ownerSchedule.area === currentSmallArea) {
+                    // 主人在当前地点：固定显示“✅就在此处”
+                    status = `✅ 就在此处`;
                 } else {
-                    // 主人无匹配行程
-                    const cacheKey = `${ownerName}_absent`;
-                    if (!ocActionCache[cacheKey]) {
-                        const charAbsentText = randomData.absentText?.[ownerName] || 
-                                              randomData.absentText?.default || 
-                                              ["暂时外出办事，稍后回来", "去附近逛逛，很快返回"];
-                        ocActionCache[cacheKey] = charAbsentText[Math.floor(Math.random() * charAbsentText.length)];
-                    }
-                    status = `🔴 暂时离开：${ocActionCache[cacheKey]}`;
+                    // 主人不在当前地点：固定显示“🔴 暂时离开，去其他地方看看吧。”
+                    status = `🔴 暂时离开，去其他地方看看吧。`;
                 }
 
                 ownerHtml += `
@@ -796,7 +741,7 @@
                         <img src="${ownerOC.avatar}" alt="${ownerName}" class="owner-avatar">
                         <div class="owner-info">
                             <div class="owner-name">${ownerName}</div>
-                            <div class="owner-status ${sleepClass}">${status}</div>
+                            <div class="owner-status">${status}</div>
                         </div>
                     </div>
                 `;
@@ -805,7 +750,7 @@
             ownerContent.innerHTML = ownerHtml || `<div class="empty">暂无主人信息</div>`;
         }
 
-        // 睡觉时段屏蔽聊天气泡
+        // 睡觉时段屏蔽聊天气泡（不变）
         function checkChatTrigger(ocList, now) {
             const chatWrap = document.getElementById("chatBubbleWrap");
             
