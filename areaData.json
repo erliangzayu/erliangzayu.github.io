@@ -3,7 +3,6 @@
     "bigArea": "1区·老城区",
     "smallArea": "福源堂",
     "owner": [
-      "Sasa",
       "Marcel"
     ],
     "important": false,
@@ -31,12 +30,7 @@
   {
     "bigArea": "1区·老城区",
     "smallArea": "LF一中",
-    "owner": [
-      "肆",
-      "凌",
-      "Sophia",
-      "Wesley"
-    ],
+    "owner": [],
     "important": false,
     "areaIntro": "知名中学，肆、Wesley就读，Sophia、晴南、凌、悠真毕业，校园环境优美，隐藏特殊能力学生。",
     "areaCode": "1_04"
@@ -168,8 +162,7 @@
     "bigArea": "5区·高密度居民区",
     "smallArea": "幻日乐队排练室",
     "owner": [
-      "Sophia",
-      "Leona"
+      "Sophia"
     ],
     "important": false,
     "areaIntro": "幻日乐队的专属排练空间，设备齐全，隔音好，成员常在此创作排练。",
@@ -206,11 +199,7 @@
   {
     "bigArea": "6区·生态居民区",
     "smallArea": "Berlon家老宅",
-    "owner": [
-      "Leona",
-      "Lee",
-      "Noo"
-    ],
+    "owner": [],
     "important": false,
     "areaIntro": "Berlon家族的老房子，位于生态区僻静处，建筑复古，周围绿植环绕，充满自然气息。",
     "areaCode": "6_24"
