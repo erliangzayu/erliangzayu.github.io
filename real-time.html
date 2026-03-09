@@ -173,22 +173,10 @@
         .oc-popup .popup-type { color: #ff9eac; font-weight: 500; }
         .oc-popup .popup-time { color: #5f9fff; }
         
-        /* 聊天气泡 */
-        .chat-bubble-wrap { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); z-index: 999; display: flex; flex-direction: column; gap: 8px; max-width: 80%; }
-        .chat-bubble { background: #1e2a44; padding: 12px 16px; border-radius: 18px; box-shadow: 0 4px 12px rgba(0,0,0,0.4); display: flex; align-items: center; gap: 10px; animation: fadeInUp 0.3s ease; }
-        .chat-avatar { width: 36px; height: 36px; border-radius: 50%; object-fit: cover; }
-        .chat-content { flex: 1; }
-        .chat-name { font-size: 12px; color: #9cb8e7; margin-bottom: 2px; }
-        .chat-text { font-size: 14px; color: #e6edf3; }
-        
         /* 空状态 */
         .empty { grid-column: span 2; text-align: center; padding: 60px 0; color: #6b7fa5; }
         
-        /* 动画 */
-        @keyframes fadeInUp {
-            from { opacity: 0; transform: translate(-50%, 20px); }
-            to { opacity: 1; transform: translate(-50%, 0); }
-        }
+        /* 动画（仅保留提示条相关） */
         @keyframes fadeOut {
             from { opacity: 1; }
             to { opacity: 0; }
@@ -200,7 +188,6 @@
             .main-container { flex-direction: column; }
             .owner-sidebar, .area-info-sidebar { width: 100%; display: none; margin-top: 20px; margin-left: 0; }
             .oc-grid { grid-template-columns: 1fr; }
-            .chat-bubble-wrap { bottom: 20px; max-width: 90%; }
             .small-area-drawer-content.show { max-height: 150px; }
             .oc-popup { width: 180px; font-size: 12px; }
         }
@@ -245,34 +232,27 @@
         </div>
     </div>
 
-    <!-- 聊天气泡容器 -->
-    <div class="chat-bubble-wrap" id="chatBubbleWrap"></div>
-
     <script>
-        // 全局变量
+        // 全局变量（删除了chatData、chatTriggered）
         let ocData = [];
         let areaData = [];
-        let chatData = [];
         let randomData = [];
         let currentBigArea = "";
         let currentSmallArea = "";
-        let chatTriggered = new Set(); 
         let ocActionCache = {}; 
         let activeAreaCode = null;
         let linkedEvents = []; // 新增：存储当前触发的联动事件
 
-        // 初始化：加载所有JSON数据
+        // 初始化：加载所有JSON数据（删除了chatRes请求）
         async function init() {
             try {
-                const [ocRes, areaRes, chatRes, randomRes] = await Promise.all([
+                const [ocRes, areaRes, randomRes] = await Promise.all([
                     fetch('./ocData.json').then(res => res.json()),
                     fetch('./areaData.json').then(res => res.json()),
-                    fetch('./chatData.json').then(res => res.json()),
                     fetch('./randomData.json').then(res => res.json())
                 ]);
                 ocData = ocRes;
                 areaData = areaRes;
-                chatData = chatRes;
                 randomData = randomRes;
 
                 initAreaNav();
@@ -694,7 +674,7 @@
             return linkedEventsList;
         }
 
-        // 渲染OC卡片（新增联动事件覆盖逻辑）
+        // 渲染OC卡片（新增联动事件覆盖逻辑，删除了checkChatTrigger调用）
         function renderOC() {
             const ocContainer = document.getElementById("ocContainer");
             const now = getRealTime();
@@ -781,12 +761,6 @@
                     }).join('')}
                 </div>
             `;
-
-            // 检查聊天气泡触发
-            checkChatTrigger(filteredOC.map(item => ({
-                name: item.oc.name,
-                scheduleType: item.scheduleType
-            })), now);
         }
 
         // 辅助函数：将type转为友好显示名（新增联动type）
@@ -857,60 +831,6 @@
             });
 
             ownerContent.innerHTML = ownerHtml || `<div class="empty">暂无主人信息</div>`;
-        }
-
-        // 睡觉时段屏蔽聊天气泡（不变）
-        function checkChatTrigger(ocList, now) {
-            const chatWrap = document.getElementById("chatBubbleWrap");
-            
-            // 筛选出非睡觉状态的OC
-            const awakeOCs = ocList.filter(item => item.scheduleType !== "sleep").map(item => item.name);
-            if (awakeOCs.length === 0) return; // 全在睡觉，直接返回
-
-            const validChats = chatData.filter(chat => {
-                // 1. 对话涉及的OC必须都醒着
-                if (!chat.characters.every(name => awakeOCs.includes(name))) return false;
-                // 2. 匹配周几和时间
-                if (!chat.week.includes(now.week)) return false;
-                
-                const [start, end] = chat.timeRange.split("-");
-                const [startH, startM] = start.split(":").map(Number);
-                const [endH, endM] = end.split(":").map(Number);
-                
-                const nowMinutes = now.hour * 60 + now.minute;
-                const startMinutes = startH * 60 + startM;
-                const endMinutes = endH * 60 + endM;
-                
-                if (endMinutes < startMinutes) {
-                    return nowMinutes >= startMinutes || nowMinutes <= endMinutes;
-                } else {
-                    return nowMinutes >= startMinutes && nowMinutes <= endMinutes;
-                }
-            });
-
-            validChats.forEach(chat => {
-                if (chatTriggered.has(chat.id)) return;
-                chatTriggered.add(chat.id);
-
-                const bubble = document.createElement("div");
-                bubble.className = "chat-bubble";
-                const speakerOC = ocData.find(o => o.name === chat.speaker);
-                const avatar = speakerOC ? speakerOC.avatar : "./images/avatar/default.png";
-
-                bubble.innerHTML = `
-                    <img src="${avatar}" alt="${chat.speaker}" class="chat-avatar">
-                    <div class="chat-content">
-                        <div class="chat-name">${chat.speaker}</div>
-                        <div class="chat-text">${chat.text}</div>
-                    </div>
-                `;
-                chatWrap.appendChild(bubble);
-
-                setTimeout(() => {
-                    bubble.classList.add("fade-out");
-                    setTimeout(() => bubble.remove(), 300);
-                }, 8000);
-            });
         }
 
         // 页面加载完成后初始化
