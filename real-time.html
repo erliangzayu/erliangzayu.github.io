@@ -17,7 +17,7 @@
         .tip-bar { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); background: #ff6b8b; color: #fff; padding: 8px 16px; border-radius: 20px; font-size: 14px; z-index: 999; opacity: 0; transition: opacity 0.3s ease; }
         .tip-bar.show { opacity: 1; }
         
-        /* 大区导航 */
+        /* 大区导航（不变） */
         .big-area-scroll { display: flex; gap: 10px; overflow-x: auto; padding: 8px 0; scrollbar-width: none; margin-bottom: 16px; }
         .big-area-scroll::-webkit-scrollbar { display: none; }
         .big-area-tab { white-space: nowrap; padding: 8px 16px; border: 2px solid #253450; border-radius: 20px; cursor: pointer; transition: 0.3s; color: #c2d0e7; }
@@ -76,26 +76,27 @@
             color: #c2d0e7;
             position: relative;
             background: transparent; 
-            border-left: 4px solid transparent;
+            border-left: 4px solid transparent; /* 默认透明边框 */
         }
+        /* 仅保留：有人地区（未点击）黄色侧边 */
         .small-area-item.has-oc { 
             border-left-color: #f6e05e;
             color: #c2d0e7;
             font-weight: 500;
         }
-        .small-area-item.active { 
+        .small-area-item.active { /* 点击后：默认样式 */
             background: #4d82f9; 
             color: #fff; 
             border-left-color: #4d82f9;
         }
-        .small-area-item.not-permanent { 
+        .small-area-item.not-permanent { /* 非常驻地区默认隐藏 */
             display: none;
         }
         .small-area-item:hover { 
             background: #253450;
         }
         
-        /* 地点信息栏 */
+        /* 地点信息栏（不变） */
         .area-info-sidebar {
             width: 280px;
             background: #172135;
@@ -119,7 +120,7 @@
             line-height: 1.6;
         }
         
-        /* 主体容器 */
+        /* 主体容器：OC卡片 + 主人栏 + 地点信息栏 */
         .main-container { display: flex; gap: 20px; margin-top: 20px; }
         .oc-container { flex: 1; }
         .owner-sidebar { width: 280px; background: #172135; border-radius: 18px; padding: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.3); flex-shrink: 0; display: none; }
@@ -130,7 +131,7 @@
         .owner-name { font-size: 15px; font-weight: 600; color: #edf2ff; }
         .owner-status { font-size: 12px; color: #9cb8e7; }
         
-        /* OC卡片网格 */
+        /* OC卡片网格（删除link相关） */
         .oc-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
         .oc-card { position: relative; background: #172135; border-radius: 18px; padding: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.3); border-left: 4px solid #4d82f9; cursor: pointer; transition: 0.3s; }
         .oc-card.random { border-left-color: #ff6b8b; }
@@ -143,7 +144,7 @@
         .oc-place { font-size: 12px; color: #9cb8e7; }
         .oc-action { font-size: 14px; color: #c2d0e7; margin-top: 6px; line-height: 1.4; }
         
-        /* 悬浮弹窗 */
+        /* 悬浮弹窗（删除行程描述） */
         .oc-popup { 
             position: absolute; 
             bottom: calc(100% + 10px); 
@@ -215,7 +216,7 @@
         <div class="area-path" id="areaPath">1区 > 居酒屋</div>
     </div>
 
-    <!-- 大区导航 -->
+    <!-- 大区导航（不变） -->
     <div class="big-area-scroll" id="bigAreaWrap"></div>
 
     <!-- 小地点抽屉 -->
@@ -258,7 +259,7 @@
         let chatTriggered = new Set(); 
         let ocActionCache = {}; 
         let activeAreaCode = null;
-        let linkedEvents = []; // 存储当前触发的联动事件
+        let linkedEvents = []; // 新增：存储当前触发的联动事件
 
         // 初始化：加载所有JSON数据
         async function init() {
@@ -296,9 +297,18 @@
             const ocAreas = new Set();
             
             ocData.forEach(oc => {
-                const ownerSchedule = getOwnerCurrentSchedule(oc, now);
-                if (ownerSchedule) {
-                    const areaInfo = areaData.find(item => item.smallArea === ownerSchedule.area);
+                // 先检查联动事件
+                const linkedEvent = linkedEvents.find(item => item.targetName === oc.name);
+                let finalSchedule = null;
+                
+                if (linkedEvent) {
+                    finalSchedule = linkedEvent;
+                } else {
+                    finalSchedule = getOwnerCurrentSchedule(oc, now);
+                }
+                
+                if (finalSchedule) {
+                    const areaInfo = areaData.find(item => item.smallArea === finalSchedule.area || item.smallArea === finalSchedule.targetArea);
                     if (areaInfo && areaInfo.areaCode) {
                         ocAreas.add(areaInfo.areaCode);
                     }
@@ -308,7 +318,7 @@
             return Array.from(ocAreas);
         }
 
-        // 初始化大区/小地点导航
+        // 初始化大区/小地点导航（删除important相关逻辑）
         function initAreaNav() {
             const bigAreaWrap = document.getElementById("bigAreaWrap");
             const drawerHeader = document.getElementById("drawerHeader");
@@ -349,13 +359,13 @@
             renderSmallArea(currentBigArea);
         }
 
-        // 渲染小地点列表
+        // 渲染小地点列表（删除important相关类）
         async function renderSmallArea(bigArea) {
             const smallAreaList = document.getElementById("smallAreaList");
             const smallAreas = areaData.filter(item => item.bigArea === bigArea);
             const currentOcAreas = await getCurrentOcAreas();
 
-            // 按原有顺序展示
+            // 不再按important排序，按原有顺序展示
             const sortedAreas = smallAreas;
 
             smallAreaList.innerHTML = sortedAreas.map(item => {
@@ -401,7 +411,7 @@
             });
         }
 
-        // 渲染地点信息栏
+        // 渲染地点信息栏（不变）
         function renderAreaInfoSidebar() {
             const areaInfoSidebar = document.getElementById("areaInfoSidebar");
             const areaInfoContent = document.getElementById("areaInfoContent");
@@ -435,12 +445,12 @@
             });
         }
 
-        // 更新当前路径
+        // 更新当前路径（不变）
         function updateAreaPath() {
             document.getElementById("areaPath").innerText = `${currentBigArea} > ${currentSmallArea}`;
         }
 
-        // 获取实时时间对象
+        // 获取实时时间对象（不变）
         function getRealTime() {
             const now = new Date();
             return {
@@ -452,19 +462,19 @@
             };
         }
 
-        // 更新实时时间显示
+        // 更新实时时间显示（不变）
         function updateRealTime() {
             const now = getRealTime();
             document.getElementById("clock").innerText = `当前时间 · ${now.str}`;
         }
 
-        // 仅更新时间显示
+        // 仅更新时间显示（不变）
         function updateRealTimeOnly() {
             const now = getRealTime();
             document.getElementById("clock").innerText = `当前时间 · ${now.str}`;
         }
 
-        // 专门用于主人的行程获取
+        // 专门用于主人的行程获取（不变）
         function getOwnerCurrentSchedule(oc, now) {
             if (!oc.baseSchedule || oc.baseSchedule.length === 0) return null;
             
@@ -491,6 +501,7 @@
                 }
                 
                 if (isInRange) {
+                    // 返回行程+默认type（无type则为work）
                     return {
                         ...schedule,
                         type: schedule.type || "work",
@@ -502,23 +513,27 @@
             return null;
         }
 
-        // 计算结束时间显示文本
+        // 计算结束时间显示文本（不变）
         function getEndTimeDisplay(start, end, now) {
             const [startH] = start.split(":").map(Number);
             const [endH, endM] = end.split(":").map(Number);
             const endTimeStr = `${String(endH).padStart(2, '0')}:${String(endM).padStart(2, '0')}`;
             
-            // 跨天判断
+            // 跨天判断：结束时间小时 < 开始时间小时 → 显示“次日X点”
             if (endH < startH) {
                 return `次日 ${endTimeStr}`;
-            } else if (now.hour < startH) {
+            } 
+            // 当天但已过午夜（比如00:00-04:00）→ 显示“当天X点”
+            else if (now.hour < startH) {
                 return `当天 ${endTimeStr}`;
-            } else {
+            } 
+            // 普通当天 → 直接显示时间
+            else {
                 return endTimeStr;
             }
         }
 
-        // 随机事件判断（默认全persist，仅persist:false例外）
+        // 随机事件判断（最终版：默认全persist，仅persist:false例外，不影响其他随机逻辑）
         function checkRandomEvent(oc, now) {
             if (!oc.randomEvents || oc.randomEvents.length === 0) {
                 return { isRandom: false, schedule: null };
@@ -547,18 +562,18 @@
                 return { isRandom: false, schedule: null };
             }
 
-            // 默认全persist，仅persist:false例外
-            const needPersist = validEvents[0].persist !== false;
+            // ========== 核心修改：默认全persist，仅persist:false例外 ==========
+            const needPersist = validEvents[0].persist !== false; // 默认true，仅persist:false才例外
             let cacheKey = "";
 
             if (needPersist) {
-                // 自动生成缓存ID
-                const today = new Date().toISOString().split('T')[0];
-                const eventWeek = validEvents[0].week.join('_');
-                const eventTime = validEvents[0].timeRange.replace(':', '').replace('-', '_');
+                // 自动生成缓存ID（OC名+周几+时间范围+当天日期）
+                const today = new Date().toISOString().split('T')[0]; // 2026-03-10
+                const eventWeek = validEvents[0].week.join('_'); // 1（周一）
+                const eventTime = validEvents[0].timeRange.replace(':', '').replace('-', '_'); // 0100_0130
                 cacheKey = `persist_random_${oc.name}_${eventWeek}_${eventTime}_${today}`;
                 
-                // 检查是否在事件时段内
+                // 检查是否在事件时段内（缓存是否有效）
                 const [eventStart, eventEnd] = validEvents[0].timeRange.split("-");
                 const [esH, esM] = eventStart.split(":").map(Number);
                 const [eeH, eeM] = eventEnd.split(":").map(Number);
@@ -579,7 +594,7 @@
                     return { isRandom: false, schedule: null };
                 }
 
-                // 检查localStorage缓存
+                // 检查localStorage缓存（持久化，刷新/关浏览器都在）
                 const cachedResult = localStorage.getItem(cacheKey);
                 if (cachedResult) {
                     const result = JSON.parse(cachedResult);
@@ -587,7 +602,7 @@
                     return result;
                 }
             } else {
-                // 普通事件：sessionStorage
+                // 仅persist:false的事件：走原有sessionStorage逻辑
                 const today = new Date().toLocaleDateString();
                 cacheKey = `random_event_${oc.name}_${today}_${now.hour}`;
                 const cachedResult = sessionStorage.getItem(cacheKey);
@@ -598,7 +613,7 @@
                 }
             }
 
-            // 通用随机判定逻辑
+            // ========== 通用随机判定逻辑 ==========
             const randomEvent = validEvents[Math.floor(Math.random() * validEvents.length)];
             const randomNum = Math.floor(Math.random() * 100) + 1;
             const isTriggered = randomNum <= randomEvent.probability;
@@ -607,11 +622,11 @@
                 schedule: isTriggered ? randomEvent : null
             };
 
-            // 存储缓存
+            // 按类型存入不同存储
             if (needPersist) {
-                localStorage.setItem(cacheKey, JSON.stringify(result));
+                localStorage.setItem(cacheKey, JSON.stringify(result)); // 持久化
             } else {
-                sessionStorage.setItem(cacheKey, JSON.stringify(result));
+                sessionStorage.setItem(cacheKey, JSON.stringify(result)); // 会话级
             }
 
             if (isTriggered) {
@@ -621,7 +636,7 @@
             return result;
         }
 
-        // 显示随机事件提示条
+        // 显示随机事件提示条（不变）
         function showTip(text) {
             const tipBar = document.getElementById("tipBar");
             tipBar.innerText = text;
@@ -631,15 +646,19 @@
             }, 5000);
         }
 
-        // 按时段类型获取状态文案
+        // 按时段类型获取状态文案（不变）
         function getLocationRandomAction(oc, area, scheduleType) {
+            // 默认type为work
             const type = scheduleType || "work";
             const locationActions = oc.locationRandomActions?.[area];
             
+            // 兼容旧格式（一维数组）和新格式（按type拆分）
             let actions = [];
             if (Array.isArray(locationActions)) {
+                // 旧格式：直接用原有文案
                 actions = locationActions;
             } else if (locationActions?.[type]) {
+                // 新格式：按type取对应文案
                 actions = locationActions[type];
             } else {
                 return type === "sleep" ? "正在睡觉，请勿打扰" : "暂无状态";
@@ -652,19 +671,21 @@
             return ocActionCache[cacheKey];
         }
 
-        // 获取所有当前触发的联动事件
+        // 新增函数：获取所有当前触发的联动事件（关联角色+地点）
         function getLinkedEvents(now) {
             const linkedEventsList = [];
             
+            // 遍历所有OC的随机事件，检查是否触发了带联动的事件
             ocData.forEach(oc => {
                 const { isRandom, schedule: randomSchedule } = checkRandomEvent(oc, now);
                 if (isRandom && randomSchedule?.linkedCharacters) {
+                    // 遍历该事件的关联角色，存入列表
                     randomSchedule.linkedCharacters.forEach(linkedChar => {
                         linkedEventsList.push({
-                            targetName: linkedChar.name,
-                            targetArea: linkedChar.area,
-                            targetType: linkedChar.type || "linked_event",
-                            targetAction: linkedChar.action || "参与特殊事件"
+                            targetName: linkedChar.name, // 要联动的NPC名
+                            targetArea: linkedChar.area, // 强制去的地点
+                            targetType: linkedChar.type || "linked_event", // 联动type
+                            targetAction: linkedChar.action || "参与特殊事件" // 联动描述
                         });
                     });
                 }
@@ -673,37 +694,39 @@
             return linkedEventsList;
         }
 
-        // 渲染OC卡片（含联动事件逻辑）
+        // 渲染OC卡片（新增联动事件覆盖逻辑）
         function renderOC() {
             const ocContainer = document.getElementById("ocContainer");
             const now = getRealTime();
+            // 第一步：获取所有当前触发的联动事件
             linkedEvents = getLinkedEvents(now);
             const filteredOC = [];
             
             ocData.forEach(oc => {
-                // 先检查联动事件（优先级最高）
+                // 先检查该OC是否被其他事件联动（优先级最高）
                 const linkedEvent = linkedEvents.find(item => item.targetName === oc.name);
                 let finalSchedule = null;
                 
                 if (linkedEvent) {
-                    // 强制使用联动行程
-                    const sourceEvent = ocData.find(o => o.randomEvents.some(e => 
+                    // 有联动事件：强制使用联动的行程
+                    // 找到触发联动的源事件的时间范围
+                    const sourceOC = ocData.find(o => o.randomEvents?.some(e => 
                         e.linkedCharacters && e.linkedCharacters.some(l => l.name === oc.name)
-                    ))?.randomEvents.find(e => 
+                    ));
+                    const sourceEvent = sourceOC?.randomEvents?.find(e => 
                         e.linkedCharacters && e.linkedCharacters.some(l => l.name === oc.name)
                     );
-                    
-                    const eventStart = sourceEvent?.timeRange.split("-")[0] || "00:00";
-                    const eventEnd = sourceEvent?.timeRange.split("-")[1] || "00:00";
+                    const sourceTimeRange = sourceEvent?.timeRange || "00:00-00:00";
+                    const [sourceStart, sourceEnd] = sourceTimeRange.split("-");
                     
                     finalSchedule = {
                         area: linkedEvent.targetArea,
                         type: linkedEvent.targetType,
                         action: linkedEvent.targetAction,
-                        endTimeStr: getEndTimeDisplay(eventStart, eventEnd, now)
+                        endTimeStr: getEndTimeDisplay(sourceStart, sourceEnd, now)
                     };
                 } else {
-                    // 原有逻辑
+                    // 无联动事件：用原有逻辑（自己的随机/基础日程）
                     const { isRandom, schedule: randomSchedule } = checkRandomEvent(oc, now);
                     const baseSchedule = getOwnerCurrentSchedule(oc, now);
                     finalSchedule = isRandom && randomSchedule ? randomSchedule : baseSchedule;
@@ -713,7 +736,7 @@
                     filteredOC.push({ 
                         oc, 
                         finalSchedule, 
-                        isRandom: !!linkedEvent || (randomSchedule && isRandom),
+                        isRandom: !!linkedEvent || (randomSchedule && isRandom), // 联动事件也算随机事件
                         scheduleType: finalSchedule.type || "work",
                         endTimeStr: finalSchedule.endTimeStr || "未知"
                     });
@@ -725,16 +748,16 @@
                 return;
             }
 
-            // 渲染OC卡片
+            // 渲染OC卡片（删除link相关）
             ocContainer.innerHTML = `
                 <div class="oc-grid">
                     ${filteredOC.map(({ oc, finalSchedule, isRandom, scheduleType, endTimeStr }) => {
                         const action = getLocationRandomAction(oc, currentSmallArea, scheduleType);
                         const isRandomClass = isRandom ? "random" : "";
                         const sleepClass = scheduleType === "sleep" ? "sleep" : ""; 
-                        const randomTag = isRandom ? `<div class="oc-random-tag">特殊事件</div>` : "";
+                        const randomTag = isRandom ? `<div class="oc-random-tag">${linkedEvent ? "特殊事件" : "随机事件"}</div>` : "";
                         
-                        // 悬浮窗内容
+                        // 悬浮窗：仅保留当前状态+停留至（删除行程描述）
                         const popupContent = `
                             <p><span class="popup-type">当前状态：</span>${getTypeDisplayName(scheduleType)}</p>
                             <p><span class="popup-time">停留至：</span>${endTimeStr}</p>
@@ -743,6 +766,7 @@
                         return `
                             <div class="oc-card ${isRandomClass}">
                                 ${randomTag}
+                                <!-- 悬浮窗 -->
                                 <div class="oc-popup">${popupContent}</div>
                                 <div class="oc-row">
                                     <img src="${oc.avatar}" alt="${oc.name}" class="oc-avatar">
@@ -765,7 +789,7 @@
             })), now);
         }
 
-        // type友好显示名
+        // 辅助函数：将type转为友好显示名（新增联动type）
         function getTypeDisplayName(type) {
             const typeMap = {
                 "work": "营业/活动",
@@ -780,7 +804,7 @@
             return typeMap[type] || type;
         }
 
-        // 主人卡片渲染
+        // 主人卡片简化：固定显示状态
         function renderOwnerSidebar() {
             const ownerSidebar = document.getElementById("ownerSidebar");
             const ownerContent = document.getElementById("ownerContent");
@@ -802,12 +826,22 @@
                 const ownerOC = ocData.find(oc => oc.name === ownerName);
                 if (!ownerOC) return;
 
-                const ownerSchedule = getOwnerCurrentSchedule(ownerOC, now);
-                let status = "";
+                // 检查是否有联动事件
+                const linkedEvent = linkedEvents.find(item => item.targetName === ownerName);
+                let ownerSchedule = null;
+                
+                if (linkedEvent) {
+                    ownerSchedule = { area: linkedEvent.targetArea };
+                } else {
+                    ownerSchedule = getOwnerCurrentSchedule(ownerOC, now);
+                }
 
+                let status = "";
                 if (ownerSchedule && ownerSchedule.area === currentSmallArea) {
+                    // 主人在当前地点：固定显示“✅就在此处”
                     status = `✅ 就在此处`;
                 } else {
+                    // 主人不在当前地点：固定显示“🔴 暂时离开，去其他地方看看吧。”
                     status = `🔴 暂时离开，去其他地方看看吧。`;
                 }
 
@@ -825,15 +859,18 @@
             ownerContent.innerHTML = ownerHtml || `<div class="empty">暂无主人信息</div>`;
         }
 
-        // 聊天气泡触发（睡觉屏蔽）
+        // 睡觉时段屏蔽聊天气泡（不变）
         function checkChatTrigger(ocList, now) {
             const chatWrap = document.getElementById("chatBubbleWrap");
             
+            // 筛选出非睡觉状态的OC
             const awakeOCs = ocList.filter(item => item.scheduleType !== "sleep").map(item => item.name);
-            if (awakeOCs.length === 0) return;
+            if (awakeOCs.length === 0) return; // 全在睡觉，直接返回
 
             const validChats = chatData.filter(chat => {
+                // 1. 对话涉及的OC必须都醒着
                 if (!chat.characters.every(name => awakeOCs.includes(name))) return false;
+                // 2. 匹配周几和时间
                 if (!chat.week.includes(now.week)) return false;
                 
                 const [start, end] = chat.timeRange.split("-");
