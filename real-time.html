@@ -5,6 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>🦁 Lionfish城 · OC实时行踪</title>
     <style>
+        /* 原有样式完全保留，仅新增睡觉状态的样式标识（可选） */
+        .oc-action.sleep { color: #a0c4ff; font-style: italic; } /* 睡觉文案加斜体+浅蓝 */
+        .owner-status.sleep { color: #ff9eac; } /* 主人睡觉状态文字变色 */
+        /* 其他样式不变 */
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
         body { background: #0f1623; color: #e6edf3; padding: 20px; min-height: 100vh; overflow-x: hidden; }
         
@@ -147,7 +151,7 @@
         .oc-card { position: relative; background: #172135; border-radius: 18px; padding: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.3); border-left: 4px solid #4d82f9; cursor: pointer; transition: 0.3s; }
         .oc-card.random { border-left-color: #ff6b8b; }
         .oc-card:hover { transform: translateY(-4px); box-shadow: 0 8px 20px rgba(77,130,249,0.25); }
-        .oc-random-tag { position: absolute; top: 10px; right: 10px; background: #ff6b8b; color: #fff; font-size: 10px; padding: 2px 6px; border-radius: 6px; }
+        .oc-random-tag { position: absolute; top: 10px; right: 10px; background: #ff6b8b; color: #fff; font-size: 10px; padding: 16px; border-radius: 6px; }
         .oc-avatar { width: 50px; height: 50px; border-radius: 12px; object-fit: cover; margin-right: 12px; }
         .oc-row { display: flex; align-items: center; }
         .oc-info { flex: 1; }
@@ -265,7 +269,7 @@
                 initAreaNav();
                 updateRealTime();
                 renderOC();
-                renderOwnerSidebar(); // 初始化就渲染主人栏
+                renderOwnerSidebar(); 
                 setInterval(updateRealTimeOnly, 1000);
                 // 定时刷新地区高亮和主人状态
                 setInterval(async () => {
@@ -285,7 +289,6 @@
             const ocAreas = new Set();
             
             ocData.forEach(oc => {
-                // 直接获取主人当前行程地点，不依赖随机事件缓存
                 const ownerSchedule = getOwnerCurrentSchedule(oc, now);
                 if (ownerSchedule) {
                     const areaInfo = areaData.find(item => item.smallArea === ownerSchedule.area);
@@ -323,7 +326,7 @@
                     currentBigArea = e.target.dataset.area;
                     await renderSmallArea(currentBigArea);
                     renderOC();
-                    renderOwnerSidebar(); // 切换大区立即更新主人栏
+                    renderOwnerSidebar(); 
                     renderAreaInfoSidebar();
                 });
             });
@@ -373,7 +376,7 @@
             if (firstItem) firstItem.classList.add("active");
 
             updateAreaPath();
-            renderOwnerSidebar(); // 切换小地点立即更新主人栏
+            renderOwnerSidebar(); 
             renderAreaInfoSidebar();
             await setAreaHighlight(currentOcAreas);
 
@@ -386,7 +389,7 @@
                     activeAreaCode = e.target.dataset.areaCode;
                     updateAreaPath();
                     renderOC();
-                    renderOwnerSidebar(); // 点击小地点立即更新主人栏
+                    renderOwnerSidebar(); 
                     renderAreaInfoSidebar();
                     const currentOcAreas = await getCurrentOcAreas();
                     await setAreaHighlight(currentOcAreas);
@@ -464,11 +467,10 @@
             document.getElementById("clock").innerText = `当前时间 · ${now.str}`;
         }
 
-        // 专门用于主人的行程获取（简化逻辑，不依赖复杂缓存）
+        // 专门用于主人的行程获取（返回行程+时段类型）
         function getOwnerCurrentSchedule(oc, now) {
             if (!oc.baseSchedule || oc.baseSchedule.length === 0) return null;
             
-            // 遍历所有基础行程，找到当前时段的行程
             for (let schedule of oc.baseSchedule) {
                 // 匹配周几
                 if (!schedule.week.includes(now.week)) continue;
@@ -492,14 +494,18 @@
                 }
                 
                 if (isInRange) {
-                    return schedule; // 找到直接返回，不处理随机事件（主人优先显示基础行程）
+                    // 返回行程+默认type（无type则为work）
+                    return {
+                        ...schedule,
+                        type: schedule.type || "work"
+                    };
                 }
             }
             
             return null;
         }
 
-        // 随机事件判断（保留会话级缓存和互斥逻辑，不影响主人行程）
+        // 随机事件判断（保留会话级缓存和互斥逻辑）
         function checkRandomEvent(oc, now) {
             if (!oc.randomEvents || oc.randomEvents.length === 0) {
                 return { isRandom: false, schedule: null };
@@ -507,7 +513,7 @@
 
             // 生成唯一缓存Key（OC名+日期+时段）
             const today = new Date().toLocaleDateString();
-            const cacheKey = `random_event_${oc.name}_${today}_${now.hour}`; // 按小时缓存，减少频繁触发
+            const cacheKey = `random_event_${oc.name}_${today}_${now.hour}`; 
             
             // 检查会话缓存
             const cachedResult = sessionStorage.getItem(cacheKey);
@@ -573,21 +579,32 @@
             }, 5000);
         }
 
-        // 获取OC的随机状态文案
-        function getLocationRandomAction(oc, area) {
-            if (!oc.locationRandomActions || !oc.locationRandomActions[area]) {
-                return "暂无状态";
-            }
-            const actions = oc.locationRandomActions[area];
-            const cacheKey = `oc_action_${oc.name}_${area}`;
+        // 核心修改：按时段类型获取状态文案
+        function getLocationRandomAction(oc, area, scheduleType) {
+            // 默认type为work
+            const type = scheduleType || "work";
+            const locationActions = oc.locationRandomActions?.[area];
             
+            // 兼容旧格式（一维数组）和新格式（按type拆分）
+            let actions = [];
+            if (Array.isArray(locationActions)) {
+                // 旧格式：直接用原有文案
+                actions = locationActions;
+            } else if (locationActions?.[type]) {
+                // 新格式：按type取对应文案
+                actions = locationActions[type];
+            } else {
+                return type === "sleep" ? "正在睡觉，请勿打扰" : "暂无状态";
+            }
+
+            const cacheKey = `oc_action_${oc.name}_${area}_${type}`; // 缓存Key加type，避免不同时段复用文案
             if (!ocActionCache[cacheKey]) {
                 ocActionCache[cacheKey] = actions[Math.floor(Math.random() * actions.length)];
             }
             return ocActionCache[cacheKey];
         }
 
-        // 渲染OC卡片
+        // 渲染OC卡片（适配时段类型）
         function renderOC() {
             const ocContainer = document.getElementById("ocContainer");
             const now = getRealTime();
@@ -599,7 +616,12 @@
                 const finalSchedule = isRandom && randomSchedule ? randomSchedule : baseSchedule;
                 
                 if (finalSchedule && finalSchedule.area === currentSmallArea) {
-                    filteredOC.push({ oc, finalSchedule, isRandom });
+                    filteredOC.push({ 
+                        oc, 
+                        finalSchedule, 
+                        isRandom,
+                        scheduleType: finalSchedule.type || "work" // 传递时段类型
+                    });
                 }
             });
 
@@ -610,9 +632,10 @@
 
             ocContainer.innerHTML = `
                 <div class="oc-grid">
-                    ${filteredOC.map(({ oc, finalSchedule, isRandom }) => {
-                        const action = getLocationRandomAction(oc, currentSmallArea);
+                    ${filteredOC.map(({ oc, finalSchedule, isRandom, scheduleType }) => {
+                        const action = getLocationRandomAction(oc, currentSmallArea, scheduleType);
                         const isRandomClass = isRandom ? "random" : "";
+                        const sleepClass = scheduleType === "sleep" ? "sleep" : ""; // 睡觉样式类
                         const randomTag = isRandom ? `<div class="oc-random-tag">随机事件</div>` : "";
                         const linkHtml = oc.link ? `<div class="oc-link" onclick="window.open('${oc.link}', '_blank')">查看详情</div>` : "";
 
@@ -626,7 +649,7 @@
                                         <div class="oc-place">📍 ${finalSchedule.area}</div>
                                     </div>
                                 </div>
-                                <div class="oc-action">${action}</div>
+                                <div class="oc-action ${sleepClass}">${action}</div>
                                 ${linkHtml}
                             </div>
                         `;
@@ -634,22 +657,23 @@
                 </div>
             `;
 
-            // 检查聊天气泡触发
-            checkChatTrigger(filteredOC.map(({ oc }) => oc.name), now);
+            // 检查聊天气泡触发（传入OC列表+时段类型）
+            checkChatTrigger(filteredOC.map(item => ({
+                name: item.oc.name,
+                scheduleType: item.scheduleType
+            })), now);
         }
 
-        // 修复主人栏渲染逻辑（核心修正）
+        // 修复主人栏渲染逻辑（适配时段类型）
         function renderOwnerSidebar() {
             const ownerSidebar = document.getElementById("ownerSidebar");
             const ownerContent = document.getElementById("ownerContent");
             const now = getRealTime();
 
-            // 1. 精准获取当前小地点信息（含大区匹配，避免重名）
             const areaInfo = areaData.find(item => 
                 item.smallArea === currentSmallArea && item.bigArea === currentBigArea
             );
             
-            // 无主人则隐藏
             if (!areaInfo || !areaInfo.owner || areaInfo.owner.length === 0) {
                 ownerSidebar.style.display = "none";
                 return;
@@ -658,27 +682,29 @@
             ownerSidebar.style.display = "block";
             let ownerHtml = "";
 
-            // 2. 遍历每个主人，单独判断状态
             areaInfo.owner.forEach(ownerName => {
-                // 找到对应的OC数据
                 const ownerOC = ocData.find(oc => oc.name === ownerName);
                 if (!ownerOC) return;
 
-                // 3. 简化行程获取，只看基础行程（主人状态优先显示实际位置）
                 const ownerSchedule = getOwnerCurrentSchedule(ownerOC, now);
                 let status = "";
+                let sleepClass = ""; // 睡觉样式类
 
                 if (ownerSchedule) {
-                    // 4. 严格匹配当前地点
+                    const scheduleType = ownerSchedule.type || "work";
                     if (ownerSchedule.area === currentSmallArea) {
-                        // 主人在当前地点
-                        const action = getLocationRandomAction(ownerOC, currentSmallArea);
-                        status = `✅ 正在此处：${action}`;
+                        // 主人在当前地点，按type显示状态
+                        const action = getLocationRandomAction(ownerOC, currentSmallArea, scheduleType);
+                        sleepClass = scheduleType === "sleep" ? "sleep" : "";
+                        if (scheduleType === "sleep") {
+                            status = `😴 正在睡觉：${action}`;
+                        } else {
+                            status = `✅ 正在此处：${action}`;
+                        }
                     } else {
                         // 主人在其他地点
                         const cacheKey = `${ownerName}_absent`;
                         if (!ocActionCache[cacheKey]) {
-                            // 优先用OC专属不在场文案，没有则用全局默认
                             const charAbsentText = randomData.absentText?.[ownerName] || 
                                                   randomData.absentText?.default || 
                                                   ["暂时外出办事，稍后回来", "去附近逛逛，很快返回"];
@@ -687,7 +713,7 @@
                         status = `🔴 暂时离开：${ocActionCache[cacheKey]}`;
                     }
                 } else {
-                    // 主人无匹配行程（默认离开）
+                    // 主人无匹配行程
                     const cacheKey = `${ownerName}_absent`;
                     if (!ocActionCache[cacheKey]) {
                         const charAbsentText = randomData.absentText?.[ownerName] || 
@@ -698,13 +724,12 @@
                     status = `🔴 暂时离开：${ocActionCache[cacheKey]}`;
                 }
 
-                // 拼接主人卡片HTML
                 ownerHtml += `
                     <div class="owner-card">
                         <img src="${ownerOC.avatar}" alt="${ownerName}" class="owner-avatar">
                         <div class="owner-info">
                             <div class="owner-name">${ownerName}</div>
-                            <div class="owner-status">${status}</div>
+                            <div class="owner-status ${sleepClass}">${status}</div>
                         </div>
                     </div>
                 `;
@@ -713,11 +738,18 @@
             ownerContent.innerHTML = ownerHtml || `<div class="empty">暂无主人信息</div>`;
         }
 
-        // 检查聊天气泡触发
-        function checkChatTrigger(ocNames, now) {
+        // 核心修改：睡觉时段屏蔽聊天气泡
+        function checkChatTrigger(ocList, now) {
             const chatWrap = document.getElementById("chatBubbleWrap");
+            
+            // 筛选出非睡觉状态的OC
+            const awakeOCs = ocList.filter(item => item.scheduleType !== "sleep").map(item => item.name);
+            if (awakeOCs.length === 0) return; // 全在睡觉，直接返回
+
             const validChats = chatData.filter(chat => {
-                if (!chat.characters.every(name => ocNames.includes(name))) return false;
+                // 1. 对话涉及的OC必须都醒着
+                if (!chat.characters.every(name => awakeOCs.includes(name))) return false;
+                // 2. 匹配周几和时间
                 if (!chat.week.includes(now.week)) return false;
                 
                 const [start, end] = chat.timeRange.split("-");
