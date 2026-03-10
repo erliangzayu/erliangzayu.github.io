@@ -552,8 +552,11 @@
             return `<div class="small-area-item ${hot} ${hide}" data-area="${item.smallArea}" data-areaCode="${item.areaCode||''}">${item.smallArea}</div>`;
         }).join('');
 
-        currentSmallArea = areas[0].smallArea;
-        activeAreaCode = areas[0].areaCode;
+        // 优先选第一个 isPermanent !== false 的常驻地点，没有再选第一个
+        const defaultArea = areas.find(item => item.isPermanent !== false) || areas[0];
+        currentSmallArea = defaultArea.smallArea;
+        activeAreaCode = defaultArea.areaCode;
+        
         document.querySelector(`[data-area="${currentSmallArea}"]`)?.classList.add('active');
         updateAreaPath();
         updateDrawerTitle();
