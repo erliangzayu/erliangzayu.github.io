@@ -17,6 +17,8 @@
             --primary: #f5a623;
             --accent: #ff9f0a;
             --shadow: 0 4px 12px rgba(0,0,0,0.4);
+            /* 镭射渐变色 */
+            --laser-gradient: linear-gradient(120deg, #84fab0 0%, #8fd3f4 50%, #a6c1ee 100%);
         }
 
         /* ☀️ 日间模式（温暖柔和奶白） */
@@ -49,21 +51,25 @@
             transition: all 0.25s ease;
         }
 
-        /* 模式切换 */
+        /* 头部容器 - 新增：包含标题、时间、模式按钮 */
+        .header-container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
+
+        /* 模式切换 - 重构：嵌入头部，缩小尺寸 */
         .mode-toggle {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            z-index: 999;
-            width: 40px;
-            height: 40px;
+            width: 32px;
+            height: 32px;
             border-radius: 50%;
             background: var(--card);
             border: 1px solid var(--border);
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 16px;
+            font-size: 14px;
             cursor: pointer;
             transition: 0.2s;
         }
@@ -79,7 +85,7 @@
         .title {
             font-size: 24px;
             font-weight: 600;
-            margin-bottom: 8px;
+            margin: 0;
         }
         .real-clock {
             display: inline-block;
@@ -88,6 +94,7 @@
             border-radius: 30px;
             color: var(--text2);
             font-size: 15px;
+            margin-top: 8px;
         }
         .area-path {
             margin-top: 8px;
@@ -284,15 +291,20 @@
         .oc-card:hover {
             transform: translateY(-3px);
         }
+        /* 镭射炫彩随机事件标签 */
         .oc-random-tag {
             position: absolute;
             top: 10px;
             right: 10px;
-            background: var(--primary);
-            color: #fff;
+            background: var(--laser-gradient);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
             font-size: 10px;
             padding: 2px 6px;
             border-radius: 6px;
+            border: 1px solid rgba(132, 250, 176, 0.3);
+            font-weight: 600;
         }
         .oc-avatar {
             width: 50px;
@@ -324,7 +336,7 @@
             line-height: 1.4;
         }
 
-        /* 悬浮弹窗 */
+        /* 悬浮弹窗 - 仅显示action和停留时间 */
         .oc-popup {
             position: absolute;
             bottom: calc(100% + 10px);
@@ -347,7 +359,7 @@
             opacity: 1;
             pointer-events: all;
         }
-        .popup-type {
+        .popup-action {
             color: var(--primary);
             font-weight: 500;
         }
@@ -373,17 +385,23 @@
             .oc-grid {
                 grid-template-columns: 1fr;
             }
+            .title {
+                font-size: 20px;
+            }
         }
     </style>
 </head>
 <body>
 
-<div class="mode-toggle" id="modeToggle">🌙</div>
 <!-- 新增提示条DOM -->
 <div class="tip-bar" id="tipBar"></div>
 
 <div class="header">
-    <div class="title">🦁 Lionfish城 · OC实时行踪</div>
+    <!-- 重构头部：新增容器包含标题和模式按钮 -->
+    <div class="header-container">
+        <div class="title">🦁 Lionfish城 · OC实时行踪</div>
+        <div class="mode-toggle" id="modeToggle">🌙</div>
+    </div>
     <div class="real-clock" id="clock">加载系统时间…</div>
     <div class="area-path" id="areaPath">1区 > 居酒屋</div>
 </div>
@@ -613,7 +631,7 @@
             if(eM < sM) inRange = nowM >= sM || nowM <= eM;
             else inRange = nowM >= sM && nowM <= eM;
             if(inRange) {
-                return {...s, type:s.type||'work', endTimeStr:getEndTimeDisplay(st,ed,now)};
+                return {...s, endTimeStr:getEndTimeDisplay(st,ed,now)};
             }
         }
         return null;
@@ -701,7 +719,6 @@
             isRandom: !!hitEvent,
             schedule: hitEvent ? {
                 ...hitEvent,
-                type: hitEvent.type || 'rest',
                 endTimeStr: getEndTimeDisplay(hitEvent.timeRange.split('-')[0], hitEvent.timeRange.split('-')[1], now)
             } : null
         };
@@ -726,7 +743,9 @@
         let arr = [];
         if(Array.isArray(acts)) arr = acts;
         else if(acts?.[type]) arr = acts[type];
-        else return type==='sleep' ? '正在睡觉' : '暂无状态';
+        // 兜底改为返回action（如果有），否则返回默认
+        const defaultAction = oc.baseSchedule?.find(s => s.area === area)?.action || '暂无状态';
+        if(arr.length === 0) return defaultAction;
         const key = `act_${oc.name}_${area}_${type}`;
         if(!ocActionCache[key]) ocActionCache[key] = arr[Math.floor(Math.random()*arr.length)];
         return ocActionCache[key];
@@ -740,7 +759,7 @@
             const base = getOwnerCurrentSchedule(oc, now);
             const final = isRandom&&rSched ? rSched : base;
             if(!final || final.area!==currentSmallArea) return null;
-            return {oc, final, isRandom, type:final.type||'work', end:final.endTimeStr||'?'};
+            return {oc, final, isRandom, end:final.endTimeStr||'?'};
         }).filter(Boolean);
 
         if(!list.length) {
@@ -751,15 +770,17 @@
         container.innerHTML = `
         <div class="oc-grid">
         ${list.map(x=>{
-            const {oc,final,isRandom,type,end} = x;
-            const txt = getLocationRandomAction(oc, currentSmallArea, type);
+            const {oc,final,isRandom,end} = x;
+            // 优先取随机事件的action，否则取基础任务的action
+            const actionText = final.action || '暂无状态';
+            const txt = getLocationRandomAction(oc, currentSmallArea, final.type) || actionText;
             const rcls = isRandom ? 'random' : '';
             const tag = isRandom ? '<div class="oc-random-tag">随机事件</div>' : '';
             return `
             <div class="oc-card ${rcls}">
                 ${tag}
                 <div class="oc-popup">
-                    <p><span class="popup-type">状态：</span>${getTypeDisplayName(type)}</p>
+                    <p><span class="popup-action">行为：</span>${actionText}</p>
                     <p><span class="popup-time">停留至：</span>${end}</p>
                 </div>
                 <div class="oc-row">
@@ -773,13 +794,6 @@
             </div>`;
         }).join('')}
         </div>`;
-    }
-
-    function getTypeDisplayName(t) {
-        const map = {
-           work: '营业/活动', sleep: '睡觉休息', rest: '休息', buy: '采购', prepare: '准备中', deliver: '送餐/送货', eat: '用餐'
-        };
-        return map[t] || t;
     }
 
     function renderOwnerSidebar() {
@@ -800,7 +814,7 @@
                 <img src="${oc.avatar}" alt="${name}" class="owner-avatar">
                 <div class="owner-info">
                     <div class="owner-name">${name}</div>
-                    <div class="owner-status">${here ? '✅ 就在此处' : '🔴 暂时离开'}</div>
+                    <div class="owner-status">${here ? '✅ 就在此处' : '🔴 暂时离开，四处走走看吧～'}</div>
                 </div>
             </div>`;
         }).join('');
