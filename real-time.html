@@ -513,6 +513,9 @@
         const modeToggle = document.getElementById('modeToggle');
         const savedTheme = localStorage.getItem('themeMode');
 
+        // ========== 修复点2：新增全局标记，控制随机事件tips仅显示一次 ==========
+        let randomEventTipShown = false; // 标记随机事件tips是否已显示
+
         // ========== 基础工具函数 ==========
         // 更新抽屉标题
         function updateDrawerTitle() {
@@ -582,13 +585,17 @@
             document.getElementById('areaPath').innerText = `${currentBigArea} > ${currentSmallArea}`;
         }
 
-        // ========== 修复点2：修改showTip函数，增加forceShow参数控制仅刷新时显示 ==========
-        // 显示全局提示（仅forceShow为true时才显示）
-        function showTip(text, forceShow = false) {
-            // 只有刷新操作时才显示提示
-            if (!forceShow) return;
-            
+        // ========== 修复点3：优化showTip函数，区分刷新提示和随机事件提示 ==========
+        // 显示全局提示
+        function showTip(text, type = 'normal') {
             const tipBar = document.getElementById('tipBar');
+            
+            // 随机事件提示：仅在未显示过时才显示
+            if (type === 'random') {
+                if (randomEventTipShown) return;
+                randomEventTipShown = true; // 显示后标记为已显示
+            }
+            
             tipBar.innerText = text;
             tipBar.classList.add('show');
             setTimeout(() => tipBar.classList.remove('show'), 4000);
@@ -601,6 +608,9 @@
             isRefreshing = true;
             pullRefresh.innerText = '刷新中...';
             pullRefresh.classList.add('loading');
+            
+            // ========== 修复点4：刷新时重置随机事件tips标记，允许重新显示 ==========
+            randomEventTipShown = false;
             
             // 保存刷新前的选中状态（关键：避免刷新后重置）
             const savedBigArea = currentBigArea;
@@ -627,12 +637,11 @@
                 renderOC();
                 renderOwnerSidebar();
                 renderAreaInfoSidebar();
-                // ========== 修复点3：调用showTip时传入forceShow=true ==========
-                showTip('✅ 刷新成功！', true);
+                // 刷新提示：使用normal类型，不受一次显示限制
+                showTip('✅ 刷新成功！', 'normal');
             } catch (e) {
                 console.error('刷新失败', e);
-                // ========== 修复点3：调用showTip时传入forceShow=true ==========
-                showTip('❌ 刷新失败，请重试', true);
+                showTip('❌ 刷新失败，请重试', 'normal');
             } finally {
                 isRefreshing = false;
                 setTimeout(resetPullState, 800);
@@ -972,8 +981,8 @@
                 const cached = localStorage.getItem(cacheKey);
                 if (cached) {
                     const result = JSON.parse(cached);
-                    // ========== 修复点4：这里的showTip会被过滤（无forceShow） ==========
-                    if (result.isRandom && result.schedule?.tip) showTip(result.schedule.tip);
+                    // ========== 修复点5：随机事件提示使用random类型，受一次显示限制 ==========
+                    if (result.isRandom && result.schedule?.tip) showTip(result.schedule.tip, 'random');
                     return result;
                 }
             } else {
@@ -983,8 +992,7 @@
                 const cached = sessionStorage.getItem(cacheKey);
                 if (cached) {
                     const result = JSON.parse(cached);
-                    // ========== 修复点4：这里的showTip会被过滤（无forceShow） ==========
-                    if (result.isRandom && result.schedule?.tip) showTip(result.schedule.tip);
+                    if (result.isRandom && result.schedule?.tip) showTip(result.schedule.tip, 'random');
                     return result;
                 }
             }
@@ -1026,8 +1034,8 @@
                 sessionStorage.setItem(cacheKey, JSON.stringify(result));
             }
             
-            // ========== 修复点4：这里的showTip会被过滤（无forceShow） ==========
-            if (hitEvent && hitEvent.tip) showTip(hitEvent.tip);
+            // ========== 修复点5：随机事件提示使用random类型，受一次显示限制 ==========
+            if (hitEvent && hitEvent.tip) showTip(hitEvent.tip, 'random');
             
             return result;
         }
@@ -1111,6 +1119,9 @@
 
             // 重置下拉刷新状态
             resetPullState();
+            
+            // ========== 修复点6：初始化时重置随机事件tips标记 ==========
+            randomEventTipShown = false;
             
             try {
                 // 加载数据
