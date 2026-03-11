@@ -238,18 +238,16 @@
             flex-shrink: 0;
             display: none;
         }
-        /* 主人栏（在上） */
+        /* 主人栏样式（在上） */
         .owner-sidebar {
-            margin-bottom: 16px;
-            padding-bottom: 16px;
-            border-bottom: 1px solid var(--border);
-            display: none;
+            margin-bottom: 20px; 
+            padding-bottom: 0;   
+            border-bottom: none;  
+            display: none; /* 默认隐藏 */
         }
-        /* 只有主人栏时去掉底部分隔线 */
+        /* 只有主人栏时，取消底部间距 */
         .owner-sidebar:only-child {
             margin-bottom: 0;
-            padding-bottom: 0;
-            border-bottom: none;
         }
         /* 地点介绍栏（在下） */
         .area-info-sidebar {
