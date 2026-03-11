@@ -294,20 +294,29 @@
         .oc-card:hover {
             transform: translateY(-3px);
         }
-        /* 镭射炫彩随机事件标签 */
+        /* 随机事件标签基础样式 */
         .oc-random-tag {
             position: absolute;
             top: 10px;
             right: 10px;
+            font-size: 10px;
+            padding: 2px 6px;
+            border-radius: 6px;
+            font-weight: 600;
+        }
+        /* 必选随机事件（页面橙色） */
+        .oc-random-tag.mandatory-tag {
+            background: var(--primary);
+            color: #fff;
+            border: 1px solid var(--accent);
+        }
+        /* 可选随机事件（镭射渐变） */
+        .oc-random-tag.laser-tag {
             background: var(--laser-gradient);
             -webkit-background-clip: text;
             background-clip: text;
             color: transparent;
-            font-size: 10px;
-            padding: 2px 6px;
-            border-radius: 6px;
             border: 1px solid rgba(132, 250, 176, 0.3);
-            font-weight: 600;
         }
         .oc-avatar {
             width: 50px;
@@ -723,6 +732,7 @@
         // 4. 组装结果并持久化
         const res = {
             isRandom: !!hitEvent,
+            isMandatory: hitEvent?.isMandatory || false, 
             schedule: hitEvent ? {
                 ...hitEvent,
                 endTimeStr: getEndTimeDisplay(hitEvent.timeRange.split('-')[0], hitEvent.timeRange.split('-')[1], now)
@@ -756,32 +766,39 @@
         if(!ocActionCache[key]) ocActionCache[key] = arr[Math.floor(Math.random()*arr.length)];
         return ocActionCache[key];
     }
-
+    
     function renderOC() {
         const now = getRealTime();
         const container = document.getElementById('ocContainer');
         const list = ocData.map(oc=>{
-            const {isRandom, schedule:rSched} = checkRandomEvent(oc, now);
+            // 新增：先保存checkRandomEvent的返回值，解构isMandatory
+            const randomResult = checkRandomEvent(oc, now);
+            const {isRandom, schedule:rSched, isMandatory} = randomResult;
+            
             const base = getOwnerCurrentSchedule(oc, now);
             const final = isRandom&&rSched ? rSched : base;
             if(!final || final.area!==currentSmallArea) return null;
-            return {oc, final, isRandom, end:final.endTimeStr||'?'};
+            // 新增：把isMandatory加入返回对象
+            return {oc, final, isRandom, isMandatory, end:final.endTimeStr||'?'};
         }).filter(Boolean);
-
+    
         if(!list.length) {
             container.innerHTML = '<div class="empty">当前地点暂无OC</div>';
             return;
         }
-
+    
         container.innerHTML = `
         <div class="oc-grid">
         ${list.map(x=>{
-            const {oc,final,isRandom,end} = x;
+            const {oc,final,isRandom,isMandatory,end} = x; // 解构isMandatory
             // 优先取随机事件的action，否则取基础任务的action
             const actionText = final.action || '暂无状态';
             const txt = getLocationRandomAction(oc, currentSmallArea, final.type) || actionText;
             const rcls = isRandom ? 'random' : '';
-            const tag = isRandom ? '<div class="oc-random-tag">随机事件</div>' : '';
+            // 新增：根据是否必选，给标签加不同class
+            const tagClass = isMandatory ? 'mandatory-tag' : 'laser-tag';
+            const tag = isRandom ? `<div class="oc-random-tag ${tagClass}">随机事件</div>` : '';
+            
             return `
             <div class="oc-card ${rcls}">
                 ${tag}
