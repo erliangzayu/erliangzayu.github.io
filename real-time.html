@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🦁 Lionfish · 居民实时行踪</title>
+    <title>🦁 Lionfish城 · OC实时行踪</title>
     <style>
         /* 🌙 夜间模式（苹果灰黑系） */
         :root {
@@ -51,7 +51,30 @@
             transition: all 0.25s ease;
         }
 
-        /* 头部容器 - 标题居中+模式按钮靠右 */
+        /* 下拉刷新样式 */
+        .pull-refresh {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            color: var(--text2);
+            transform: translateY(-100%);
+            transition: transform 0.2s ease;
+            z-index: 99;
+        }
+        .pull-refresh.show {
+            transform: translateY(0);
+        }
+        .pull-refresh.loading {
+            color: var(--primary);
+        }
+
+        /* 头部容器 - 新增：包含标题、时间、模式按钮 */
         .header-container {
             display: flex;
             align-items: center;
@@ -60,7 +83,7 @@
             position: relative;
         }
 
-        /* 模式切换按钮 */
+        /* 模式切换 - 重构：嵌入头部，缩小尺寸 */
         .mode-toggle {
             position: absolute; 
             right: 0; 
@@ -228,7 +251,7 @@
             flex: 1;
         }
 
-        /* 合并后的侧边栏容器（主人+地点介绍） */
+        /* 合并后的侧边栏容器 */
         .combined-sidebar {
             width: 280px;
             background: var(--card);
@@ -236,25 +259,27 @@
             padding: 16px;
             box-shadow: var(--shadow);
             flex-shrink: 0;
-            display: none;
+            display: none; /* 默认隐藏，由JS控制 */
         }
+
         /* 主人栏样式（在上） */
         .owner-sidebar {
-            margin-bottom: 20px; 
-            padding-bottom: 0;   
-            border-bottom: none;  
+            margin-bottom: 20px; /* 用间距代替分隔线 */
+            padding-bottom: 0;    /* 去掉内边距 */
+            border-bottom: none;  /* 移除分隔线 */
             display: none; /* 默认隐藏 */
         }
         /* 只有主人栏时，取消底部间距 */
         .owner-sidebar:only-child {
             margin-bottom: 0;
         }
-        /* 地点介绍栏（在下） */
+
+        /* 地点介绍栏样式（在下） */
         .area-info-sidebar {
-            display: none;
+            display: none; /* 默认隐藏 */
         }
 
-        /* 侧边栏标题/内容样式 */
+        /* 保留原标题和内容样式 */
         .owner-title,
         .area-info-title {
             font-size: 16px;
@@ -312,8 +337,8 @@
         .oc-card:hover {
             transform: translateY(-3px);
         }
-
-        /* 随机事件标签样式拆分 */
+        
+        /* 随机事件标签基础样式 */
         .oc-random-tag {
             position: absolute;
             top: 10px;
@@ -323,7 +348,7 @@
             border-radius: 6px;
             font-weight: 600;
         }
-        /* 必选随机事件（橙色） */
+        /* 必选随机事件（页面橙色） */
         .oc-random-tag.mandatory-tag {
             background: var(--primary);
             color: #fff;
@@ -368,7 +393,7 @@
             line-height: 1.4;
         }
 
-        /* 悬浮弹窗 */
+        /* 悬浮弹窗 - 仅显示action和停留时间 */
         .oc-popup {
             position: absolute;
             bottom: calc(100% + 10px);
@@ -406,7 +431,7 @@
             color: var(--text3);
         }
 
-        /* 移动端适配 */
+        /* 移动端 */
         @media (max-width: 768px) {
             .main-container {
                 flex-direction: column;
@@ -424,464 +449,564 @@
     </style>
 </head>
 <body>
+    <!-- 下拉刷新提示 -->
+    <div class="pull-refresh" id="pullRefresh">下拉刷新...</div>
 
-<!-- 提示条 -->
-<div class="tip-bar" id="tipBar"></div>
+    <!-- 新增提示条DOM -->
+    <div class="tip-bar" id="tipBar"></div>
 
-<div class="header">
-    <div class="header-container">
-        <div class="title">🦁 Lionfish · 居民实时行踪</div>
-        <div class="mode-toggle" id="modeToggle">🌙</div>
-    </div>
-    <div class="real-clock" id="clock">加载系统时间…</div>
-    <div class="area-path" id="areaPath">1区 > 居酒屋</div>
-</div>
-
-<div class="big-area-scroll" id="bigAreaWrap"></div>
-
-<div class="small-area-drawer-wrap">
-    <div class="small-area-drawer-header" id="drawerHeader">
-        <div class="small-area-drawer-title" id="drawerTitle">目前地点·居酒屋</div>
-        <div class="small-area-drawer-arrow" id="drawerArrow">▼</div>
-    </div>
-    <div class="small-area-drawer-content" id="drawerContent">
-        <div class="small-area-list" id="smallAreaList"></div>
-    </div>
-</div>
-
-<div class="main-container">
-    <div class="oc-container" id="ocContainer">
-        <div class="empty">加载中...</div>
-    </div>
-    <!-- 合并后的侧边栏：主人栏在上，地点介绍在下 -->
-    <div class="combined-sidebar" id="combinedSidebar">
-        <div class="owner-sidebar" id="ownerSidebar">
-            <div class="owner-title">📍 地点主人</div>
-            <div id="ownerContent"></div>
+    <div class="header">
+        <!-- 重构头部：新增容器包含标题和模式按钮 -->
+        <div class="header-container">
+            <div class="title">🦁 Lionfish城 · OC实时行踪</div>
+            <div class="mode-toggle" id="modeToggle">🌙</div>
         </div>
-        <div class="area-info-sidebar" id="areaInfoSidebar">
-            <div class="area-info-title">📝 地点介绍</div>
-            <div class="area-info-content" id="areaInfoContent">加载地点信息中...</div>
+        <div class="real-clock" id="clock">加载系统时间…</div>
+        <div class="area-path" id="areaPath">1区 > 居酒屋</div>
+    </div>
+
+    <div class="big-area-scroll" id="bigAreaWrap"></div>
+
+    <div class="small-area-drawer-wrap">
+        <div class="small-area-drawer-header" id="drawerHeader">
+            <div class="small-area-drawer-title" id="drawerTitle">目前地点·居酒屋</div>
+            <div class="small-area-drawer-arrow" id="drawerArrow">▼</div>
+        </div>
+        <div class="small-area-drawer-content" id="drawerContent">
+            <div class="small-area-list" id="smallAreaList"></div>
         </div>
     </div>
-</div>
 
-<script>
-    let ocData = [];
-    let areaData = [];
-    let currentBigArea = "";
-    let currentSmallArea = "";
-    let ocActionCache = {};
-    let activeAreaCode = null;
+    <div class="main-container">
+        <div class="oc-container" id="ocContainer">
+            <div class="empty">加载中...</div>
+        </div>
+        <!-- 合并后的侧边栏容器 -->
+        <div class="combined-sidebar" id="combinedSidebar">
+            <div class="owner-sidebar" id="ownerSidebar">
+                <div class="owner-title">📍 地点主人</div>
+                <div id="ownerContent"></div>
+            </div>
+            <div class="area-info-sidebar" id="areaInfoSidebar">
+                <div class="area-info-title">📝 地点介绍</div>
+                <div class="area-info-content" id="areaInfoContent">加载地点信息中...</div>
+            </div>
+        </div>
+    </div>
 
-    // 模式切换
-    let isDark = true;
-    const modeToggle = document.getElementById('modeToggle');
-    const saved = localStorage.getItem('themeMode');
+    <script>
+        let ocData = [];
+        let areaData = [];
+        let currentBigArea = "";
+        let currentSmallArea = "";
+        let ocActionCache = {};
+        let activeAreaCode = null;
 
-    function updateDrawerTitle() {
-        document.getElementById('drawerTitle').innerText = `目前地点·${currentSmallArea}`;
-    }
+        // 下拉刷新核心变量
+        let pullStartY = 0;    // 触摸起始Y坐标
+        let pullDistance = 0;  // 下拉距离
+        let isPulling = false; // 是否正在下拉
+        let isRefreshing = false; // 是否正在刷新
+        const pullRefresh = document.getElementById('pullRefresh');
 
-    function setDark() {
-        document.body.classList.remove('light-mode');
-        modeToggle.innerText = '🌙';
-        isDark = true;
-        localStorage.setItem('themeMode','dark');
-    }
-    function setLight() {
-        document.body.classList.add('light-mode');
-        modeToggle.innerText = '☀️';
-        isDark = false;
-        localStorage.setItem('themeMode','light');
-    }
+        // 模式切换
+        let isDark = true;
+        const modeToggle = document.getElementById('modeToggle');
+        const saved = localStorage.getItem('themeMode');
 
-    if(saved === 'light') setLight();
-    else setDark();
-
-    modeToggle.onclick = () => isDark ? setLight() : setDark();
-
-    async function init() {
-        try {
-            const [ocRes, areaRes] = await Promise.all([
-                fetch('./ocData.json').then(r=>r.json()),
-                fetch('./areaData.json').then(r=>r.json())
-            ]);
-            ocData = ocRes;
-            areaData = areaRes;
-
-            initAreaNav();
-            updateRealTime();
-            renderOC();
-            renderOwnerSidebar();
-            setInterval(updateRealTimeOnly, 1000);
-            setInterval(async ()=>{
-                const arr = await getCurrentOcAreas();
-                await setAreaHighlight(arr);
-                renderOwnerSidebar();
-            },60000);
-        } catch(e) {
-            console.error(e);
-            document.getElementById('ocContainer').innerHTML = '<div class="empty">加载失败</div>';
+        // 重置下拉状态
+        function resetPullState() {
+            pullStartY = 0;
+            pullDistance = 0;
+            isPulling = false;
+            pullRefresh.classList.remove('show', 'loading');
+            pullRefresh.innerText = '下拉刷新...';
         }
-    }
 
-    async function getCurrentOcAreas() {
-        const now = getRealTime();
-        const set = new Set();
-        ocData.forEach(oc=>{
-            const {isRandom, schedule: rSched} = checkRandomEvent(oc, now);
-            const s = isRandom&&rSched ? rSched : getOwnerCurrentSchedule(oc,now);
-            if(s) {
-                const a = areaData.find(x=>x.smallArea===s.area);
-                if(a?.areaCode) set.add(a.areaCode);
-            }
-        });
-        return Array.from(set);
-    }
-
-    function initAreaNav() {
-        const wrap = document.getElementById('bigAreaWrap');
-        const bigs = [...new Set(areaData.map(x=>x.bigArea))];
-        wrap.innerHTML = bigs.map(a=>`<div class="big-area-tab" data-area="${a}">${a}</div>`).join('');
-        currentBigArea = bigs[0];
-        document.querySelector(`[data-area="${currentBigArea}"]`).classList.add('active');
-
-        document.querySelectorAll('.big-area-tab').forEach(t=>{
-            t.onclick = async e=>{
-                document.querySelectorAll('.big-area-tab').forEach(x=>x.classList.remove('active'));
-                e.target.classList.add('active');
-                currentBigArea = e.target.dataset.area;
-                await renderSmallArea(currentBigArea);
+        // 执行刷新操作
+        async function doRefresh() {
+            if (isRefreshing) return;
+            isRefreshing = true;
+            pullRefresh.innerText = '刷新中...';
+            pullRefresh.classList.add('loading');
+            
+            try {
+                // 重新加载数据 + 渲染
+                const [ocRes, areaRes] = await Promise.all([
+                    fetch('./ocData.json').then(r=>r.json()),
+                    fetch('./areaData.json').then(r=>r.json())
+                ]);
+                ocData = ocRes;
+                areaData = areaRes;
+                
+                // 清空缓存 + 重新渲染
+                ocActionCache = {};
+                localStorage.clear(); // 清空随机事件缓存
+                sessionStorage.clear();
+                
                 renderOC();
+                renderSmallArea(currentBigArea);
                 renderOwnerSidebar();
                 renderAreaInfoSidebar();
+                showTip('✅ 刷新成功！');
+            } catch (e) {
+                console.error('刷新失败', e);
+                showTip('❌ 刷新失败，请重试');
+            } finally {
+                isRefreshing = false;
+                setTimeout(resetPullState, 800); // 延迟重置，让用户看到反馈
+            }
+        }
+
+        // 监听触摸事件（移动端下拉刷新）
+        document.addEventListener('touchstart', (e) => {
+            if (isRefreshing) return;
+            // 只有在页面顶部时才触发下拉刷新
+            if (window.scrollY <= 0) {
+                pullStartY = e.touches[0].clientY;
+                isPulling = true;
             }
         });
 
-        const header = document.getElementById('drawerHeader');
-        const content = document.getElementById('drawerContent');
-        const arrow = document.getElementById('drawerArrow');
-        header.onclick = ()=>{
-            content.classList.toggle('show');
-            arrow.classList.toggle('active');
-            arrow.innerText = content.classList.contains('show') ? '▲' : '▼';
-        };
-        renderSmallArea(currentBigArea);
-    }
+        document.addEventListener('touchmove', (e) => {
+            if (!isPulling || isRefreshing) return;
+            pullDistance = e.touches[0].clientY - pullStartY;
+            // 下拉距离超过60px才显示提示
+            if (pullDistance > 60) {
+                pullRefresh.classList.add('show');
+                pullRefresh.innerText = '松开刷新...';
+            } else if (pullDistance > 0) {
+                pullRefresh.classList.add('show');
+                pullRefresh.innerText = '下拉刷新...';
+            } else {
+                pullRefresh.classList.remove('show');
+            }
+        });
 
-    async function renderSmallArea(big) {
-        const list = document.getElementById('smallAreaList');
-        const areas = areaData.filter(x=>x.bigArea===big);
-        const ocAreas = await getCurrentOcAreas();
+        document.addEventListener('touchend', () => {
+            if (!isPulling || isRefreshing) return;
+            // 下拉距离超过60px触发刷新
+            if (pullDistance > 60) {
+                doRefresh();
+            } else {
+                resetPullState();
+            }
+        });
 
-        list.innerHTML = areas.map(item=>{
-            const perm = item.isPermanent!==false;
-            const has = ocAreas.includes(item.areaCode);
-            const hide = !perm && !has ? 'not-permanent' : '';
-            const hot = has ? 'has-oc' : '';
-            return `<div class="small-area-item ${hot} ${hide}" data-area="${item.smallArea}" data-areaCode="${item.areaCode||''}">${item.smallArea}</div>`;
-        }).join('');
+        // 桌面端补充：按F5触发刷新
+        window.addEventListener('keydown', (e) => {
+            if (e.key === 'F5') {
+                e.preventDefault();
+                doRefresh();
+            }
+        });
 
-        // 优先选第一个常驻地点，无则选第一个
-        const defaultArea = areas.find(item => item.isPermanent !== false) || areas[0];
-        currentSmallArea = defaultArea.smallArea;
-        activeAreaCode = defaultArea.areaCode;
-        
-        document.querySelector(`[data-area="${currentSmallArea}"]`)?.classList.add('active');
-        updateAreaPath();
-        updateDrawerTitle();
-        renderOwnerSidebar();
-        renderAreaInfoSidebar();
-        await setAreaHighlight(ocAreas);
+        function updateDrawerTitle() {
+            document.getElementById('drawerTitle').innerText = `目前地点·${currentSmallArea}`;
+        }
 
-        document.querySelectorAll('.small-area-item').forEach(i=>{
-            i.onclick = async e=>{
-                document.querySelectorAll('.small-area-item').forEach(x=>x.classList.remove('active'));
-                e.target.classList.add('active');
-                currentSmallArea = e.target.dataset.area;
-                activeAreaCode = e.target.dataset.areaCode;
-                updateAreaPath();
-                updateDrawerTitle();
+        function setDark() {
+            document.body.classList.remove('light-mode');
+            modeToggle.innerText = '🌙';
+            isDark = true;
+            localStorage.setItem('themeMode','dark');
+        }
+        function setLight() {
+            document.body.classList.add('light-mode');
+            modeToggle.innerText = '☀️';
+            isDark = false;
+            localStorage.setItem('themeMode','light');
+        }
+
+        if(saved === 'light') setLight();
+        else setDark();
+
+        modeToggle.onclick = () => isDark ? setLight() : setDark();
+
+        // 更新合并侧边栏显示状态
+        function updateCombinedSidebar() {
+            const combined = document.getElementById('combinedSidebar');
+            const ownerSidebar = document.getElementById('ownerSidebar');
+            const areaInfoSidebar = document.getElementById('areaInfoSidebar');
+            // 只要有一个子栏显示，就显示合并容器
+            const hasContent = ownerSidebar.style.display === 'block' || areaInfoSidebar.style.display === 'block';
+            combined.style.display = hasContent ? 'block' : 'none';
+        }
+
+        async function init() {
+            resetPullState(); // 初始化时重置下拉状态
+            try {
+                const [ocRes, areaRes] = await Promise.all([
+                    fetch('./ocData.json').then(r=>r.json()),
+                    fetch('./areaData.json').then(r=>r.json())
+                ]);
+                ocData = ocRes;
+                areaData = areaRes;
+
+                initAreaNav();
+                updateRealTime();
                 renderOC();
                 renderOwnerSidebar();
-                renderAreaInfoSidebar();
-                const arr = await getCurrentOcAreas();
-                await setAreaHighlight(arr);
-            }
-        });
-    }
-
-    // 更新合并侧边栏显示状态
-    function updateCombinedSidebar() {
-        const combined = document.getElementById('combinedSidebar');
-        const ownerSidebar = document.getElementById('ownerSidebar');
-        const areaInfoSidebar = document.getElementById('areaInfoSidebar');
-        // 有任一子栏显示则显示合并容器
-        const hasContent = ownerSidebar.style.display === 'block' || areaInfoSidebar.style.display === 'block';
-        combined.style.display = hasContent ? 'block' : 'none';
-    }
-
-    function renderAreaInfoSidebar() {
-        const info = areaData.find(x=>x.smallArea===currentSmallArea&&x.bigArea===currentBigArea);
-        const side = document.getElementById('areaInfoSidebar');
-        const c = document.getElementById('areaInfoContent');
-        if(!info) {
-            side.style.display = 'none';
-        } else {
-            side.style.display = 'block';
-            c.innerText = info.areaIntro || '暂无介绍';
-        }
-        updateCombinedSidebar(); // 同步更新合并容器
-    }
-
-    async function setAreaHighlight(arr) {
-        document.querySelectorAll('.small-area-item').forEach(i=>{
-            const code = i.dataset.areacode;
-            i.classList.remove('has-oc');
-            if(code===activeAreaCode) return;
-            if(arr.includes(code)) i.classList.add('has-oc');
-        });
-    }
-
-    function updateAreaPath() {
-        document.getElementById('areaPath').innerText = `${currentBigArea} > ${currentSmallArea}`;
-    }
-
-    function getRealTime() {
-        const d = new Date();
-        const wd = ['周日','周一','周二','周三','周四','周五','周六'][d.getDay()];
-        const h = String(d.getHours()).padStart(2,'0');
-        const m = String(d.getMinutes()).padStart(2,'0');
-        return {
-            week: d.getDay(),
-            hour: d.getHours(),
-            minute: d.getMinutes(),
-            str: `${wd} ${h}:${m}`
-        };
-    }
-
-    function updateRealTime() {
-        document.getElementById('clock').innerText = `当前时间 · ${getRealTime().str}`;
-    }
-    function updateRealTimeOnly() {
-        document.getElementById('clock').innerText = `当前时间 · ${getRealTime().str}`;
-    }
-
-    function getOwnerCurrentSchedule(oc, now) {
-        if(!oc.baseSchedule) return null;
-        for(const s of oc.baseSchedule) {
-            if(!s.week.includes(now.week)) continue;
-            const [st,ed] = s.timeRange.split('-');
-            const [sh,sm] = st.split(':').map(Number);
-            const [eh,em] = ed.split(':').map(Number);
-            const nowM = now.hour*60+now.minute;
-            const sM = sh*60+sm;
-            const eM = eh*60+em;
-            let inRange = false;
-            if(eM < sM) inRange = nowM >= sM || nowM <= eM;
-            else inRange = nowM >= sM && nowM <= eM;
-            if(inRange) {
-                return {...s, endTimeStr:getEndTimeDisplay(st,ed,now)};
-            }
-        }
-        return null;
-    }
-
-    function getEndTimeDisplay(st,ed,now) {
-        const [sh] = st.split(':').map(Number);
-        const [eh,em] = ed.split(':').map(Number);
-        const end = `${String(eh).padStart(2,'0')}:${String(em).padStart(2,'0')}`;
-        if(eh < sh) return `次日 ${end}`;
-        if(now.hour < sh) return `当天 ${end}`;
-        return end;
-    }
-
-    // 区分必选/可选随机事件
-    function checkRandomEvent(oc, now) {
-        if(!oc.randomEvents?.length) return {isRandom:false, schedule:null};
-        
-        // 筛选当前时段有效事件
-        const validEvents = oc.randomEvents.filter(e=>{
-            if(!e.week.includes(now.week)) return false;
-            const [st,ed] = e.timeRange.split('-');
-            const [sh,sm] = st.split(':').map(Number);
-            const [eh,em] = ed.split(':').map(Number);
-            const nowM = now.hour*60+now.minute;
-            const sM = sh*60+sm;
-            const eM = eh*60+em;
-            return eM < sM ? (nowM >= sM || nowM <= eM) : (nowM >= sM && nowM <= eM);
-        });
-        if(!validEvents.length) return {isRandom:false, schedule:null};
-
-        // 持久化逻辑
-        const needPersist = validEvents[0].persist !== false;
-        let key;
-        if(needPersist) {
-            const day = new Date().toISOString().split('T')[0];
-            key = `rand_${oc.name}_${validEvents[0].week}_${validEvents[0].timeRange}_${day}`;
-            const [es,ee] = validEvents[0].timeRange.split('-');
-            const [esh,esm] = es.split(':').map(Number);
-            const [eeh,eem] = ee.split(':').map(Number);
-            const sM = esh*60+esm;
-            const eM = eeh*60+eem;
-            const nowM = now.hour*60+now.minute;
-            const inTime = eM < sM ? (nowM >= sM || nowM <= eM) : (nowM >= sM && nowM <= eM);
-            if(!inTime) { localStorage.removeItem(key); return {isRandom:false, schedule:null}; }
-            const cache = localStorage.getItem(key);
-            if(cache) {
-                const r = JSON.parse(cache);
-                if(r.isRandom && r.schedule.tip) showTip(r.schedule.tip);
-                return r;
-            }
-        } else {
-            const day = new Date().toLocaleDateString();
-            key = `rand_${oc.name}_${day}_${now.hour}`;
-            const cache = sessionStorage.getItem(key);
-            if(cache) {
-                const r = JSON.parse(cache);
-                if(r.isRandom && r.schedule.tip) showTip(r.schedule.tip);
-                return r;
+                setInterval(updateRealTimeOnly, 1000);
+                setInterval(async ()=>{
+                    const arr = await getCurrentOcAreas();
+                    await setAreaHighlight(arr);
+                    renderOwnerSidebar();
+                },60000);
+            } catch(e) {
+                console.error(e);
+                document.getElementById('ocContainer').innerHTML = '<div class="empty">加载失败</div>';
             }
         }
 
-        // 区分必选/可选事件
-        const hasMandatory = validEvents.some(e => e.isMandatory);
-        let hitEvent = null;
-
-        if(hasMandatory) {
-            // 必选事件：按权重100%选一个
-            const mandatoryEvents = validEvents.filter(e => e.isMandatory);
-            let totalWeight = 0;
-            const weightMap = mandatoryEvents.map(e => {
-                totalWeight += e.probability;
-                return { event: e, endWeight: totalWeight };
-            });
-            const randomNum = Math.random() * totalWeight;
-            hitEvent = weightMap.find(item => randomNum <= item.endWeight)?.event;
-        } else {
-            // 可选事件：低概率随机触发
-            const ev = validEvents[Math.floor(Math.random()*validEvents.length)];
-            hitEvent = Math.random()*100 < ev.probability ? ev : null;
-        }
-
-        // 组装结果（新增isMandatory标识）
-        const res = {
-            isRandom: !!hitEvent,
-            isMandatory: hitEvent?.isMandatory || false, 
-            schedule: hitEvent ? {
-                ...hitEvent,
-                endTimeStr: getEndTimeDisplay(hitEvent.timeRange.split('-')[0], hitEvent.timeRange.split('-')[1], now)
-            } : null
-        };
-        
-        if(needPersist) localStorage.setItem(key, JSON.stringify(res));
-        else sessionStorage.setItem(key, JSON.stringify(res));
-        
-        if(hitEvent && hitEvent.tip) showTip(hitEvent.tip);
-        return res;
-    }
-
-    function showTip(text) {
-        const t = document.getElementById('tipBar');
-        t.innerText = text;
-        t.classList.add('show');
-        setTimeout(()=>t.classList.remove('show'),4000);
-    }
-
-    function getLocationRandomAction(oc, area, type) {
-        type = type || 'work';
-        const acts = oc.locationRandomActions?.[area];
-        let arr = [];
-        if(Array.isArray(acts)) arr = acts;
-        else if(acts?.[type]) arr = acts[type];
-        // 兜底返回action或默认值
-        const defaultAction = oc.baseSchedule?.find(s => s.area === area)?.action || '暂无状态';
-        if(arr.length === 0) return defaultAction;
-        const key = `act_${oc.name}_${area}_${type}`;
-        if(!ocActionCache[key]) ocActionCache[key] = arr[Math.floor(Math.random()*arr.length)];
-        return ocActionCache[key];
-    }
-    
-    function renderOC() {
-        const now = getRealTime();
-        const container = document.getElementById('ocContainer');
-        const list = ocData.map(oc=>{
-            // 解构必选/可选标识
-            const randomResult = checkRandomEvent(oc, now);
-            const {isRandom, schedule:rSched, isMandatory} = randomResult;
-            
-            const base = getOwnerCurrentSchedule(oc, now);
-            const final = isRandom&&rSched ? rSched : base;
-            if(!final || final.area!==currentSmallArea) return null;
-            return {oc, final, isRandom, isMandatory, end:final.endTimeStr||'?'};
-        }).filter(Boolean);
-    
-        if(!list.length) {
-            container.innerHTML = '<div class="empty">当前地点暂无OC</div>';
-            return;
-        }
-    
-        container.innerHTML = `
-        <div class="oc-grid">
-        ${list.map(x=>{
-            const {oc,final,isRandom,isMandatory,end} = x;
-            const actionText = final.action || '暂无状态';
-            const txt = getLocationRandomAction(oc, currentSmallArea, final.type) || actionText;
-            const rcls = isRandom ? 'random' : '';
-            // 区分标签样式：必选=橙色，可选=镭射
-            const tagClass = isMandatory ? 'mandatory-tag' : 'laser-tag';
-            const tag = isRandom ? `<div class="oc-random-tag ${tagClass}">随机事件</div>` : '';
-            
-            return `
-            <div class="oc-card ${rcls}">
-                ${tag}
-                <div class="oc-popup">
-                    <p><span class="popup-action">行为：</span>${actionText}</p>
-                    <p><span class="popup-time">停留至：</span>${end}</p>
-                </div>
-                <div class="oc-row">
-                    <img src="${oc.avatar}" alt="${oc.name}" class="oc-avatar">
-                    <div class="oc-info">
-                        <div class="oc-name">${oc.name}</div>
-                        <div class="oc-place">📍 ${final.area}</div>
-                    </div>
-                </div>
-                <div class="oc-action">${txt}</div>
-            </div>`;
-        }).join('')}
-        </div>`;
-    }
-
-    function renderOwnerSidebar() {
-        const area = areaData.find(x=>x.smallArea===currentSmallArea&&x.bigArea===currentBigArea);
-        const side = document.getElementById('ownerSidebar');
-        const content = document.getElementById('ownerContent');
-        if(!area || !area.owner?.length) {
-            side.style.display = 'none';
-        } else {
-            side.style.display = 'block';
+        async function getCurrentOcAreas() {
             const now = getRealTime();
-            content.innerHTML = area.owner.map(name=>{
-                const oc = ocData.find(o=>o.name===name);
-                if(!oc) return '';
-                const {isRandom, schedule:rSched} = checkRandomEvent(oc, now);
-                const s = isRandom&&rSched ? rSched : getOwnerCurrentSchedule(oc, now);
-                const here = s?.area === currentSmallArea;
-                return `
-                <div class="owner-card">
-                    <img src="${oc.avatar}" alt="${name}" class="owner-avatar">
-                    <div class="owner-info">
-                        <div class="owner-name">${name}</div>
-                        <div class="owner-status">${here ? '✅ 就在此处' : '🔴 暂时离开，四处走走看吧～'}</div>
-                    </div>
-                </div>`;
-            }).join('');
+            const set = new Set();
+            ocData.forEach(oc=>{
+                const {isRandom, schedule: rSched} = checkRandomEvent(oc, now);
+                const s = isRandom&&rSched ? rSched : getOwnerCurrentSchedule(oc,now);
+                if(s) {
+                    const a = areaData.find(x=>x.smallArea===s.area);
+                    if(a?.areaCode) set.add(a.areaCode);
+                }
+            });
+            return Array.from(set);
         }
-        updateCombinedSidebar(); // 同步更新合并容器
-    }
 
-    window.onload = init;
-</script>
+        function initAreaNav() {
+            const wrap = document.getElementById('bigAreaWrap');
+            const bigs = [...new Set(areaData.map(x=>x.bigArea))];
+            wrap.innerHTML = bigs.map(a=>`<div class="big-area-tab" data-area="${a}">${a}</div>`).join('');
+            currentBigArea = bigs[0];
+            document.querySelector(`[data-area="${currentBigArea}"]`).classList.add('active');
+
+            document.querySelectorAll('.big-area-tab').forEach(t=>{
+                t.onclick = async e=>{
+                    document.querySelectorAll('.big-area-tab').forEach(x=>x.classList.remove('active'));
+                    e.target.classList.add('active');
+                    currentBigArea = e.target.dataset.area;
+                    await renderSmallArea(currentBigArea);
+                    renderOC();
+                    renderOwnerSidebar();
+                    renderAreaInfoSidebar();
+                }
+            });
+
+            const header = document.getElementById('drawerHeader');
+            const content = document.getElementById('drawerContent');
+            const arrow = document.getElementById('drawerArrow');
+            header.onclick = ()=>{
+                content.classList.toggle('show');
+                arrow.classList.toggle('active');
+                arrow.innerText = content.classList.contains('show') ? '▲' : '▼';
+            };
+            renderSmallArea(currentBigArea);
+        }
+
+        async function renderSmallArea(big) {
+            const list = document.getElementById('smallAreaList');
+            const areas = areaData.filter(x=>x.bigArea===big);
+            const ocAreas = await getCurrentOcAreas();
+
+            list.innerHTML = areas.map(item=>{
+                const perm = item.isPermanent!==false;
+                const has = ocAreas.includes(item.areaCode);
+                const hide = !perm && !has ? 'not-permanent' : '';
+                const hot = has ? 'has-oc' : '';
+                return `<div class="small-area-item ${hot} ${hide}" data-area="${item.smallArea}" data-areaCode="${item.areaCode||''}">${item.smallArea}</div>`;
+            }).join('');
+
+            // 优先选第一个 isPermanent !== false 的常驻地点，没有再选第一个
+            const defaultArea = areas.find(item => item.isPermanent !== false) || areas[0];
+            currentSmallArea = defaultArea.smallArea;
+            activeAreaCode = defaultArea.areaCode;
+            
+            document.querySelector(`[data-area="${currentSmallArea}"]`)?.classList.add('active');
+            updateAreaPath();
+            updateDrawerTitle();
+            renderOwnerSidebar();
+            renderAreaInfoSidebar();
+            await setAreaHighlight(ocAreas);
+
+            document.querySelectorAll('.small-area-item').forEach(i=>{
+                i.onclick = async e=>{
+                    document.querySelectorAll('.small-area-item').forEach(x=>x.classList.remove('active'));
+                    e.target.classList.add('active');
+                    currentSmallArea = e.target.dataset.area;
+                    activeAreaCode = e.target.dataset.areaCode;
+                    updateAreaPath();
+                    updateDrawerTitle();
+                    renderOC();
+                    renderOwnerSidebar();
+                    renderAreaInfoSidebar();
+                    const arr = await getCurrentOcAreas();
+                    await setAreaHighlight(arr);
+                }
+            });
+        }
+
+        function renderAreaInfoSidebar() {
+            const info = areaData.find(x=>x.smallArea===currentSmallArea&&x.bigArea===currentBigArea);
+            const side = document.getElementById('areaInfoSidebar');
+            const c = document.getElementById('areaInfoContent');
+            if(!info) {
+                side.style.display = 'none';
+            } else {
+                side.style.display = 'block';
+                c.innerText = info.areaIntro || '暂无介绍';
+            }
+            updateCombinedSidebar(); // 同步更新合并容器
+        }
+
+        async function setAreaHighlight(arr) {
+            document.querySelectorAll('.small-area-item').forEach(i=>{
+                const code = i.dataset.areacode;
+                i.classList.remove('has-oc');
+                if(code===activeAreaCode) return;
+                if(arr.includes(code)) i.classList.add('has-oc');
+            });
+        }
+
+        function updateAreaPath() {
+            document.getElementById('areaPath').innerText = `${currentBigArea} > ${currentSmallArea}`;
+        }
+
+        function getRealTime() {
+            const d = new Date();
+            const wd = ['周日','周一','周二','周三','周四','周五','周六'][d.getDay()];
+            const h = String(d.getHours()).padStart(2,'0');
+            const m = String(d.getMinutes()).padStart(2,'0');
+            return {
+                week: d.getDay(),
+                hour: d.getHours(),
+                minute: d.getMinutes(),
+                str: `${wd} ${h}:${m}`
+            };
+        }
+
+        function updateRealTime() {
+            document.getElementById('clock').innerText = `当前时间 · ${getRealTime().str}`;
+        }
+        function updateRealTimeOnly() {
+            document.getElementById('clock').innerText = `当前时间 · ${getRealTime().str}`;
+        }
+
+        function getOwnerCurrentSchedule(oc, now) {
+            if(!oc.baseSchedule) return null;
+            for(const s of oc.baseSchedule) {
+                if(!s.week.includes(now.week)) continue;
+                const [st,ed] = s.timeRange.split('-');
+                const [sh,sm] = st.split(':').map(Number);
+                const [eh,em] = ed.split(':').map(Number);
+                const nowM = now.hour*60+now.minute;
+                const sM = sh*60+sm;
+                const eM = eh*60+em;
+                let inRange = false;
+                if(eM < sM) inRange = nowM >= sM || nowM <= eM;
+                else inRange = nowM >= sM && nowM <= eM;
+                if(inRange) {
+                    return {...s, endTimeStr:getEndTimeDisplay(st,ed,now)};
+                }
+            }
+            return null;
+        }
+
+        function getEndTimeDisplay(st,ed,now) {
+            const [sh] = st.split(':').map(Number);
+            const [eh,em] = ed.split(':').map(Number);
+            const end = `${String(eh).padStart(2,'0')}:${String(em).padStart(2,'0')}`;
+            if(eh < sh) return `次日 ${end}`;
+            if(now.hour < sh) return `当天 ${end}`;
+            return end;
+        }
+
+        // 核心修改：区分必选/可选随机事件
+        function checkRandomEvent(oc, now) {
+            if(!oc.randomEvents?.length) return {isRandom:false, schedule:null};
+            
+            // 1. 筛选当前时段有效的随机事件
+            const validEvents = oc.randomEvents.filter(e=>{
+                if(!e.week.includes(now.week)) return false;
+                const [st,ed] = e.timeRange.split('-');
+                const [sh,sm] = st.split(':').map(Number);
+                const [eh,em] = ed.split(':').map(Number);
+                const nowM = now.hour*60+now.minute;
+                const sM = sh*60+sm;
+                const eM = eh*60+em;
+                return eM < sM ? (nowM >= sM || nowM <= eM) : (nowM >= sM && nowM <= eM);
+            });
+            if(!validEvents.length) return {isRandom:false, schedule:null};
+
+            // 2. 持久化逻辑（保持不变）
+            const needPersist = validEvents[0].persist !== false;
+            let key;
+            if(needPersist) {
+                const day = new Date().toISOString().split('T')[0];
+                key = `rand_${oc.name}_${validEvents[0].week}_${validEvents[0].timeRange}_${day}`;
+                const [es,ee] = validEvents[0].timeRange.split('-');
+                const [esh,esm] = es.split(':').map(Number);
+                const [eeh,eem] = ee.split(':').map(Number);
+                const sM = esh*60+esm;
+                const eM = eeh*60+eem;
+                const nowM = now.hour*60+now.minute;
+                const inTime = eM < sM ? (nowM >= sM || nowM <= eM) : (nowM >= sM && nowM <= eM);
+                if(!inTime) { localStorage.removeItem(key); return {isRandom:false, schedule:null}; }
+                const cache = localStorage.getItem(key);
+                if(cache) {
+                    const r = JSON.parse(cache);
+                    if(r.isRandom && r.schedule.tip) showTip(r.schedule.tip);
+                    return r;
+                }
+            } else {
+                const day = new Date().toLocaleDateString();
+                key = `rand_${oc.name}_${day}_${now.hour}`;
+                const cache = sessionStorage.getItem(key);
+                if(cache) {
+                    const r = JSON.parse(cache);
+                    if(r.isRandom && r.schedule.tip) showTip(r.schedule.tip);
+                    return r;
+                }
+            }
+
+            // 3. 区分「必选随机事件」和「可选随机事件」
+            const hasMandatory = validEvents.some(e => e.isMandatory);
+            let hitEvent = null;
+
+            if(hasMandatory) {
+                // ========== 必选事件逻辑：按权重100%选一个 ==========
+                const mandatoryEvents = validEvents.filter(e => e.isMandatory);
+                let totalWeight = 0;
+                const weightMap = mandatoryEvents.map(e => {
+                    totalWeight += e.probability;
+                    return { event: e, endWeight: totalWeight };
+                });
+                const randomNum = Math.random() * totalWeight;
+                hitEvent = weightMap.find(item => randomNum <= item.endWeight)?.event;
+            } else {
+                // ========== 可选事件逻辑：保留原低概率判断 ==========
+                const ev = validEvents[Math.floor(Math.random()*validEvents.length)];
+                hitEvent = Math.random()*100 < ev.probability ? ev : null;
+            }
+
+            // 4. 组装结果并持久化
+            const res = {
+                isRandom: !!hitEvent,
+                isMandatory: hitEvent?.isMandatory || false, // 标记是否是必选随机事件
+                schedule: hitEvent ? {
+                    ...hitEvent,
+                    endTimeStr: getEndTimeDisplay(hitEvent.timeRange.split('-')[0], hitEvent.timeRange.split('-')[1], now)
+                } : null
+            };
+            
+            if(needPersist) localStorage.setItem(key, JSON.stringify(res));
+            else sessionStorage.setItem(key, JSON.stringify(res));
+            
+            if(hitEvent && hitEvent.tip) showTip(hitEvent.tip);
+            return res;
+        }
+
+        function showTip(text) {
+            const t = document.getElementById('tipBar');
+            t.innerText = text;
+            t.classList.add('show');
+            setTimeout(()=>t.classList.remove('show'),4000);
+        }
+
+        function getLocationRandomAction(oc, area, type) {
+            type = type || 'work';
+            const acts = oc.locationRandomActions?.[area];
+            let arr = [];
+            if(Array.isArray(acts)) arr = acts;
+            else if(acts?.[type]) arr = acts[type];
+            // 兜底改为返回action（如果有），否则返回默认
+            const defaultAction = oc.baseSchedule?.find(s => s.area === area)?.action || '暂无状态';
+            if(arr.length === 0) return defaultAction;
+            const key = `act_${oc.name}_${area}_${type}`;
+            if(!ocActionCache[key]) ocActionCache[key] = arr[Math.floor(Math.random()*arr.length)];
+            return ocActionCache[key];
+        }
+
+        function renderOC() {
+            const now = getRealTime();
+            const container = document.getElementById('ocContainer');
+            const list = ocData.map(oc=>{
+                // 新增：先保存checkRandomEvent的返回值，解构isMandatory
+                const randomResult = checkRandomEvent(oc, now);
+                const {isRandom, schedule:rSched, isMandatory} = randomResult;
+                
+                const base = getOwnerCurrentSchedule(oc, now);
+                const final = isRandom&&rSched ? rSched : base;
+                if(!final || final.area!==currentSmallArea) return null;
+                // 新增：把isMandatory加入返回对象
+                return {oc, final, isRandom, isMandatory, end:final.endTimeStr||'?'};
+            }).filter(Boolean);
+
+            if(!list.length) {
+                container.innerHTML = '<div class="empty">当前地点暂无OC</div>';
+                return;
+            }
+
+            container.innerHTML = `
+            <div class="oc-grid">
+            ${list.map(x=>{
+                const {oc,final,isRandom,isMandatory,end} = x; // 解构isMandatory
+                // 优先取随机事件的action，否则取基础任务的action
+                const actionText = final.action || '暂无状态';
+                const txt = getLocationRandomAction(oc, currentSmallArea, final.type) || actionText;
+                const rcls = isRandom ? 'random' : '';
+                // 新增：根据是否必选，给标签加不同class
+                const tagClass = isMandatory ? 'mandatory-tag' : 'laser-tag';
+                const tag = isRandom ? `<div class="oc-random-tag ${tagClass}">随机事件</div>` : '';
+                
+                return `
+                <div class="oc-card ${rcls}">
+                    ${tag}
+                    <div class="oc-popup">
+                        <p><span class="popup-action">行为：</span>${actionText}</p>
+                        <p><span class="popup-time">停留至：</span>${end}</p>
+                    </div>
+                    <div class="oc-row">
+                        <img src="${oc.avatar}" alt="${oc.name}" class="oc-avatar">
+                        <div class="oc-info">
+                            <div class="oc-name">${oc.name}</div>
+                            <div class="oc-place">📍 ${final.area}</div>
+                        </div>
+                    </div>
+                    <div class="oc-action">${txt}</div>
+                </div>`;
+            }).join('')}
+            </div>`;
+        }
+
+        function renderOwnerSidebar() {
+            const area = areaData.find(x=>x.smallArea===currentSmallArea&&x.bigArea===currentBigArea);
+            const side = document.getElementById('ownerSidebar');
+            const content = document.getElementById('ownerContent');
+            if(!area || !area.owner?.length) {
+                side.style.display = 'none';
+            } else {
+                side.style.display = 'block';
+                const now = getRealTime();
+                content.innerHTML = area.owner.map(name=>{
+                    const oc = ocData.find(o=>o.name===name);
+                    if(!oc) return '';
+                    const {isRandom, schedule:rSched} = checkRandomEvent(oc, now);
+                    const s = isRandom&&rSched ? rSched : getOwnerCurrentSchedule(oc, now);
+                    const here = s?.area === currentSmallArea;
+                    return `
+                    <div class="owner-card">
+                        <img src="${oc.avatar}" alt="${name}" class="owner-avatar">
+                        <div class="owner-info">
+                            <div class="owner-name">${name}</div>
+                            <div class="owner-status">${here ? '✅ 就在此处' : '🔴 暂时离开，四处走走看吧～'}</div>
+                        </div>
+                    </div>`;
+                }).join('');
+            }
+            updateCombinedSidebar(); // 同步更新合并容器
+        }
+
+        window.onload = init;
+    </script>
 </body>
 </html>
