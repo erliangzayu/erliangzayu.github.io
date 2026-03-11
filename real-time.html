@@ -51,7 +51,7 @@
             transition: all 0.25s ease;
         }
 
-        /* 头部容器 - 新增：包含标题、时间、模式按钮 */
+        /* 头部容器 - 标题居中+模式按钮靠右 */
         .header-container {
             display: flex;
             align-items: center;
@@ -60,7 +60,7 @@
             position: relative;
         }
 
-        /* 模式切换 - 重构：嵌入头部，缩小尺寸 */
+        /* 模式切换按钮 */
         .mode-toggle {
             position: absolute; 
             right: 0; 
@@ -227,8 +227,9 @@
         .oc-container {
             flex: 1;
         }
-        .owner-sidebar,
-        .area-info-sidebar {
+
+        /* 合并后的侧边栏容器（主人+地点介绍） */
+        .combined-sidebar {
             width: 280px;
             background: var(--card);
             border-radius: 18px;
@@ -237,6 +238,25 @@
             flex-shrink: 0;
             display: none;
         }
+        /* 主人栏（在上） */
+        .owner-sidebar {
+            margin-bottom: 16px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid var(--border);
+            display: none;
+        }
+        /* 只有主人栏时去掉底部分隔线 */
+        .owner-sidebar:only-child {
+            margin-bottom: 0;
+            padding-bottom: 0;
+            border-bottom: none;
+        }
+        /* 地点介绍栏（在下） */
+        .area-info-sidebar {
+            display: none;
+        }
+
+        /* 侧边栏标题/内容样式 */
         .owner-title,
         .area-info-title {
             font-size: 16px;
@@ -294,7 +314,8 @@
         .oc-card:hover {
             transform: translateY(-3px);
         }
-        /* 随机事件标签基础样式 */
+
+        /* 随机事件标签样式拆分 */
         .oc-random-tag {
             position: absolute;
             top: 10px;
@@ -304,7 +325,7 @@
             border-radius: 6px;
             font-weight: 600;
         }
-        /* 必选随机事件（页面橙色） */
+        /* 必选随机事件（橙色） */
         .oc-random-tag.mandatory-tag {
             background: var(--primary);
             color: #fff;
@@ -318,6 +339,7 @@
             color: transparent;
             border: 1px solid rgba(132, 250, 176, 0.3);
         }
+
         .oc-avatar {
             width: 50px;
             height: 50px;
@@ -348,7 +370,7 @@
             line-height: 1.4;
         }
 
-        /* 悬浮弹窗 - 仅显示action和停留时间 */
+        /* 悬浮弹窗 */
         .oc-popup {
             position: absolute;
             bottom: calc(100% + 10px);
@@ -386,12 +408,12 @@
             color: var(--text3);
         }
 
-        /* 移动端 */
+        /* 移动端适配 */
         @media (max-width: 768px) {
             .main-container {
                 flex-direction: column;
             }
-            .owner-sidebar, .area-info-sidebar {
+            .combined-sidebar {
                 width: 100%;
             }
             .oc-grid {
@@ -405,11 +427,10 @@
 </head>
 <body>
 
-<!-- 新增提示条DOM -->
+<!-- 提示条 -->
 <div class="tip-bar" id="tipBar"></div>
 
 <div class="header">
-    <!-- 重构头部：新增容器包含标题和模式按钮 -->
     <div class="header-container">
         <div class="title">🦁 Lionfish · 居民实时行踪</div>
         <div class="mode-toggle" id="modeToggle">🌙</div>
@@ -434,13 +455,16 @@
     <div class="oc-container" id="ocContainer">
         <div class="empty">加载中...</div>
     </div>
-    <div class="owner-sidebar" id="ownerSidebar">
-        <div class="owner-title">📍 地点主人</div>
-        <div id="ownerContent"></div>
-    </div>
-    <div class="area-info-sidebar" id="areaInfoSidebar">
-        <div class="area-info-title">📝 地点介绍</div>
-        <div class="area-info-content" id="areaInfoContent">加载地点信息中...</div>
+    <!-- 合并后的侧边栏：主人栏在上，地点介绍在下 -->
+    <div class="combined-sidebar" id="combinedSidebar">
+        <div class="owner-sidebar" id="ownerSidebar">
+            <div class="owner-title">📍 地点主人</div>
+            <div id="ownerContent"></div>
+        </div>
+        <div class="area-info-sidebar" id="areaInfoSidebar">
+            <div class="area-info-title">📝 地点介绍</div>
+            <div class="area-info-content" id="areaInfoContent">加载地点信息中...</div>
+        </div>
     </div>
 </div>
 
@@ -561,7 +585,7 @@
             return `<div class="small-area-item ${hot} ${hide}" data-area="${item.smallArea}" data-areaCode="${item.areaCode||''}">${item.smallArea}</div>`;
         }).join('');
 
-        // 优先选第一个 isPermanent !== false 的常驻地点，没有再选第一个
+        // 优先选第一个常驻地点，无则选第一个
         const defaultArea = areas.find(item => item.isPermanent !== false) || areas[0];
         currentSmallArea = defaultArea.smallArea;
         activeAreaCode = defaultArea.areaCode;
@@ -590,13 +614,27 @@
         });
     }
 
+    // 更新合并侧边栏显示状态
+    function updateCombinedSidebar() {
+        const combined = document.getElementById('combinedSidebar');
+        const ownerSidebar = document.getElementById('ownerSidebar');
+        const areaInfoSidebar = document.getElementById('areaInfoSidebar');
+        // 有任一子栏显示则显示合并容器
+        const hasContent = ownerSidebar.style.display === 'block' || areaInfoSidebar.style.display === 'block';
+        combined.style.display = hasContent ? 'block' : 'none';
+    }
+
     function renderAreaInfoSidebar() {
         const info = areaData.find(x=>x.smallArea===currentSmallArea&&x.bigArea===currentBigArea);
         const side = document.getElementById('areaInfoSidebar');
         const c = document.getElementById('areaInfoContent');
-        if(!info) { side.style.display='none'; return; }
-        side.style.display='block';
-        c.innerText = info.areaIntro || '暂无介绍';
+        if(!info) {
+            side.style.display = 'none';
+        } else {
+            side.style.display = 'block';
+            c.innerText = info.areaIntro || '暂无介绍';
+        }
+        updateCombinedSidebar(); // 同步更新合并容器
     }
 
     async function setAreaHighlight(arr) {
@@ -661,11 +699,11 @@
         return end;
     }
 
-    // 核心修改：区分必选/可选随机事件
+    // 区分必选/可选随机事件
     function checkRandomEvent(oc, now) {
         if(!oc.randomEvents?.length) return {isRandom:false, schedule:null};
         
-        // 1. 筛选当前时段有效的随机事件
+        // 筛选当前时段有效事件
         const validEvents = oc.randomEvents.filter(e=>{
             if(!e.week.includes(now.week)) return false;
             const [st,ed] = e.timeRange.split('-');
@@ -678,7 +716,7 @@
         });
         if(!validEvents.length) return {isRandom:false, schedule:null};
 
-        // 2. 持久化逻辑（保持不变）
+        // 持久化逻辑
         const needPersist = validEvents[0].persist !== false;
         let key;
         if(needPersist) {
@@ -709,12 +747,12 @@
             }
         }
 
-        // 3. 区分「必选随机事件」和「可选随机事件」
+        // 区分必选/可选事件
         const hasMandatory = validEvents.some(e => e.isMandatory);
         let hitEvent = null;
 
         if(hasMandatory) {
-            // ========== 必选事件逻辑：按权重100%选一个 ==========
+            // 必选事件：按权重100%选一个
             const mandatoryEvents = validEvents.filter(e => e.isMandatory);
             let totalWeight = 0;
             const weightMap = mandatoryEvents.map(e => {
@@ -724,12 +762,12 @@
             const randomNum = Math.random() * totalWeight;
             hitEvent = weightMap.find(item => randomNum <= item.endWeight)?.event;
         } else {
-            // ========== 可选事件逻辑：保留原低概率判断 ==========
+            // 可选事件：低概率随机触发
             const ev = validEvents[Math.floor(Math.random()*validEvents.length)];
             hitEvent = Math.random()*100 < ev.probability ? ev : null;
         }
 
-        // 4. 组装结果并持久化
+        // 组装结果（新增isMandatory标识）
         const res = {
             isRandom: !!hitEvent,
             isMandatory: hitEvent?.isMandatory || false, 
@@ -759,7 +797,7 @@
         let arr = [];
         if(Array.isArray(acts)) arr = acts;
         else if(acts?.[type]) arr = acts[type];
-        // 兜底改为返回action（如果有），否则返回默认
+        // 兜底返回action或默认值
         const defaultAction = oc.baseSchedule?.find(s => s.area === area)?.action || '暂无状态';
         if(arr.length === 0) return defaultAction;
         const key = `act_${oc.name}_${area}_${type}`;
@@ -771,14 +809,13 @@
         const now = getRealTime();
         const container = document.getElementById('ocContainer');
         const list = ocData.map(oc=>{
-            // 新增：先保存checkRandomEvent的返回值，解构isMandatory
+            // 解构必选/可选标识
             const randomResult = checkRandomEvent(oc, now);
             const {isRandom, schedule:rSched, isMandatory} = randomResult;
             
             const base = getOwnerCurrentSchedule(oc, now);
             const final = isRandom&&rSched ? rSched : base;
             if(!final || final.area!==currentSmallArea) return null;
-            // 新增：把isMandatory加入返回对象
             return {oc, final, isRandom, isMandatory, end:final.endTimeStr||'?'};
         }).filter(Boolean);
     
@@ -790,12 +827,11 @@
         container.innerHTML = `
         <div class="oc-grid">
         ${list.map(x=>{
-            const {oc,final,isRandom,isMandatory,end} = x; // 解构isMandatory
-            // 优先取随机事件的action，否则取基础任务的action
+            const {oc,final,isRandom,isMandatory,end} = x;
             const actionText = final.action || '暂无状态';
             const txt = getLocationRandomAction(oc, currentSmallArea, final.type) || actionText;
             const rcls = isRandom ? 'random' : '';
-            // 新增：根据是否必选，给标签加不同class
+            // 区分标签样式：必选=橙色，可选=镭射
             const tagClass = isMandatory ? 'mandatory-tag' : 'laser-tag';
             const tag = isRandom ? `<div class="oc-random-tag ${tagClass}">随机事件</div>` : '';
             
@@ -823,24 +859,28 @@
         const area = areaData.find(x=>x.smallArea===currentSmallArea&&x.bigArea===currentBigArea);
         const side = document.getElementById('ownerSidebar');
         const content = document.getElementById('ownerContent');
-        if(!area || !area.owner?.length) { side.style.display='none'; return; }
-        side.style.display='block';
-        const now = getRealTime();
-        content.innerHTML = area.owner.map(name=>{
-            const oc = ocData.find(o=>o.name===name);
-            if(!oc) return '';
-            const {isRandom, schedule:rSched} = checkRandomEvent(oc, now);
-            const s = isRandom&&rSched ? rSched : getOwnerCurrentSchedule(oc, now);
-            const here = s?.area === currentSmallArea;
-            return `
-            <div class="owner-card">
-                <img src="${oc.avatar}" alt="${name}" class="owner-avatar">
-                <div class="owner-info">
-                    <div class="owner-name">${name}</div>
-                    <div class="owner-status">${here ? '✅ 就在此处' : '🔴 暂时离开，四处走走看吧～'}</div>
-                </div>
-            </div>`;
-        }).join('');
+        if(!area || !area.owner?.length) {
+            side.style.display = 'none';
+        } else {
+            side.style.display = 'block';
+            const now = getRealTime();
+            content.innerHTML = area.owner.map(name=>{
+                const oc = ocData.find(o=>o.name===name);
+                if(!oc) return '';
+                const {isRandom, schedule:rSched} = checkRandomEvent(oc, now);
+                const s = isRandom&&rSched ? rSched : getOwnerCurrentSchedule(oc, now);
+                const here = s?.area === currentSmallArea;
+                return `
+                <div class="owner-card">
+                    <img src="${oc.avatar}" alt="${name}" class="owner-avatar">
+                    <div class="owner-info">
+                        <div class="owner-name">${name}</div>
+                        <div class="owner-status">${here ? '✅ 就在此处' : '🔴 暂时离开，四处走走看吧～'}</div>
+                    </div>
+                </div>`;
+            }).join('');
+        }
+        updateCombinedSidebar(); // 同步更新合并容器
     }
 
     window.onload = init;
