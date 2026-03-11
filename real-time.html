@@ -127,9 +127,10 @@
             font-size: 14px;
             color: var(--text2);
         }
+        /* ========== 修复点1：调整tips位置到页面底部 ========== */
         .tip-bar {
             position: fixed;
-            top: 20px;
+            bottom: 20px; /* 从top改为bottom，移到页面底部 */
             left: 50%;
             transform: translateX(-50%);
             background: var(--primary);
@@ -581,8 +582,12 @@
             document.getElementById('areaPath').innerText = `${currentBigArea} > ${currentSmallArea}`;
         }
 
-        // 显示全局提示
-        function showTip(text) {
+        // ========== 修复点2：修改showTip函数，增加forceShow参数控制仅刷新时显示 ==========
+        // 显示全局提示（仅forceShow为true时才显示）
+        function showTip(text, forceShow = false) {
+            // 只有刷新操作时才显示提示
+            if (!forceShow) return;
+            
             const tipBar = document.getElementById('tipBar');
             tipBar.innerText = text;
             tipBar.classList.add('show');
@@ -622,10 +627,12 @@
                 renderOC();
                 renderOwnerSidebar();
                 renderAreaInfoSidebar();
-                showTip('✅ 刷新成功！');
+                // ========== 修复点3：调用showTip时传入forceShow=true ==========
+                showTip('✅ 刷新成功！', true);
             } catch (e) {
                 console.error('刷新失败', e);
-                showTip('❌ 刷新失败，请重试');
+                // ========== 修复点3：调用showTip时传入forceShow=true ==========
+                showTip('❌ 刷新失败，请重试', true);
             } finally {
                 isRefreshing = false;
                 setTimeout(resetPullState, 800);
@@ -965,6 +972,7 @@
                 const cached = localStorage.getItem(cacheKey);
                 if (cached) {
                     const result = JSON.parse(cached);
+                    // ========== 修复点4：这里的showTip会被过滤（无forceShow） ==========
                     if (result.isRandom && result.schedule?.tip) showTip(result.schedule.tip);
                     return result;
                 }
@@ -975,6 +983,7 @@
                 const cached = sessionStorage.getItem(cacheKey);
                 if (cached) {
                     const result = JSON.parse(cached);
+                    // ========== 修复点4：这里的showTip会被过滤（无forceShow） ==========
                     if (result.isRandom && result.schedule?.tip) showTip(result.schedule.tip);
                     return result;
                 }
@@ -1017,7 +1026,7 @@
                 sessionStorage.setItem(cacheKey, JSON.stringify(result));
             }
             
-            // 显示提示
+            // ========== 修复点4：这里的showTip会被过滤（无forceShow） ==========
             if (hitEvent && hitEvent.tip) showTip(hitEvent.tip);
             
             return result;
