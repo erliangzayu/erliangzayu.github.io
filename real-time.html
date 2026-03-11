@@ -1,740 +1,849 @@
-[
-  {
-    "name": "杂鱼",
-    "avatar": "./images/avatar/zayu.PNG",
-    "baseSchedule": [
-      {
-        "week": [ 0,1,2,3,4,5,6 ],
-        "timeRange": "20:00-03:30",
-        "area": "九木酒屋",
-        "type": "work",
-        "action": "营业中"
-      },
-      {
-        "week":  [ 0,1,2,3,4,5,6 ],
-        "timeRange": "03:30-04:30",
-        "area": "九木酒屋",
-        "type": "rest",
-        "action": "收工啦！吃饭打扫中！"
-      },
-      {
-        "week":  [ 0,1,2,3,4,5,6 ],
-        "timeRange": "04:30-05:30",
-        "area": "旧港集市",
-        "type": "buy",
-        "action": "采购食材中"
-      },
-      {
-        "week":  [ 0,1,2,3,4,5,6 ],
-        "timeRange": "05:30-13:00",
-        "area": "九木酒屋",
-        "type": "sleep",
-        "action": "睡眠中"
-      },
-      {
-        "week":  [ 0,1,2,3,4,5,6 ],
-        "timeRange": "15:00-16:30",
-        "area": "九木酒屋",
-        "type": "prepare",
-        "action": "预处理食材中"
-      },
-      {
-        "week":  [ 0,1,2,3,4,5,6 ],
-        "timeRange": "16:30-17:00",
-        "area": "福源堂",
-        "type": "deliver",
-        "action": "送餐中"
-      },
-      {
-        "week": [ 5,6,0 ],
-        "timeRange": "16:30-17:00",
-        "area": "警署",
-        "type": "deliver",
-        "action": "送餐中"
-      },
-      {
-        "week": [
-          0,
-          6
-        ],
-        "timeRange": "17:00-17:30",
-        "area": "九木酒屋",
-        "type": "eat",
-        "action": "用餐中"
-      },
-      {
-        "week": [
-          1,
-          2,
-          3,
-          4
-        ],
-        "timeRange": "17:00-18:00",
-        "area": "福源堂",
-        "type": "eat",
-        "action": "用餐中"
-      },
-      {
-        "week": [
-          5
-        ],
-        "timeRange": "17:00-17:30",
-        "area": "八爪胡同",
-        "type": "eat",
-        "action": "用餐中"
-      },
-      {
-        "week":  [ 0,1,2,3,4,5,6 ],
-        "timeRange": "18:00-20:00",
-        "area": "九木酒屋",
-        "type": "prepare",
-        "action": "做开店准备中"
-      }
-    ],
-    "locationRandomActions": {
-    "九木酒屋": {
-      "work": [
-        "\"欢迎光临～看看想吃什么？\"",
-        "\"里边卡座空着，您随便坐！\"",
-        "\"蒜烤帆立贝，请慢用～❤️\"",
-        "记下客人的点单，转身快步进了后厨",
-        "给熟客添酒，聊聊最近的新鲜事",
-        "正端着餐盘穿梭在桌间",
-        "终于得闲，慢慢洗着酒杯，留意着客人的招呼手势"
-      ],
-      "prepare": [
-        "生蚝～好难撬！",
-        "今天的茄子质量好好...",
-        "萝卜削皮，准备炖汤和腌咸菜",
-        "牛肉切薄片，用料酒生抽简单腌渍入味",
-        "整理吧台，把酒瓶摆得整整齐齐"
-      ],
-      "eat": [
-        "吃点什么呢...炒个菜吗？",
-        "翻翻剩菜...🧐",
-        "煮个面条吧！"
-      ],
-      "rest": [ 
-        "下～班！",
-        "好饿...拖个地就休息！"
-      ],
-      "sleep":[
-        "💤..."
-      ]
-    },
-      "旧港集市": {
-        "eat":[
-          "紫金八刀汤～",
-          "馄饨！馄饨！"
-        ],
-        "buy":[
-        "捏着海鲜检查状态，和摊主随口聊着今日的海货行情",
-        "在买嫩青菜🥬",
-        "拎着装好的花蛤袋，蹲在菜摊前挑着小葱"
-      ]
-    },
-      "福源堂": {
-        "deliver":[
-        "Sasa今天怎么样？",
-        "看到诊所的金鱼，停下来逗了一会儿",
-        "给Marcel带了刚烤的丸子😋"],
-        "eat":[
-        "坐在诊所角落吃饭，听Marcel和病人聊天",
-        "你们慢慢吃，炖锅没人看呢，我马上回去。",
-        "明天想吃什么？"],
-        "rest":[
-            "我血压没问题的啦～",
-            "中、中药...一定要喝吗😭",
-            "A————咳咳咳咳咳————"
-        ]
-    },
-      "警署": [
-        "各位维护治安辛苦啦！订餐到啦～",
-        "下次去我店里坐坐～",
-        "给北原真辉递送餐盒，顺便聊两句",
-        "看到警署忙碌的样子，轻声没有打扰",
-        "提醒大家趁热吃，别放凉了"
-      ],
-      "八爪胡同": {
-        "eat":[
-        "选哪家店呢....",
-        "肠粉好吃...加蛋加瘦肉！",
-        "坐在小摊子前，偷师老板炒粉...",
-        "好想再加一份鱼蛋啊..可是吃不动了"
-      ],
-      "buy":[
-        "饮品的话...请帮我补乌龙茶、柠檬沙瓦基酒",
-        "长期在你这拿，给个实在价...嘿嘿！多谢啦！",
-        "还得麻烦您明天帮我把酒送到啊～感谢！"
-      ]
-    },
-      "市民公园": [
-        "在公园小路遛弯儿",
-        "给公园的流浪猫喂零食"
-      ],
-      "艺术街区": [
-        "欣赏青花瓷碗中...",
-        "好贵...",
-        "看街头艺人画油画",
-        "在手工饰品店给Addy挑礼物中..."
-      ],
-      "大学城": [
-        "找了个靠窗的位置看书，阳光太好了！",
-        "睡着了.",
-        "果然还是只能看懂漫画书吗...",
-        "偷窥小情侣中...噫～"
-      ],
-      "旧港码头": [
-        "靠在码头栏杆上，看渔船慢慢靠岸",
-        "举着手机拍海鸥...不要突然💩啊！"
-      ],
-      "小林的算命摊": [
-        "你怎么总吃这家炒饭...",
-        "噎...噎住了...shui....",
-        "晚上来吗？"
-      ],
-     "LF一中": [
-        "21号！21号呢！你的餐————",
-        "又没遇到肆那小子放学啊...",
-        "九木的餐在这儿————哎同学好你是几号？"
-      ]
-
-    },
-      "randomEvents": [
-      {
-        "week": [0,1,2,3,4,5,6],
-        "timeRange": "13:00-14:00",
-        "probability": 40,
-        "area": "九木酒屋",
-        "type": "eat",
-        "action": "用餐中",
-        "isMandatory": true
-      },
-      {
-        "week": [0,1,2,3,4,5,6],
-        "timeRange": "13:00-14:00",
-        "probability": 40,
-        "area": "旧港集市",
-        "type":"eat",
-        "action": "用餐中",
-        "isMandatory": true
-      },
-      {
-        "week": [0,1,2,3,4,5,6],
-        "timeRange": "13:00-14:00",
-        "probability": 20,
-        "area": "小林的算命摊",
-        "action": "被小林拉到算命摊一起吃饭",
-        "isMandatory": true
-      },
-      {
-        "week": [0,1,2,3,4,5,6],
-        "timeRange": "14:00-15:00",
-        "probability": 30,
-        "area": "市民公园",
-        "isMandatory": true,
-        "action": "休息中"
-      },
-      {
-        "week": [0,1,2,3,4,5,6],
-        "timeRange": "14:00-15:00",
-        "probability": 20,
-        "area": "艺术街区",
-        "isMandatory": true,
-        "action": "休息中"
-      },
-      {
-        "week": [0,1,2,3,4,5,6],
-        "timeRange": "14:00-15:00",
-        "probability": 20,
-        "area": "大学城",
-        "isMandatory": true,
-        "action": "休息中"
-      },
-      {
-        "week": [0,1,2,3,4,5,6],
-        "timeRange": "14:00-15:00",
-        "probability": 30,
-        "area": "旧港码头",
-        "isMandatory": true,
-        "action": "休息中"
-      },
-        {
-            "week": [3,5,6,0], 
-            "timeRange": "18:00-19:00",
-            "probability": 25, 
-            "area": "八爪胡同",
-            "type": "buy",
-            "action": "🛻 采购中！",
-            "tip": "✨ 杂鱼跑去八爪胡同采购啦！酒又不够了吗～",
-            "persist": true 
-        },
-        {
-            "week": [1,2,4],
-            "timeRange": "18:00-19:00",
-            "probability": 35,
-            "area": "LF一中",
-            "type": "deliver",
-            "action": "🏫 在校门口哦～",
-            "tip": "✨ 杂鱼去给一中订晚餐的高三生送餐啦！",
-            "persist": true
-        },
-        {
-            "week": [2,3],
-            "timeRange": "18:00-20:00",
-            "probability": 30,
-            "area": "福源堂",
-            "type": "rest",
-            "action": "🏥 例行检查！",
-            "tip": "✨ 杂鱼的身体也要看医生吗？",
-            "persist": true
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🦁 Lionfish · 居民实时行踪</title>
+    <style>
+        /* 🌙 夜间模式（苹果灰黑系） */
+        :root {
+            --bg: #121212;
+            --card: #1c1c1e;
+            --card-light: #2c2c2e;
+            --border: #3a3a3c;
+            --text: #f5f5f7;
+            --text2: #8e8e93;
+            --text3: #636366;
+            --primary: #f5a623;
+            --accent: #ff9f0a;
+            --shadow: 0 4px 12px rgba(0,0,0,0.4);
+            /* 镭射渐变色 */
+            --laser-gradient: linear-gradient(120deg, #84fab0 0%, #8fd3f4 50%, #a6c1ee 100%);
         }
-    ]
-  },
-  {
-    "name": "Marcel",
-    "avatar": "./images/avatar/marcel.PNG",
-    "baseSchedule": [
-      {
-        "week": [0,1,2,3,4,5,6],
-        "timeRange": "00:00-07:00",
-        "area": "福源堂",
-        "type": "sleep",
-        "action": "睡眠中"
-      },
-      {
-        "week": [3],
-        "timeRange": "07:00-08:30",
-        "area": "福源堂",
-        "type": "sleep",
-        "action": "睡眠中"
-      },
-      {
-        "week": [0,1,2,4,5,6],
-        "timeRange": "07:00-08:00",
-        "area": "福源堂",
-        "type": "breakfast",
-        "action": "吃早饭"
-      },
-      {
-        "week": [3],
-        "timeRange": "08:30-09:30",
-        "area": "市民公园",
-        "type": "eat",
-        "action": "吃早饭"
-      },
-      {
-        "week": [0,1,2,4,5,6],
-        "timeRange": "08:00-12:00",
-        "area": "福源堂",
-        "type": "work",
-        "action": "坐诊中"
-      },
-      {
-        "week": [3],
-        "timeRange": "09:30-12:00",
-        "area": "市民公园",
-        "type": "work",
-        "action": "义诊中"
-      },
-      {
-        "week": [0,1,2,4,5,6],
-        "timeRange": "12:00-13:00",
-        "area": "福源堂",
-        "type": "eat",
-        "action": "吃午餐"
-      },
-      {
-        "week": [3],
-        "timeRange": "12:00-13:00",
-        "area": "6-11便利店",
-        "type": "eat",
-        "action": "吃午餐"
-      },
-      {
-        "week": [4],
-        "timeRange": "13:00-14:00",
-        "area": "福源堂",
-        "type": "sasacheck",
-        "action": "Sasa体检"
-      },
-      {
-        "week": [3],
-        "timeRange": "13:00-14:30",
-        "area": "Wesley的家",
-        "type": "work",
-        "action": "面诊中"
-      },
-      {
-        "week": [0,1,2,5,6],
-        "timeRange": "13:00-14:00",
-        "area": "福源堂",
-        "type": "sleep",
-        "action": "午睡中"
-      },
-      {
-        "week": [0,1,2,4,6],
-        "timeRange": "14:00-17:00",
-        "area": "福源堂",
-        "type": "work",
-        "action": "坐诊"
-      },
-      {
-        "week": [3],
-        "timeRange": "14:30-15:30",
-        "area": "Berlon家老宅",
-        "type": "work",
-        "action": "面诊中"
-      },
-      {
-        "week": [3],
-        "timeRange": "15:30-16:30",
-        "area": "雾港仓库",
-        "type": "deliver",
-        "action": "送药"
-      },
-      {
-        "week": [3],
-        "timeRange": "16:30-17:00",
-        "area": "在地铁上",
-        "action": "🚇..."
-      },
-      {
-        "week": [5],
-        "timeRange": "14:00-17:00",
-        "area": "警署",
-        "type": "work",
-        "action": "异能监管局检查"
-      },
-      {
-        "week": [0],
-        "timeRange": "17:00-22:00",
-        "area": "Valmont Plaza 购物中心",
-        "type": "rest",
-        "action": "休息中～"
-      },
-      {
-        "week": [1,2,3,4,5,6],
-        "timeRange": "17:00-18:00",
-        "area": "福源堂",
-        "type": "eat",
-        "action": "晚餐时间！"
-      },
-      {
-        "week": [1,2,3,4,5,6],
-        "timeRange": "18:00-20:00",
-        "area": "福源堂",
-        "type": "rest",
-        "action": "休息中"
-      },
-      {
-        "week": [3,4],
-        "timeRange": "20:00-22:00",
-        "area": "福源堂",
-        "type": "rest",
-        "action": "休息中"
-      },
-      {
-        "week": [1],
-        "timeRange": "20:00-22:00",
-        "area": "旧港集市",
-        "type": "buy",
-        "action": "买菜中"
-      },
-      {
-        "week": [0,6],
-        "timeRange": "22:00-24:00",
-        "area": "福源堂",
-        "type": "rest",
-        "action": "休息中"
-      },
-      {
-        "week": [1,3],
-        "timeRange": "22:00-24:00",
-        "area": "九木酒屋",
-        "type": "eat",
-        "action": "吃夜宵"
-      }
-    ],
-    "locationRandomActions": {
-      "福源堂": {
-        "sleep": [
-          "呼噜呼噜💤",
-          "...鸭鸭🌀"
-        ],
-        "breakfast": [
-          "喝杯咖啡?☕️",
-          "今天是煎蛋饼?嗯,好吃｡",
-          "昨晚睡得腰有些疼啊｡"
-        ],
-        "eat": [
-          "Sasa?别忙活了,来先吃饭｡",
-          "这牛肉好吃｡",
-          "凉拌黄瓜?有营养啊｡",
-          "嗯...炖的还挺香😌"
-        ],
-         "sasacheck": [
-          "今天这状态不错嘛",
-          "最近什么时候头疼过还记得吗?",
-          "稳定多了(笑)",
-          "你这手...给先生看看｡昨天烫到的?怎么不说?"
-        ],
-        "work": [
-          "处理些擦伤､感冒､跌打损伤这类小毛病",
-          "汤药回去煎二十分钟...记好了",
-          "明天这个点儿回来换药,不能耽误了,明白吗?",
-          "舌苔厚腻,脾胃不和,忌辛辣生冷,我开个方子｡",
-          "头疼是神经性的,少熬夜,等下去拿药｡",
-          "你这只是扭伤...不信我?想拍片得去大医院,我这小地方可拍不了｡"
-        ],
-        "rest": [
-          "但愿别来什么活儿...清净会儿",
-          "Sasa?电视调大点声｡",
-          "(趴在沙发上,似乎睡着了)",
-          "洗好的衣服该晾了啊｡",
-          "晃着水杯里的水，看着金鱼缸发呆🐠"
-        ]
-      },
-      "市民公园": {
-        "eat": [
-          "豆浆不错｡",
-          "啧｡太油了｡",
-          "今天还去那家早餐店吗?",
-          "Sasa还准备了餐盒啊...这小子有心了｡"
-        ],
-        "work": [
-          "张大爷?又来了?血压又高了吧?",
-          "今天感觉怎么样?比上次强点没?",
-          "血压得坚持测｡可别偷懒",
-          "您这个血糖问题还得再调理...",
-          "我?我是医生,我不是鬼(笑)...别薅我鸭子👋🏻"
-        ]
-      },
-      "6-11便利店": {
-        "eat": [
-          "🍱便当麻烦帮我加热吧｡",
-          "嘶...好烫｡",
-          "再来杯咖啡"
-        ]
-      },
-      "Wesley的家": [
-          "孙子还省心？",
-          "这几天睡得还稳，没再头晕了吧？"
-        ],
-      "雾港仓库": {
-        "deliver": [
-          "药放这了，注意剂量",
-          "门口血腥味这么重，就不能收拾干净点？",
-          "真不用给你推荐个心理医生？"
-        ],
-        "work": [
-          "驾轻就熟地给自己盛杯咖啡。",
-          "Lee，你腿怎么样？",
-          "来看看有什么事儿？"
-        ]
-      },
-      "警署": {
-        "work": [
-          "这位没什么社会危害性。",
-          "容易自燃？有意思。",
-          "最近私闯水怪出没区的市民很多啊，你们不去问问？"
-        ],
-      "check": [
-        "Marcel.",
-        "材料都没过期吧？"
-      ]
-      },
-      "Valmont Plaza 购物中心": {
-        "rest": [
-          "找个长椅坐会儿，人太多了闹得慌",
-          "买杯冰饮🧊",
-          "Sasa...？SASA!!...原来在这儿呢..吓死先生了。",
-          "想吃什么？泰餐？"
-        ]
-      },
-      "在地铁上": [
-        "地铁————晕车患者的福音"
-      ],
-      "旧港集市": {
-        "buy": [
-          "老板，这青菜怎么卖？",
-          "正在把橙子塞进身体里",
-          "捏捏番茄",
-          "顺道买包糖，Sasa爱吃甜的"
-        ]
-      },
-      "九木酒屋": {
-        "eat": [
-          "杂鱼，来碗味增汤，少放点盐",
-          "厨房下水道还堵吗？",
-          "有什么炒菜？你随便炒。",
-          "怎么？医生下班还不能喝酒了（笑）",
-          "看着店里的客人，嘴角勾着笑看热闹"
-        ]
-      },
-      "Berlon家老宅": [
-          "Lee那边没事儿，竹本家的小子我盯着呢。",
-          "家里的药箱该补了，我给你们留了些常备药。"
-        ],
-      "融大附中": [
-          "准备做午间卫生安全讲座",
-          "主题是什么？结膜炎？"
-        ],
-      "深蓝海岸": [
-          "靠在礁石上，听着海浪声发呆🌊",
-          "海水...",
-          "捡些漂亮的贝壳，随手塞进口袋"
-        ],
-      "水怪出没区": {
-        "rest": [
-          "摸摸水怪触手。",
-          "...起雾了。",
-          "只留下一团暗夜下的黑影。"
-        ]
-      },
-      "魔鬼鱼号": [
-          "Addy？东西我取走了？",
-          "小心点儿，最近查得严。",
-          "...呕...你这船还是这么晃..."
-        ],
-      "猎人小屋": [
-          "老板，来点草药，配点药膏...那边儿有点麻烦。",
-          "顺道买个药杵，家里的坏了",
-          "屋里的松脂味，还挺安神的",
-          "山里最近怎么样？",
-          "给老板带了包凉茶。"
-      ],
-      "白日Livehouse": {
-        "rest": [
-          "找个角落坐下，听着歌喝点酒",
-          "😋",
-          "😎"
-        ]
-      },
-      "能乐町": {
-        "rest": [
-          "茶屋...不错。",
-          "办的是正事儿。",
-          "来买...霓虹助剂。"
-        ]
-      },
-      "地下拳场": {
-        "work": [
-          "不要命了？",
-          "Felix...让我在这种地方呆着，总要多给点诊费吧？"
-        ]
-      }
-    },
-    "randomEvents": [
-      {
-        "week": [4,6],
-        "timeRange": "22:00-24:00",
-        "probability": 30,
-        "area": "福源堂",
-        "type": "rest",
-        "action": "休息中",
-        "isMandatory": true
-      },
-      {
-        "week": [4,6],
-        "timeRange": "22:00-24:00",
-        "probability": 25,
-        "area": "深蓝海岸",
-        "type": "rest",
-        "action": "休息中",
-        "isMandatory": true
-      },
-      {
-        "week": [4,6],
-        "timeRange": "22:00-24:00",
-        "probability": 25,
-        "area": "水怪出没区",
-        "type": "rest",
-        "action": "散心中",
-        "isMandatory": true
-      },
-      {
-        "week": [4,6],
-        "timeRange": "22:00-24:00",
-        "probability": 20,
-        "area": "魔鬼鱼号",
-        "action": "取货中",
-        "isMandatory": true
-      },
-      {
-        "week": [5],
-        "timeRange": "20:00-24:00",
-        "probability": 45,
-        "area": "雾港仓库",
-        "type": "work",
-        "action": "来看看",
-        "isMandatory": true
-      },
-      {
-        "week": [5],
-        "timeRange": "20:00-24:00",
-        "probability": 55,
-        "area": "地下拳场",
-        "type": "work",
-        "action": "工作中",
-        "isMandatory": true
-      },
-      {
-        "week": [2],
-        "timeRange": "20:00-24:00",
-        "probability": 30,
-        "area": "九木酒屋",
-        "type": "eat",
-        "action": "吃夜宵",
-        "isMandatory": true
-      },
-      {
-        "week": [2],
-        "timeRange": "20:00-24:00",
-        "probability": 35,
-        "area": "白日Livehouse",
-        "type": "rest",
-        "action": "休闲中",
-        "isMandatory": true
-      },
-      {
-        "week": [2],
-        "timeRange": "20:00-24:00",
-        "probability": 35,
-        "area": "能乐町",
-        "type": "rest",
-        "action": "闲逛中",
-        "isMandatory": true
-      },
-      {
-        "week": [2,4],
-        "timeRange": "13:00-14:00",
-        "probability": 25,
-        "area": "融大附中",
-        "type": "work",
-        "action": "📖 校园健康讲座",
-        "tip": "✨ Marcel去融大附中做校园卫生安全讲座啦！",
-        "persist": true
-      },
-      {
-        "week": [1],
-        "timeRange": "10:00-11:30",
-        "probability": 25,
-        "area": "警署",
-        "type": "work",
-        "action": "🔍 异能局常规审查",
-        "tip": "✨ 根据异能局规定，在册登记的超能力者需要定期报道复查",
-        "persist": true
-      },
-      {
-        "week": [0,6],
-        "timeRange": "09:30-11:00",
-        "probability": 30,
-        "area": "猎人小屋",
-        "action": "🌿 采购草药",
-        "tip": "✨ Marcel去猎人小屋采购草药啦，要配新药膏咯！",
-        "persist": true
-      }
-    ]
-  }
-]
+
+        /* ☀️ 日间模式（温暖柔和奶白） */
+        .light-mode {
+            --bg: #fdfdfb;
+            --card: #ffffff;
+            --card-light: #f7f3ee;
+            --border: #e8e2d9;
+            --text: #2d2a26;
+            --text2: #7d7871;
+            --text3: #b0aaa0;
+            --primary: #f78c40;
+            --accent: #ff9f0a;
+            --shadow: 0 4px 12px rgba(0,0,0,0.06);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            padding: 20px;
+            min-height: 100vh;
+            overflow-x: hidden;
+            transition: all 0.25s ease;
+        }
+
+        /* 头部容器 - 新增：包含标题、时间、模式按钮 */
+        .header-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 8px;
+            position: relative;
+        }
+
+        /* 模式切换 - 重构：嵌入头部，缩小尺寸 */
+        .mode-toggle {
+            position: absolute; 
+            right: 0; 
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: var(--card);
+            border: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .mode-toggle:hover {
+            transform: scale(1.05);
+        }
+
+        /* 头部 */
+        .header {
+            text-align: center;
+            margin-bottom: 24px;
+        }
+        .title {
+            font-size: 24px;
+            font-weight: 600;
+            margin: 0;
+        }
+        .real-clock {
+            display: inline-block;
+            background: var(--card-light);
+            padding: 8px 16px;
+            border-radius: 30px;
+            color: var(--text2);
+            font-size: 15px;
+            margin-top: 8px;
+        }
+        .area-path {
+            margin-top: 8px;
+            font-size: 14px;
+            color: var(--text2);
+        }
+        .tip-bar {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--primary);
+            color: #fff;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+            z-index: 999;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        .tip-bar.show {
+            opacity: 1;
+        }
+
+        /* 大区导航 */
+        .big-area-scroll {
+            display: flex;
+            gap: 10px;
+            overflow-x: auto;
+            padding: 8px 0;
+            scrollbar-width: none;
+            margin-bottom: 16px;
+        }
+        .big-area-scroll::-webkit-scrollbar {
+            display: none;
+        }
+        .big-area-tab {
+            white-space: nowrap;
+            padding: 8px 16px;
+            border: 2px solid var(--border);
+            border-radius: 20px;
+            cursor: pointer;
+            transition: 0.2s;
+            color: var(--text2);
+            background: transparent;
+        }
+        .big-area-tab.active {
+            background: var(--primary);
+            color: #fff;
+            border-color: var(--primary);
+        }
+
+        /* 小地点抽屉 */
+        .small-area-drawer-wrap {
+            background: var(--card);
+            border-radius: 12px;
+            margin-bottom: 20px;
+            overflow: hidden;
+            box-shadow: var(--shadow);
+        }
+        .small-area-drawer-header {
+            padding: 12px 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            cursor: pointer;
+            border-bottom: 1px solid var(--border);
+        }
+        .small-area-drawer-title {
+            font-size: 15px;
+            font-weight: 600;
+        }
+        .small-area-drawer-arrow {
+            color: var(--text2);
+            transition: transform 0.3s ease;
+        }
+        .small-area-drawer-arrow.active {
+            transform: rotate(180deg);
+        }
+        .small-area-drawer-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+        }
+        .small-area-drawer-content.show {
+            max-height: 200px;
+            padding: 8px 0;
+            overflow-y: auto;
+        }
+
+        /* 小地点 */
+        .small-area-list {
+            padding: 0 8px;
+        }
+        .small-area-item {
+            padding: 10px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: 0.2s;
+            margin: 4px 0;
+            color: var(--text2);
+            border-left: 4px solid transparent;
+        }
+        .small-area-item.has-oc {
+            border-left-color: var(--accent);
+            color: var(--accent);
+            font-weight: 500;
+        }
+        .small-area-item.active {
+            background: var(--primary);
+            color: #fff;
+            border-left-color: var(--primary);
+        }
+        .small-area-item.not-permanent {
+            display: none;
+        }
+        .small-area-item:hover {
+            background: var(--card-light);
+        }
+
+        /* 布局 */
+        .main-container {
+            display: flex;
+            gap: 20px;
+            margin-top: 20px;
+        }
+        .oc-container {
+            flex: 1;
+        }
+        .owner-sidebar,
+        .area-info-sidebar {
+            width: 280px;
+            background: var(--card);
+            border-radius: 18px;
+            padding: 16px;
+            box-shadow: var(--shadow);
+            flex-shrink: 0;
+            display: none;
+        }
+        .owner-title,
+        .area-info-title {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 12px;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 8px;
+        }
+        .area-info-content {
+            font-size: 14px;
+            color: var(--text2);
+            line-height: 1.6;
+        }
+
+        /* 主人卡片 */
+        .owner-card {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 12px;
+        }
+        .owner-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            object-fit: cover;
+        }
+        .owner-name {
+            font-size: 15px;
+            font-weight: 600;
+        }
+        .owner-status {
+            font-size: 12px;
+            color: var(--text2);
+        }
+
+        /* OC卡片 */
+        .oc-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+        }
+        .oc-card {
+            position: relative;
+            background: var(--card);
+            border-radius: 18px;
+            padding: 16px;
+            box-shadow: var(--shadow);
+            border-left: 4px solid var(--primary);
+            transition: 0.2s;
+        }
+        .oc-card.random {
+            border-left-color: var(--primary);
+        }
+        .oc-card:hover {
+            transform: translateY(-3px);
+        }
+        /* 随机事件标签基础样式 */
+        .oc-random-tag {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            font-size: 10px;
+            padding: 2px 6px;
+            border-radius: 6px;
+            font-weight: 600;
+        }
+        /* 必选随机事件（页面橙色） */
+        .oc-random-tag.mandatory-tag {
+            background: var(--primary);
+            color: #fff;
+            border: 1px solid var(--accent);
+        }
+        /* 可选随机事件（镭射渐变） */
+        .oc-random-tag.laser-tag {
+            background: var(--laser-gradient);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            border: 1px solid rgba(132, 250, 176, 0.3);
+        }
+        .oc-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 12px;
+            object-fit: cover;
+            margin-right: 12px;
+        }
+        .oc-row {
+            display: flex;
+            align-items: center;
+        }
+        .oc-info {
+            flex: 1;
+        }
+        .oc-name {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+        .oc-place {
+            font-size: 12px;
+            color: var(--text2);
+        }
+        .oc-action {
+            font-size: 14px;
+            color: var(--text2);
+            margin-top: 6px;
+            line-height: 1.4;
+        }
+
+        /* 悬浮弹窗 - 仅显示action和停留时间 */
+        .oc-popup {
+            position: absolute;
+            bottom: calc(100% + 10px);
+            left: 50%;
+            transform: translateX(-50%);
+            width: 220px;
+            background: var(--card-light);
+            color: var(--text);
+            padding: 12px;
+            border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            font-size: 13px;
+            line-height: 1.5;
+            z-index: 10;
+            opacity: 0;
+            pointer-events: none;
+            transition: 0.2s;
+        }
+        .oc-card:hover .oc-popup {
+            opacity: 1;
+            pointer-events: all;
+        }
+        .popup-action {
+            color: var(--primary);
+            font-weight: 500;
+        }
+        .popup-time {
+            color: var(--accent);
+        }
+
+        .empty {
+            grid-column: span 2;
+            text-align: center;
+            padding: 60px 0;
+            color: var(--text3);
+        }
+
+        /* 移动端 */
+        @media (max-width: 768px) {
+            .main-container {
+                flex-direction: column;
+            }
+            .owner-sidebar, .area-info-sidebar {
+                width: 100%;
+            }
+            .oc-grid {
+                grid-template-columns: 1fr;
+            }
+            .title {
+                font-size: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<!-- 新增提示条DOM -->
+<div class="tip-bar" id="tipBar"></div>
+
+<div class="header">
+    <!-- 重构头部：新增容器包含标题和模式按钮 -->
+    <div class="header-container">
+        <div class="title">🦁 Lionfish · 居民实时行踪</div>
+        <div class="mode-toggle" id="modeToggle">🌙</div>
+    </div>
+    <div class="real-clock" id="clock">加载系统时间…</div>
+    <div class="area-path" id="areaPath">1区 > 居酒屋</div>
+</div>
+
+<div class="big-area-scroll" id="bigAreaWrap"></div>
+
+<div class="small-area-drawer-wrap">
+    <div class="small-area-drawer-header" id="drawerHeader">
+        <div class="small-area-drawer-title" id="drawerTitle">目前地点·居酒屋</div>
+        <div class="small-area-drawer-arrow" id="drawerArrow">▼</div>
+    </div>
+    <div class="small-area-drawer-content" id="drawerContent">
+        <div class="small-area-list" id="smallAreaList"></div>
+    </div>
+</div>
+
+<div class="main-container">
+    <div class="oc-container" id="ocContainer">
+        <div class="empty">加载中...</div>
+    </div>
+    <div class="owner-sidebar" id="ownerSidebar">
+        <div class="owner-title">📍 地点主人</div>
+        <div id="ownerContent"></div>
+    </div>
+    <div class="area-info-sidebar" id="areaInfoSidebar">
+        <div class="area-info-title">📝 地点介绍</div>
+        <div class="area-info-content" id="areaInfoContent">加载地点信息中...</div>
+    </div>
+</div>
+
+<script>
+    let ocData = [];
+    let areaData = [];
+    let currentBigArea = "";
+    let currentSmallArea = "";
+    let ocActionCache = {};
+    let activeAreaCode = null;
+
+    // 模式切换
+    let isDark = true;
+    const modeToggle = document.getElementById('modeToggle');
+    const saved = localStorage.getItem('themeMode');
+
+    function updateDrawerTitle() {
+        document.getElementById('drawerTitle').innerText = `目前地点·${currentSmallArea}`;
+    }
+
+    function setDark() {
+        document.body.classList.remove('light-mode');
+        modeToggle.innerText = '🌙';
+        isDark = true;
+        localStorage.setItem('themeMode','dark');
+    }
+    function setLight() {
+        document.body.classList.add('light-mode');
+        modeToggle.innerText = '☀️';
+        isDark = false;
+        localStorage.setItem('themeMode','light');
+    }
+
+    if(saved === 'light') setLight();
+    else setDark();
+
+    modeToggle.onclick = () => isDark ? setLight() : setDark();
+
+    async function init() {
+        try {
+            const [ocRes, areaRes] = await Promise.all([
+                fetch('./ocData.json').then(r=>r.json()),
+                fetch('./areaData.json').then(r=>r.json())
+            ]);
+            ocData = ocRes;
+            areaData = areaRes;
+
+            initAreaNav();
+            updateRealTime();
+            renderOC();
+            renderOwnerSidebar();
+            setInterval(updateRealTimeOnly, 1000);
+            setInterval(async ()=>{
+                const arr = await getCurrentOcAreas();
+                await setAreaHighlight(arr);
+                renderOwnerSidebar();
+            },60000);
+        } catch(e) {
+            console.error(e);
+            document.getElementById('ocContainer').innerHTML = '<div class="empty">加载失败</div>';
+        }
+    }
+
+    async function getCurrentOcAreas() {
+        const now = getRealTime();
+        const set = new Set();
+        ocData.forEach(oc=>{
+            const {isRandom, schedule: rSched} = checkRandomEvent(oc, now);
+            const s = isRandom&&rSched ? rSched : getOwnerCurrentSchedule(oc,now);
+            if(s) {
+                const a = areaData.find(x=>x.smallArea===s.area);
+                if(a?.areaCode) set.add(a.areaCode);
+            }
+        });
+        return Array.from(set);
+    }
+
+    function initAreaNav() {
+        const wrap = document.getElementById('bigAreaWrap');
+        const bigs = [...new Set(areaData.map(x=>x.bigArea))];
+        wrap.innerHTML = bigs.map(a=>`<div class="big-area-tab" data-area="${a}">${a}</div>`).join('');
+        currentBigArea = bigs[0];
+        document.querySelector(`[data-area="${currentBigArea}"]`).classList.add('active');
+
+        document.querySelectorAll('.big-area-tab').forEach(t=>{
+            t.onclick = async e=>{
+                document.querySelectorAll('.big-area-tab').forEach(x=>x.classList.remove('active'));
+                e.target.classList.add('active');
+                currentBigArea = e.target.dataset.area;
+                await renderSmallArea(currentBigArea);
+                renderOC();
+                renderOwnerSidebar();
+                renderAreaInfoSidebar();
+            }
+        });
+
+        const header = document.getElementById('drawerHeader');
+        const content = document.getElementById('drawerContent');
+        const arrow = document.getElementById('drawerArrow');
+        header.onclick = ()=>{
+            content.classList.toggle('show');
+            arrow.classList.toggle('active');
+            arrow.innerText = content.classList.contains('show') ? '▲' : '▼';
+        };
+        renderSmallArea(currentBigArea);
+    }
+
+    async function renderSmallArea(big) {
+        const list = document.getElementById('smallAreaList');
+        const areas = areaData.filter(x=>x.bigArea===big);
+        const ocAreas = await getCurrentOcAreas();
+
+        list.innerHTML = areas.map(item=>{
+            const perm = item.isPermanent!==false;
+            const has = ocAreas.includes(item.areaCode);
+            const hide = !perm && !has ? 'not-permanent' : '';
+            const hot = has ? 'has-oc' : '';
+            return `<div class="small-area-item ${hot} ${hide}" data-area="${item.smallArea}" data-areaCode="${item.areaCode||''}">${item.smallArea}</div>`;
+        }).join('');
+
+        // 优先选第一个 isPermanent !== false 的常驻地点，没有再选第一个
+        const defaultArea = areas.find(item => item.isPermanent !== false) || areas[0];
+        currentSmallArea = defaultArea.smallArea;
+        activeAreaCode = defaultArea.areaCode;
+        
+        document.querySelector(`[data-area="${currentSmallArea}"]`)?.classList.add('active');
+        updateAreaPath();
+        updateDrawerTitle();
+        renderOwnerSidebar();
+        renderAreaInfoSidebar();
+        await setAreaHighlight(ocAreas);
+
+        document.querySelectorAll('.small-area-item').forEach(i=>{
+            i.onclick = async e=>{
+                document.querySelectorAll('.small-area-item').forEach(x=>x.classList.remove('active'));
+                e.target.classList.add('active');
+                currentSmallArea = e.target.dataset.area;
+                activeAreaCode = e.target.dataset.areaCode;
+                updateAreaPath();
+                updateDrawerTitle();
+                renderOC();
+                renderOwnerSidebar();
+                renderAreaInfoSidebar();
+                const arr = await getCurrentOcAreas();
+                await setAreaHighlight(arr);
+            }
+        });
+    }
+
+    function renderAreaInfoSidebar() {
+        const info = areaData.find(x=>x.smallArea===currentSmallArea&&x.bigArea===currentBigArea);
+        const side = document.getElementById('areaInfoSidebar');
+        const c = document.getElementById('areaInfoContent');
+        if(!info) { side.style.display='none'; return; }
+        side.style.display='block';
+        c.innerText = info.areaIntro || '暂无介绍';
+    }
+
+    async function setAreaHighlight(arr) {
+        document.querySelectorAll('.small-area-item').forEach(i=>{
+            const code = i.dataset.areacode;
+            i.classList.remove('has-oc');
+            if(code===activeAreaCode) return;
+            if(arr.includes(code)) i.classList.add('has-oc');
+        });
+    }
+
+    function updateAreaPath() {
+        document.getElementById('areaPath').innerText = `${currentBigArea} > ${currentSmallArea}`;
+    }
+
+    function getRealTime() {
+        const d = new Date();
+        const wd = ['周日','周一','周二','周三','周四','周五','周六'][d.getDay()];
+        const h = String(d.getHours()).padStart(2,'0');
+        const m = String(d.getMinutes()).padStart(2,'0');
+        return {
+            week: d.getDay(),
+            hour: d.getHours(),
+            minute: d.getMinutes(),
+            str: `${wd} ${h}:${m}`
+        };
+    }
+
+    function updateRealTime() {
+        document.getElementById('clock').innerText = `当前时间 · ${getRealTime().str}`;
+    }
+    function updateRealTimeOnly() {
+        document.getElementById('clock').innerText = `当前时间 · ${getRealTime().str}`;
+    }
+
+    function getOwnerCurrentSchedule(oc, now) {
+        if(!oc.baseSchedule) return null;
+        for(const s of oc.baseSchedule) {
+            if(!s.week.includes(now.week)) continue;
+            const [st,ed] = s.timeRange.split('-');
+            const [sh,sm] = st.split(':').map(Number);
+            const [eh,em] = ed.split(':').map(Number);
+            const nowM = now.hour*60+now.minute;
+            const sM = sh*60+sm;
+            const eM = eh*60+em;
+            let inRange = false;
+            if(eM < sM) inRange = nowM >= sM || nowM <= eM;
+            else inRange = nowM >= sM && nowM <= eM;
+            if(inRange) {
+                return {...s, endTimeStr:getEndTimeDisplay(st,ed,now)};
+            }
+        }
+        return null;
+    }
+
+    function getEndTimeDisplay(st,ed,now) {
+        const [sh] = st.split(':').map(Number);
+        const [eh,em] = ed.split(':').map(Number);
+        const end = `${String(eh).padStart(2,'0')}:${String(em).padStart(2,'0')}`;
+        if(eh < sh) return `次日 ${end}`;
+        if(now.hour < sh) return `当天 ${end}`;
+        return end;
+    }
+
+    // 核心修改：区分必选/可选随机事件
+    function checkRandomEvent(oc, now) {
+        if(!oc.randomEvents?.length) return {isRandom:false, schedule:null};
+        
+        // 1. 筛选当前时段有效的随机事件
+        const validEvents = oc.randomEvents.filter(e=>{
+            if(!e.week.includes(now.week)) return false;
+            const [st,ed] = e.timeRange.split('-');
+            const [sh,sm] = st.split(':').map(Number);
+            const [eh,em] = ed.split(':').map(Number);
+            const nowM = now.hour*60+now.minute;
+            const sM = sh*60+sm;
+            const eM = eh*60+em;
+            return eM < sM ? (nowM >= sM || nowM <= eM) : (nowM >= sM && nowM <= eM);
+        });
+        if(!validEvents.length) return {isRandom:false, schedule:null};
+
+        // 2. 持久化逻辑（保持不变）
+        const needPersist = validEvents[0].persist !== false;
+        let key;
+        if(needPersist) {
+            const day = new Date().toISOString().split('T')[0];
+            key = `rand_${oc.name}_${validEvents[0].week}_${validEvents[0].timeRange}_${day}`;
+            const [es,ee] = validEvents[0].timeRange.split('-');
+            const [esh,esm] = es.split(':').map(Number);
+            const [eeh,eem] = ee.split(':').map(Number);
+            const sM = esh*60+esm;
+            const eM = eeh*60+eem;
+            const nowM = now.hour*60+now.minute;
+            const inTime = eM < sM ? (nowM >= sM || nowM <= eM) : (nowM >= sM && nowM <= eM);
+            if(!inTime) { localStorage.removeItem(key); return {isRandom:false, schedule:null}; }
+            const cache = localStorage.getItem(key);
+            if(cache) {
+                const r = JSON.parse(cache);
+                if(r.isRandom && r.schedule.tip) showTip(r.schedule.tip);
+                return r;
+            }
+        } else {
+            const day = new Date().toLocaleDateString();
+            key = `rand_${oc.name}_${day}_${now.hour}`;
+            const cache = sessionStorage.getItem(key);
+            if(cache) {
+                const r = JSON.parse(cache);
+                if(r.isRandom && r.schedule.tip) showTip(r.schedule.tip);
+                return r;
+            }
+        }
+
+        // 3. 区分「必选随机事件」和「可选随机事件」
+        const hasMandatory = validEvents.some(e => e.isMandatory);
+        let hitEvent = null;
+
+        if(hasMandatory) {
+            // ========== 必选事件逻辑：按权重100%选一个 ==========
+            const mandatoryEvents = validEvents.filter(e => e.isMandatory);
+            let totalWeight = 0;
+            const weightMap = mandatoryEvents.map(e => {
+                totalWeight += e.probability;
+                return { event: e, endWeight: totalWeight };
+            });
+            const randomNum = Math.random() * totalWeight;
+            hitEvent = weightMap.find(item => randomNum <= item.endWeight)?.event;
+        } else {
+            // ========== 可选事件逻辑：保留原低概率判断 ==========
+            const ev = validEvents[Math.floor(Math.random()*validEvents.length)];
+            hitEvent = Math.random()*100 < ev.probability ? ev : null;
+        }
+
+        // 4. 组装结果并持久化
+        const res = {
+            isRandom: !!hitEvent,
+            isMandatory: hitEvent?.isMandatory || false, 
+            schedule: hitEvent ? {
+                ...hitEvent,
+                endTimeStr: getEndTimeDisplay(hitEvent.timeRange.split('-')[0], hitEvent.timeRange.split('-')[1], now)
+            } : null
+        };
+        
+        if(needPersist) localStorage.setItem(key, JSON.stringify(res));
+        else sessionStorage.setItem(key, JSON.stringify(res));
+        
+        if(hitEvent && hitEvent.tip) showTip(hitEvent.tip);
+        return res;
+    }
+
+    function showTip(text) {
+        const t = document.getElementById('tipBar');
+        t.innerText = text;
+        t.classList.add('show');
+        setTimeout(()=>t.classList.remove('show'),4000);
+    }
+
+    function getLocationRandomAction(oc, area, type) {
+        type = type || 'work';
+        const acts = oc.locationRandomActions?.[area];
+        let arr = [];
+        if(Array.isArray(acts)) arr = acts;
+        else if(acts?.[type]) arr = acts[type];
+        // 兜底改为返回action（如果有），否则返回默认
+        const defaultAction = oc.baseSchedule?.find(s => s.area === area)?.action || '暂无状态';
+        if(arr.length === 0) return defaultAction;
+        const key = `act_${oc.name}_${area}_${type}`;
+        if(!ocActionCache[key]) ocActionCache[key] = arr[Math.floor(Math.random()*arr.length)];
+        return ocActionCache[key];
+    }
+    
+    function renderOC() {
+        const now = getRealTime();
+        const container = document.getElementById('ocContainer');
+        const list = ocData.map(oc=>{
+            // 新增：先保存checkRandomEvent的返回值，解构isMandatory
+            const randomResult = checkRandomEvent(oc, now);
+            const {isRandom, schedule:rSched, isMandatory} = randomResult;
+            
+            const base = getOwnerCurrentSchedule(oc, now);
+            const final = isRandom&&rSched ? rSched : base;
+            if(!final || final.area!==currentSmallArea) return null;
+            // 新增：把isMandatory加入返回对象
+            return {oc, final, isRandom, isMandatory, end:final.endTimeStr||'?'};
+        }).filter(Boolean);
+    
+        if(!list.length) {
+            container.innerHTML = '<div class="empty">当前地点暂无OC</div>';
+            return;
+        }
+    
+        container.innerHTML = `
+        <div class="oc-grid">
+        ${list.map(x=>{
+            const {oc,final,isRandom,isMandatory,end} = x; // 解构isMandatory
+            // 优先取随机事件的action，否则取基础任务的action
+            const actionText = final.action || '暂无状态';
+            const txt = getLocationRandomAction(oc, currentSmallArea, final.type) || actionText;
+            const rcls = isRandom ? 'random' : '';
+            // 新增：根据是否必选，给标签加不同class
+            const tagClass = isMandatory ? 'mandatory-tag' : 'laser-tag';
+            const tag = isRandom ? `<div class="oc-random-tag ${tagClass}">随机事件</div>` : '';
+            
+            return `
+            <div class="oc-card ${rcls}">
+                ${tag}
+                <div class="oc-popup">
+                    <p><span class="popup-action">行为：</span>${actionText}</p>
+                    <p><span class="popup-time">停留至：</span>${end}</p>
+                </div>
+                <div class="oc-row">
+                    <img src="${oc.avatar}" alt="${oc.name}" class="oc-avatar">
+                    <div class="oc-info">
+                        <div class="oc-name">${oc.name}</div>
+                        <div class="oc-place">📍 ${final.area}</div>
+                    </div>
+                </div>
+                <div class="oc-action">${txt}</div>
+            </div>`;
+        }).join('')}
+        </div>`;
+    }
+
+    function renderOwnerSidebar() {
+        const area = areaData.find(x=>x.smallArea===currentSmallArea&&x.bigArea===currentBigArea);
+        const side = document.getElementById('ownerSidebar');
+        const content = document.getElementById('ownerContent');
+        if(!area || !area.owner?.length) { side.style.display='none'; return; }
+        side.style.display='block';
+        const now = getRealTime();
+        content.innerHTML = area.owner.map(name=>{
+            const oc = ocData.find(o=>o.name===name);
+            if(!oc) return '';
+            const {isRandom, schedule:rSched} = checkRandomEvent(oc, now);
+            const s = isRandom&&rSched ? rSched : getOwnerCurrentSchedule(oc, now);
+            const here = s?.area === currentSmallArea;
+            return `
+            <div class="owner-card">
+                <img src="${oc.avatar}" alt="${name}" class="owner-avatar">
+                <div class="owner-info">
+                    <div class="owner-name">${name}</div>
+                    <div class="owner-status">${here ? '✅ 就在此处' : '🔴 暂时离开，四处走走看吧～'}</div>
+                </div>
+            </div>`;
+        }).join('');
+    }
+
+    window.onload = init;
+</script>
+</body>
+</html>
