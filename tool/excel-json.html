@@ -3,14 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>OC 角色数据配置工具 - 纵向大表版</title>
+    <title>OC 角色数据配置工具 - 智能多轴联动版</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         .table-input { @apply border border-gray-300 px-1 py-0.5 w-full rounded focus:outline-none focus:border-blue-500 text-xs text-left bg-white text-gray-800; }
         .table-select { @apply border border-gray-300 px-0.5 py-0.5 rounded focus:outline-none focus:border-blue-500 text-[11px] bg-gray-50; }
         .tab-btn-active { @apply border-b-2 border-blue-500 text-blue-600 font-bold; }
         .excel-cell { @apply p-1.5 border border-gray-200 transition-colors duration-150 align-top; }
-        /* 必然随机事件标记色 */
         .cell-mandatory { @apply bg-amber-50/80; }
         .custom-scroll::-webkit-scrollbar { width: 6px; height: 6px; }
         .custom-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
@@ -56,7 +55,7 @@
                 <button onclick="switchTab('m2')" id="tab-m2" class="px-4 py-2 text-gray-600 hover:text-blue-500">2. 全天日程总表 (00:00-24:00)</button>
                 <button onclick="switchTab('m3')" id="tab-m3" class="px-4 py-2 text-gray-600 hover:text-blue-500 flex items-center gap-1">3. 必然随机事件库 <span id="m3-badge" class="bg-amber-500 text-white font-mono rounded-full px-1.5 py-0.2 text-[10px] hidden">0</span></button>
                 <button onclick="switchTab('m4')" id="tab-m4" class="px-4 py-2 text-gray-600 hover:text-blue-500">4. 真随机事件 (不绑定死时间)</button>
-                <button onclick="switchTab('m5')" id="tab-m5" class="px-4 py-2 text-gray-600 hover:text-blue-500">5. 地点随机话术池</button>
+                <button onclick="switchTab('m5')" id="tab-m5" class="px-4 py-2 text-gray-600 hover:text-blue-500 flex items-center gap-1">5. 地点随机话术池 <span id="m5-badge" class="bg-blue-500 text-white font-mono rounded-full px-1.5 py-0.2 text-[10px] hidden">0</span></button>
             </div>
 
             <div class="flex-1 overflow-y-auto p-4 custom-scroll">
@@ -96,7 +95,7 @@
 
                 <div id="content-m3" class="tab-content hidden space-y-4">
                     <div class="bg-blue-50 border border-blue-200 p-2.5 rounded text-xs text-blue-700">
-                        💡 <strong>智能联动：</strong>下方列表是根据你在大表中选择的随机时间段自动生成的独立事件盒。直接在各时间盒中点击增加小事件分支即可，无需再去对时间。
+                        💡 <strong>智能时段联动：</strong>下方列表是根据你在大表中选择的随机时间段自动生成的独立事件盒。直接在各时间盒中点击增加小事件分支即可。
                     </div>
                     <div id="mandatory-containers-root" class="space-y-4">
                         <div class="text-center py-8 text-gray-400 text-xs">暂无联动数据，请先去大表中选择“必然随机事件”</div>
@@ -130,21 +129,21 @@
                 </div>
 
                 <div id="content-m5" class="tab-content hidden space-y-3">
-                    <div class="flex justify-between items-center">
-                        <span class="text-xs text-gray-400">闲聊对白兜底池。</span>
-                        <button onclick="addLocationTextRow()" class="bg-gray-800 text-white px-3 py-1 rounded text-xs hover:bg-gray-700">+ 增加地点话术</button>
+                    <div class="bg-emerald-50 border border-emerald-200 p-2.5 rounded text-xs text-emerald-700">
+                        ✨ <strong>话术池自动监听同步：</strong>无需手动增加地点！系统已自动提取前几页（固定大表、必然随机、真随机）中出现的所有 <strong>地点 + 类别</strong> 组合。你可以在此直接填写各自地点的随机聊天文本。
                     </div>
-                    <div class="border rounded overflow-hidden">
+                    <div class="border rounded overflow-hidden bg-white">
                         <table class="w-full border-collapse text-xs">
                             <thead>
                                 <tr class="bg-gray-50 border-b text-gray-500 font-medium">
-                                    <th class="p-1 border-r w-40 text-center">地点 (area)</th>
-                                    <th class="p-1 border-r w-32 text-center">活动类别 (type)</th>
-                                    <th class="p-1 border-r px-2">对白文本/基础闲聊动作</th>
-                                    <th class="p-1 text-center w-12">操作</th>
+                                    <th class="p-1 border-r w-48 text-center">捕捉到的地点 (area)</th>
+                                    <th class="p-1 border-r w-36 text-center">触发活动类别 (type)</th>
+                                    <th class="p-1 border-r px-2">对白文本/基础闲聊动作 (输入后多条自动并入 JSON 数组)</th>
                                 </tr>
                             </thead>
-                            <tbody id="tbody-location-texts"></tbody>
+                            <tbody id="tbody-location-texts">
+                                <tr class="text-center text-gray-400"><td colspan="3" class="p-4">暂无被捕获的地点数据，请先在其他页面填写内容。</td></tr>
+                            </tbody>
                         </table>
                     </div>
                 </div>
@@ -165,9 +164,9 @@
             TIME_SLOTS.push(`${pH}:30–${(h + 1).toString().padStart(2, '0')}:00`);
         }
 
-        // 全局动态暂存：用来留存用户在第3页填写的必然随机事件明细数据
-        // 结构：{"W2_20:00-24:00_组1": [ {probability:35, area:'能乐町', type:'rest', action:'闲逛中'}, ... ]}
-        let MANDATORY_BRANCHES_DATA = {};
+        // 全局动态暂存：
+        let MANDATORY_BRANCHES_DATA = {};  // 必然随机分支缓存
+        let LOCATION_TEXTS_CACHE = {};     // 话术池文本输入存储器 {"地点_类别": "聊天台词1"}
 
         function initTimelineTable() {
             const tbody = document.getElementById('tbody-timeline');
@@ -221,7 +220,7 @@
                 cell.classList.add('cell-mandatory');
                 groupWrapper.classList.remove('hidden');
                 groupWrapper.classList.add('flex');
-                inputContainer.classList.add('hidden'); // 必然随机不需要大表的输入框
+                inputContainer.classList.add('hidden');
             } else {
                 cell.classList.remove('cell-mandatory');
                 groupWrapper.classList.add('hidden');
@@ -233,27 +232,15 @@
 
         function mergeCheckedRows() {
             const checkedBoxes = document.querySelectorAll('.row-checker:checked');
-            if (checkedBoxes.length <= 1) {
-                alert("请在左侧勾选 2 个或以上的时间时段！");
-                return;
-            }
-
+            if (checkedBoxes.length <= 1) { alert("请在左侧勾选 2 个或以上的时间时段！"); return; }
             const targetDay = document.getElementById('target-merge-day').value;
             const indices = Array.from(checkedBoxes).map(cb => parseInt(cb.getAttribute('data-index'))).sort((a, b) => a - b);
-            
             for (let i = 0; i < indices.length - 1; i++) {
-                if (indices[i+1] - indices[i] !== 1) {
-                    alert("合并失败：所勾选的时间格必须是完全连续的！");
-                    return;
-                }
+                if (indices[i+1] - indices[i] !== 1) { alert("合并失败：所勾选的时间格必须是完全连续的！"); return; }
             }
-
             const startIdx = indices[0];
             const masterCell = document.getElementById(`cell-${targetDay}-${startIdx}`);
-            if (!masterCell || masterCell.style.display === 'none') {
-                alert("合并位置冲突，请先确保目标没有被合并覆盖。");
-                return;
-            }
+            if (!masterCell || masterCell.style.display === 'none') { alert("合并位置冲突，请先确保目标没有被合并覆盖。"); return; }
 
             masterCell.rowSpan = indices.length;
             masterCell.querySelector('.btn-split').classList.remove('hidden');
@@ -262,13 +249,9 @@
             const hiddenIds = [];
             for (let i = 1; i < indices.length; i++) {
                 const subCell = document.getElementById(`cell-${targetDay}-${indices[i]}`);
-                if (subCell) {
-                    subCell.style.display = 'none';
-                    hiddenIds.push(subCell.id);
-                }
+                if (subCell) { subCell.style.display = 'none'; hiddenIds.push(subCell.id); }
             }
             masterCell.setAttribute('data-merged-ids', JSON.stringify(hiddenIds));
-
             checkedBoxes.forEach(cb => cb.checked = false);
             updateAll();
         }
@@ -278,38 +261,31 @@
             masterCell.rowSpan = 1;
             btn.classList.add('hidden');
             masterCell.classList.remove('bg-slate-50', 'border-b-2', 'border-b-blue-400');
-
             const hiddenIds = JSON.parse(masterCell.getAttribute('data-merged-ids') || '[]');
-            hiddenIds.forEach(id => {
-                const cell = document.getElementById(id);
-                if (cell) cell.style.display = '';
-            });
+            hiddenIds.forEach(id => { const cell = document.getElementById(id); if (cell) cell.style.display = ''; });
             masterCell.removeAttribute('data-merged-ids');
             updateAll();
         }
 
-        // --- 核心改动：根据大表选择，动态渲染和构建第3页必然随机的“专属时间盒” ---
+        // --- 必然随机子时段渲染器 ---
         function syncMandatoryContainersHTML(detectedList) {
             const root = document.getElementById('mandatory-containers-root');
             const badge = document.getElementById('m3-badge');
-            
             if (detectedList.length === 0) {
                 root.innerHTML = `<div class="text-center py-8 text-gray-400 text-xs">暂无联动数据，请先去大表中选择“必然随机事件”</div>`;
                 badge.classList.add('hidden');
                 return;
             }
-
             badge.textContent = detectedList.length;
             badge.classList.remove('hidden');
 
-            // 搜集当前页面上正在编辑的值，写入临时缓存以防刷新时丢失
             saveAllCurrentBranchInputs();
 
             let html = "";
             detectedList.forEach(item => {
                 const cacheKey = `W${item.day}_${item.timeRange}_G${item.groupId}`;
                 const branches = MANDATORY_BRANCHES_DATA[cacheKey] || [ {probability: 50, area: '', type: 'rest', action: ''} ];
-                MANDATORY_BRANCHES_DATA[cacheKey] = branches; // 确保初始化有1条
+                MANDATORY_BRANCHES_DATA[cacheKey] = branches;
 
                 let rowsHtml = "";
                 branches.forEach((b, bIdx) => {
@@ -345,23 +321,13 @@
                                     <th class="p-1 w-12">操作</th>
                                 </tr>
                             </thead>
-                            <tbody>
-                                ${rowsHtml}
-                            </tbody>
+                            <tbody>${rowsHtml}</tbody>
                         </table>
                     </div>
                 `;
             });
-
             root.innerHTML = html;
-            
-            // 绑定事件处理器让其能够实时打包编译
-            root.querySelectorAll('input').forEach(input => {
-                input.addEventListener('input', () => {
-                    saveAllCurrentBranchInputs();
-                    generateJSON();
-                });
-            });
+            root.querySelectorAll('input').forEach(input => { input.addEventListener('input', () => { saveAllCurrentBranchInputs(); updateAll(); }); });
         }
 
         function saveAllCurrentBranchInputs() {
@@ -370,14 +336,11 @@
                 const rowsInKey = Array.from(document.querySelectorAll(`[data-cache-key="${key}"]`));
                 const idx = rowsInKey.indexOf(row);
                 if (idx === -1) return;
-
                 if (!MANDATORY_BRANCHES_DATA[key]) MANDATORY_BRANCHES_DATA[key] = [];
-                if (!MANDATORY_BRANCHES_DATA[key][idx]) MANDATORY_BRANCHES_DATA[key][idx] = {};
-
                 MANDATORY_BRANCHES_DATA[key][idx] = {
                     probability: parseInt(row.querySelector('.b-prob').value, 10) || 0,
                     area: row.querySelector('.b-area').value.trim(),
-                    type: row.querySelector('.b-type').value.trim(),
+                    type: row.querySelector('.b-type').value.trim() || "rest",
                     action: row.querySelector('.b-action').value.trim()
                 };
             });
@@ -387,8 +350,6 @@
             saveAllCurrentBranchInputs();
             if (!MANDATORY_BRANCHES_DATA[cacheKey]) MANDATORY_BRANCHES_DATA[cacheKey] = [];
             MANDATORY_BRANCHES_DATA[cacheKey].push({probability: 10, area: '', type: 'rest', action: ''});
-            
-            // 重新刷新视图
             updateAll();
         }
 
@@ -396,14 +357,59 @@
             saveAllCurrentBranchInputs();
             if (MANDATORY_BRANCHES_DATA[cacheKey]) {
                 MANDATORY_BRANCHES_DATA[cacheKey].splice(idx, 1);
-                if (MANDATORY_BRANCHES_DATA[cacheKey].length === 0) {
-                    MANDATORY_BRANCHES_DATA[cacheKey] = [{probability: 10, area: '', type: 'rest', action: ''}];
-                }
+                if (MANDATORY_BRANCHES_DATA[cacheKey].length === 0) MANDATORY_BRANCHES_DATA[cacheKey] = [{probability: 10, area: '', type: 'rest', action: ''}];
             }
             updateAll();
         }
 
-        // --- 全新核心打包和重构编译算法 ---
+        // --- 核心改动：话术池全自动同步渲染器 ---
+        function syncLocationTextsHTML(uniqueLocations) {
+            const tbody = document.getElementById('tbody-location-texts');
+            const badge = document.getElementById('m5-badge');
+            
+            // 收集当前话术池里正在填写的最新文本
+            document.querySelectorAll('.loc-text-row').forEach(row => {
+                const k = row.getAttribute('data-loc-key');
+                LOCATION_TEXTS_CACHE[k] = row.querySelector('.loc-input').value.trim();
+            });
+
+            if (uniqueLocations.size === 0) {
+                tbody.innerHTML = `<tr class="text-center text-gray-400"><td colspan="3" class="p-4">暂无被捕获的地点数据，请先在其他页面填写内容。</td></tr>`;
+                badge.classList.add('hidden');
+                return;
+            }
+
+            badge.textContent = uniqueLocations.size;
+            badge.classList.remove('hidden');
+
+            let html = "";
+            Array.from(uniqueLocations).sort().forEach(key => {
+                const [area, type] = key.split('|||');
+                const val = LOCATION_TEXTS_CACHE[key] || ""; // 读取缓存里填好的内容
+
+                html += `
+                    <tr class="border-b hover:bg-slate-50 loc-text-row" data-loc-key="${key}">
+                        <td class="p-2 border-r font-medium text-gray-700 text-center bg-gray-50/50">${area}</td>
+                        <td class="p-2 border-r text-center font-mono text-blue-600">${type}</td>
+                        <td class="p-1 border-r px-2">
+                            <input type="text" value="${val}" placeholder="例如：闲逛中对白1（输入多条可以英文逗号或分号隔开，配置端会自动解析为数组）" class="w-full border-0 focus:outline-none p-1 text-xs text-slate-800 bg-transparent font-sans loc-input">
+                        </td>
+                    </tr>
+                `;
+            });
+            tbody.innerHTML = html;
+
+            // 让话术池的输入框也能在敲击时实时更新编译
+            tbody.querySelectorAll('.loc-input').forEach(input => {
+                input.addEventListener('input', () => {
+                    const row = input.closest('.loc-text-row');
+                    LOCATION_TEXTS_CACHE[row.getAttribute('data-loc-key')] = input.value.trim();
+                    generateJSON();
+                });
+            });
+        }
+
+        // --- 全局核心数据统一编译打包算法 ---
         function generateJSON() {
             const result = {
                 name: document.getElementById('m1-name').value.trim(),
@@ -414,9 +420,10 @@
             };
 
             const schedulePool = {};
-            const detectedMandatories = []; // 用来暂存扫描大表时发现的必然随机事件定义
+            const detectedMandatories = []; 
+            const uniqueLocations = new Set(); // 核心：用于收集全表出现的 地点|||type 唯一组合
 
-            // 1. 扫描并解析大表
+            // 1. 扫描大表
             for (let d = 0; d <= 6; d++) {
                 const weekKey = JSON.stringify([d]);
                 if (!schedulePool[weekKey]) schedulePool[weekKey] = { week: [d], schedule: [] };
@@ -435,89 +442,79 @@
                         finalTimeRange = `${startStr}-${endStr}`;
                     }
 
-                    // 核心修改：如果是必然随机事件，提取基础参数阻断加入 baseSchedule，并丢入 detected 队列中
                     if (selectVal === 'mandatory') {
-                        detectedMandatories.push({
-                            day: d,
-                            timeRange: finalTimeRange,
-                            groupId: groupId || "1"
-                        });
+                        detectedMandatories.push({ day: d, timeRange: finalTimeRange, groupId: groupId || "1" });
                         continue; 
                     }
 
-                    // 只有纯固定日程才能进入 baseSchedule
                     const area = cell.querySelector('.cell-area').value.trim();
-                    const type = cell.querySelector('.cell-type').value.trim();
+                    const type = cell.querySelector('.cell-type').value.trim() || "rest";
                     const action = cell.querySelector('.cell-action').value.trim();
 
                     if (!area && !action) continue;
 
+                    if (area) { uniqueLocations.add(`${area}|||${type}`); } // 捕捉大表地点组合
+
                     schedulePool[weekKey].schedule.push({
-                        timeRange: finalTimeRange,
-                        area: area,
-                        type: type || "rest",
-                        action: action
+                        timeRange: finalTimeRange, area: area, type: type, action: action
                     });
                 }
             }
             result.baseSchedule = Object.values(schedulePool).filter(b => b.schedule.length > 0);
 
-            // 2. 根据检测到的必然随机卡片，调取对应盒子的分支内容打包进 randomEvents
+            // 2. 处理必然随机分支
             detectedMandatories.forEach(item => {
                 const cacheKey = `W${item.day}_${item.timeRange}_G${item.groupId}`;
                 const branches = MANDATORY_BRANCHES_DATA[cacheKey] || [];
 
                 branches.forEach(b => {
-                    if (!b.area && !b.action) return; // 空数据过滤
+                    if (!b.area && !b.action) return; 
+                    const t = b.type || "rest";
+                    if (b.area) { uniqueLocations.add(`${b.area}|||${t}`); } // 捕捉必然随机分支地点
+
                     result.randomEvents.push({
-                        week: [item.day],
-                        timeRange: item.timeRange,
-                        probability: b.probability,
-                        area: b.area,
-                        type: b.type || "rest",
-                        action: b.action,
-                        isMandatory: true
+                        week: [item.day], timeRange: item.timeRange, probability: b.probability,
+                        area: b.area, type: t, action: b.action, isMandatory: true
                     });
                 });
             });
 
-            // 3. 解析真随机事件库
+            // 3. 处理真随机事件
             document.querySelectorAll('#tbody-true-random tr').forEach(row => {
                 const els = row.querySelectorAll('input');
                 if (els.length < 9) return;
-
                 const areaVal = els[4].value.trim();
+                const typeVal = els[5].value.trim() || "rest";
                 const actVal = els[6].value.trim();
                 if (!areaVal && !actVal) return;
 
+                if (areaVal) { uniqueLocations.add(`${areaVal}|||${typeVal}`); } // 捕捉真随机事件地点
+
                 result.randomEvents.push({
-                    week: parseWeeks(els[1].value),
-                    timeRange: els[2].value.trim(),
-                    probability: parseInt(els[3].value, 10) || 0,
-                    area: areaVal,
-                    type: els[5].value.trim() || "rest",
-                    action: actVal,
-                    tip: els[8].value.trim(),
-                    persist: els[7].value.trim() === '是'
+                    week: parseWeeks(els[1].value), timeRange: els[2].value.trim(), probability: parseInt(els[3].value, 10) || 0,
+                    area: areaVal, type: typeVal, action: actVal, tip: els[8].value.trim(), persist: els[7].value.trim() === '是'
                 });
             });
 
-            // 4. 公共地点话术
-            document.querySelectorAll('#tbody-location-texts tr').forEach(row => {
-                const els = row.querySelectorAll('input');
-                if (els.length < 3) return;
-                const a = els[0].value.trim(), t = els[1].value.trim(), txt = els[2].value.trim();
-                if (!a || !t || !txt) return;
-                if (!result.locationRandomActions[a]) result.locationRandomActions[a] = {};
-                if (!result.locationRandomActions[a][t]) result.locationRandomActions[a][t] = [];
-                result.locationRandomActions[a][t].push(txt);
+            // 4. 解析并组装自动生成的地点话术文本内容
+            uniqueLocations.forEach(key => {
+                const [area, type] = key.split('|||');
+                const rawText = LOCATION_TEXTS_CACHE[key] || "";
+                if (!rawText) return; 
+
+                // 如果用户输入了话术，按常见的中英文逗号分号智能拆分为多段
+                const textArr = rawText.split(/[,，;；]/).map(t => t.trim()).filter(t => t.length > 0);
+                if (textArr.length === 0) return;
+
+                if (!result.locationRandomActions[area]) result.locationRandomActions[area] = {};
+                result.locationRandomActions[area][type] = textArr;
             });
 
             document.getElementById('json-output').textContent = JSON.stringify(result, null, 2);
-            return detectedMandatories;
+            return { detectedMandatories, uniqueLocations };
         }
 
-        // --- 支持高级联动回显还原的 JSON 导入器 ---
+        // --- 全面兼容逆向解析的导入器 ---
         function importJSON(event) {
             const file = event.target.files[0];
             if (!file) return;
@@ -529,19 +526,16 @@
                     document.getElementById('m1-avatar').value = data.avatar || "";
 
                     initTimelineTable();
-                    MANDATORY_BRANCHES_DATA = {}; // 清空历史缓存
+                    MANDATORY_BRANCHES_DATA = {};
+                    LOCATION_TEXTS_CACHE = {};
 
-                    // 恢复固定大表
+                    // 恢复大表
                     if (data.baseSchedule) {
                         data.baseSchedule.forEach(block => {
                             const days = block.week || [];
-                            if (!block.schedule) return;
-
                             block.schedule.forEach(item => {
                                 const trange = item.timeRange.replace('-', '–');
                                 const parts = trange.split('–');
-                                if (parts.length < 2) return;
-
                                 let startIdx = TIME_SLOTS.findIndex(s => s.startsWith(parts[0]));
                                 let endIdx = TIME_SLOTS.findIndex(s => s.endsWith(parts[1]));
 
@@ -551,88 +545,58 @@
                                     if (!master) return;
 
                                     if (endIdx > startIdx) {
-                                        const count = endIdx - startIdx + 1;
-                                        master.rowSpan = count;
+                                        master.rowSpan = endIdx - startIdx + 1;
                                         master.querySelector('.btn-split').classList.remove('hidden');
                                         master.classList.add('bg-slate-50', 'border-b-2', 'border-b-blue-400');
-
                                         const hiddenIds = [];
                                         for (let k = startIdx + 1; k <= endIdx; k++) {
                                             const subCell = document.getElementById(`cell-${d}-${k}`);
-                                            if (subCell) {
-                                                subCell.style.display = 'none';
-                                                hiddenIds.push(subCell.id);
-                                            }
+                                            if (subCell) { subCell.style.display = 'none'; hiddenIds.push(subCell.id); }
                                         }
                                         master.setAttribute('data-merged-ids', JSON.stringify(hiddenIds));
                                     }
 
-                                    const select = master.querySelector('.cell-main-dropdown');
-                                    const areaIn = master.querySelector('.cell-area');
-                                    const typeIn = master.querySelector('.cell-type');
-                                    const actionIn = master.querySelector('.cell-action');
-
-                                    select.value = 'fixed';
-                                    areaIn.value = item.area || "";
-                                    typeIn.value = item.type || "";
-                                    actionIn.value = item.action || "";
+                                    master.querySelector('.cell-main-dropdown').value = 'fixed';
+                                    master.querySelector('.cell-area').value = item.area || "";
+                                    master.querySelector('.cell-type').value = item.type || "";
+                                    master.querySelector('.cell-action').value = item.action || "";
                                 });
                             });
                         });
                     }
 
-                    // 分解逆向提取随机事件
+                    // 恢复随机事件与缓存
                     const tbodyTR = document.getElementById('tbody-true-random'); tbodyTR.innerHTML = "";
                     let mockGroupCounter = 1;
+                    const timeToGroupMap = {};
 
                     if (data.randomEvents) {
-                        // 建立时间到组ID的映射，协助归拢同类项
-                        const timeToGroupMap = {};
-
                         data.randomEvents.forEach((r, idx) => {
                             if (r.isMandatory) {
-                                // 必然随机：解析并将其归位塞进缓存，同时在大表中将对应的格子由固定转为必然随机标记
                                 const day = (r.week && r.week.length > 0) ? r.week[0] : 0;
-                                const trange = r.timeRange.replace('-', '–');
-                                const parts = trange.split('–');
-                                
-                                if (parts.length >= 2) {
-                                    let startIdx = TIME_SLOTS.findIndex(s => s.startsWith(parts[0]));
-                                    if (startIdx !== -1) {
-                                        const master = document.getElementById(`cell-${day}-${startIdx}`);
-                                        if (master) {
-                                            const select = master.querySelector('.cell-main-dropdown');
-                                            const groupWrapper = master.querySelector('.item-group-wrapper');
-                                            const inputContainer = master.querySelector('.cell-input-container');
-                                            const groupIn = master.querySelector('.cell-group-id');
+                                const parts = r.timeRange.split('-');
+                                let startIdx = TIME_SLOTS.findIndex(s => s.startsWith(parts[0]));
+                                if (startIdx !== -1) {
+                                    const master = document.getElementById(`cell-${day}-${startIdx}`);
+                                    if (master) {
+                                        master.querySelector('.cell-main-dropdown').value = 'mandatory';
+                                        master.classList.add('cell-mandatory');
+                                        master.querySelector('.item-group-wrapper').classList.remove('hidden');
+                                        master.querySelector('.item-group-wrapper').classList.add('flex');
+                                        master.querySelector('.cell-input-container').classList.add('hidden');
 
-                                            select.value = 'mandatory';
-                                            master.classList.add('cell-mandatory');
-                                            groupWrapper.classList.remove('hidden');
-                                            groupWrapper.classList.add('flex');
-                                            inputContainer.classList.add('hidden');
+                                        const mapKey = `${day}_${r.timeRange}`;
+                                        if (!timeToGroupMap[mapKey]) timeToGroupMap[mapKey] = mockGroupCounter++;
+                                        master.querySelector('.cell-group-id').value = timeToGroupMap[mapKey];
 
-                                            // 生成或复用唯一的组识别号
-                                            const mapKey = `${day}_${r.timeRange}`;
-                                            if (!timeToGroupMap[mapKey]) {
-                                                timeToGroupMap[mapKey] = mockGroupCounter++;
-                                            }
-                                            groupIn.value = timeToGroupMap[mapKey];
-
-                                            // 写入内存暂存器，提供给第3页渲染
-                                            const cacheKey = `W${day}_${r.timeRange}_G${timeToGroupMap[mapKey]}`;
-                                            if (!MANDATORY_BRANCHES_DATA[cacheKey]) MANDATORY_BRANCHES_DATA[cacheKey] = [];
-                                            MANDATORY_BRANCHES_DATA[cacheKey].push({
-                                                probability: r.probability || 0,
-                                                area: r.area || "",
-                                                type: r.type || "rest",
-                                                action: r.action || ""
-                                            });
-                                        }
+                                        const cacheKey = `W${day}_${r.timeRange}_G${timeToGroupMap[mapKey]}`;
+                                        if (!MANDATORY_BRANCHES_DATA[cacheKey]) MANDATORY_BRANCHES_DATA[cacheKey] = [];
+                                        MANDATORY_BRANCHES_DATA[cacheKey].push({
+                                            probability: r.probability || 0, area: r.area || "", type: r.type || "rest", action: r.action || ""
+                                        });
                                     }
                                 }
                             } else {
-                                // 真随机：扔回真随机子表
                                 const tr = document.createElement('tr');
                                 tr.innerHTML = `
                                     <td class="p-1 border-r"><input type="text" value="ev_${idx}" class="w-full border-0 p-0"></td>
@@ -651,30 +615,19 @@
                         });
                     }
 
-                    // 恢复公共地点话术
-                    const tbodyTxt = document.getElementById('tbody-location-texts'); tbodyTxt.innerHTML = "";
+                    // 恢复话术池文本到缓存器中
                     if (data.locationRandomActions) {
                         for (const area in data.locationRandomActions) {
                             for (const type in data.locationRandomActions[area]) {
-                                data.locationRandomActions[area][type].forEach(txt => {
-                                    const tr = document.createElement('tr');
-                                    tr.innerHTML = `
-                                        <td class="p-1 border-r"><input type="text" value="${area}" list="location-list" class="w-full text-center border-0 p-0"></td>
-                                        <td class="p-1 border-r"><input type="text" value="${type}" class="w-full text-center border-0 p-0"></td>
-                                        <td class="p-1 border-r"><input type="text" value="${txt}" class="w-full border-0 p-0 px-2"></td>
-                                        <td class="p-1 text-center"><button onclick="deleteRow(this)" class="text-gray-300 hover:text-red-500 font-bold">×</button></td>
-                                    `;
-                                    tbodyTxt.appendChild(tr);
-                                });
+                                const textKey = `${area}|||${type}`;
+                                LOCATION_TEXTS_CACHE[textKey] = data.locationRandomActions[area][type].join(', ');
                             }
                         }
                     }
 
                     updateAll();
-                    alert("🎯 成功导入！智能深度联动与自定义组别已就绪！");
-                } catch(e) {
-                    alert("导入错误: " + e.message);
-                }
+                    alert("🎯 成功导入！地点随机话术池全自动同步器已全部就绪！");
+                } catch(e) { alert("导入错误: " + e.message); }
             };
             reader.readAsText(file);
         }
@@ -707,18 +660,6 @@
             updateAll();
         }
 
-        function addLocationTextRow() {
-            const tr = document.createElement('tr');
-            tr.innerHTML = `
-                <td class="p-1 border-r"><input type="text" list="location-list" class="w-full text-center border-0 p-0"></td>
-                <td class="p-1 border-r"><input type="text" class="w-full text-center border-0 p-0"></td>
-                <td class="p-1 border-r"><input type="text" class="w-full border-0 p-0 px-2"></td>
-                <td class="p-1 text-center"><button onclick="deleteRow(this)" class="text-gray-300 hover:text-red-500 font-bold">×</button></td>
-            `;
-            document.getElementById('tbody-location-texts').appendChild(tr);
-            updateAll();
-        }
-
         function deleteRow(btn) { btn.closest('tr').remove(); updateAll(); }
         
         function switchTab(id) {
@@ -729,10 +670,11 @@
         }
 
         function updateAll() { 
-            // 每次页面变动，先计算出大表中所有激活的必然随机事件
-            const detectedList = generateJSON(); 
-            // 将其同步更新到第3页的列表页面中
-            syncMandatoryContainersHTML(detectedList);
+            const state = generateJSON(); 
+            // 1. 同步必然随机分支盒子
+            syncMandatoryContainersHTML(state.detectedMandatories);
+            // 2. 同步地点话术池捕获列表
+            syncLocationTextsHTML(state.uniqueLocations);
         }
 
         function copyJSON() { navigator.clipboard.writeText(document.getElementById('json-output').textContent).then(() => alert('数据已复制')); }
@@ -747,7 +689,6 @@
             initTimelineTable();
             document.getElementById('excel-main-table').addEventListener('input', updateAll);
             document.getElementById('tbody-true-random').addEventListener('input', updateAll);
-            document.getElementById('tbody-location-texts').addEventListener('input', updateAll);
             updateAll();
         };
     </script>
