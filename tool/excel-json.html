@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>OC 角色数据配置工具 - 智能多轴联动版</title>
+    <title>OC 角色数据配置工具 - 终极无损兼容版</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         .table-input { @apply border border-gray-300 px-1 py-0.5 w-full rounded focus:outline-none focus:border-blue-500 text-xs text-left bg-white text-gray-800; }
@@ -388,7 +388,7 @@
                         <td class="p-2 border-r font-medium text-gray-700 text-center bg-gray-50/50">${area}</td>
                         <td class="p-2 border-r text-center font-mono text-blue-600">${type}</td>
                         <td class="p-1 border-r px-2">
-                            <input type="text" value="${val}" placeholder="例如：闲逛中对白1（输入多条可以英文逗号或分号隔开，配置端会自动解析为数组）" class="w-full border-0 focus:outline-none p-1 text-xs text-slate-800 bg-transparent font-sans loc-input">
+                            <input type="text" value="${val}" placeholder="例如：对白1（以逗号隔开，配置端会自动解析为数组）" class="w-full border-0 focus:outline-none p-1 text-xs text-slate-800 bg-transparent font-sans loc-input">
                         </td>
                     </tr>
                 `;
@@ -502,7 +502,7 @@
             return { detectedMandatories, uniqueLocations };
         }
 
-        // --- ⭐【核心修复与全能降级兼容导入器】 ⭐ ---
+        // --- ⭐【防覆盖隔离与无损对齐回显引擎】⭐ ---
         function importJSON(event) {
             const file = event.target.files[0];
             if (!file) return;
@@ -510,8 +510,6 @@
             reader.onload = function(e) {
                 try {
                     let data = JSON.parse(e.target.result);
-                    
-                    // 兼容模式1：处理最外层被包装在单个对象的数组里
                     if (Array.isArray(data)) { data = data[0]; }
 
                     document.getElementById('m1-name').value = data.name || "";
@@ -521,12 +519,10 @@
                     MANDATORY_BRANCHES_DATA = {};
                     LOCATION_TEXTS_CACHE = {};
 
-                    // 兼容模式2：⭐ 核心算法——把旧版扁平的 baseSchedule 升级为全新合并大轴数组
+                    // 1. 扁平旧版升级转换
                     if (data.baseSchedule && data.baseSchedule.length > 0) {
                         const firstItem = data.baseSchedule[0];
-                        // 探测是否是旧版的扁平对象样式：缺少 schedule 键名但存在直接的 area 或 timeRange 属性
                         if (!firstItem.hasOwnProperty('schedule') && (firstItem.hasOwnProperty('area') || firstItem.hasOwnProperty('timeRange'))) {
-                            console.log("检测到旧版扁平化日程，启动智能升级编译转化引擎...");
                             const upgradedBase = [];
                             data.baseSchedule.forEach(oldItem => {
                                 const wKey = oldItem.week ? oldItem.week.sort().join(',') : 'all';
@@ -542,21 +538,21 @@
                                     action: oldItem.action || ""
                                 });
                             });
-                            data.baseSchedule = upgradedBase; // 完成内存数据完美升级！
+                            data.baseSchedule = upgradedBase;
                         }
                     }
 
-                    // 恢复新版数据大表
+                    // 2. 第一阶段：强行只填充固定日程，锁定基础盘，防止被大范围随机时段覆盖
                     if (data.baseSchedule) {
                         data.baseSchedule.forEach(block => {
                             const days = block.week || [];
-                            if (!block.schedule) return; // 容错防止崩溃
+                            if (!block.schedule) return;
 
                             block.schedule.forEach(item => {
                                 const trange = item.timeRange.replace('-', '–');
                                 const parts = trange.split('–');
-                                let startIdx = TIME_SLOTS.findIndex(s => s.startsWith(parts[0]));
-                                let endIdx = TIME_SLOTS.findIndex(s => s.endsWith(parts[1]));
+                                let startIdx = TIME_SLOTS.findIndex(s => s.startsWith(parts[0].trim()));
+                                let endIdx = TIME_SLOTS.findIndex(s => s.endsWith(parts[1].trim()));
 
                                 days.forEach(d => {
                                     if (startIdx === -1 || endIdx === -1) return;
@@ -584,7 +580,7 @@
                         });
                     }
 
-                    // 恢复随机事件与缓存
+                    // 3. 第二阶段：填充必然随机事件（支持多组及精细切分拆块，绝不盲目覆盖已有格子）
                     const tbodyTR = document.getElementById('tbody-true-random'); tbodyTR.innerHTML = "";
                     let mockGroupCounter = 1;
                     const timeToGroupMap = {};
@@ -592,30 +588,46 @@
                     if (data.randomEvents) {
                         data.randomEvents.forEach((r, idx) => {
                             if (r.isMandatory) {
-                                const day = (r.week && r.week.length > 0) ? r.week[0] : 0;
+                                const days = r.week || [0];
                                 const parts = r.timeRange.split('-');
-                                let startIdx = TIME_SLOTS.findIndex(s => s.startsWith(parts[0]));
-                                if (startIdx !== -1) {
+                                let startIdx = TIME_SLOTS.findIndex(s => s.startsWith(parts[0].trim()));
+                                let endIdx = TIME_SLOTS.findIndex(s => s.endsWith(parts[1].trim()));
+
+                                days.forEach(day => {
+                                    if (startIdx === -1) return;
+                                    
+                                    // 检查首格是否已经有固定日程，如果有，绝不覆盖，避免大表空白
                                     const master = document.getElementById(`cell-${day}-${startIdx}`);
                                     if (master) {
-                                        master.querySelector('.cell-main-dropdown').value = 'mandatory';
-                                        master.classList.add('cell-mandatory');
-                                        master.querySelector('.item-group-wrapper').classList.remove('hidden');
-                                        master.querySelector('.item-group-wrapper').classList.add('flex');
-                                        master.querySelector('.cell-input-container').classList.add('hidden');
+                                        const areaInput = master.querySelector('.cell-area');
+                                        if (!areaInput || !areaInput.value.trim()) {
+                                            master.querySelector('.cell-main-dropdown').value = 'mandatory';
+                                            master.classList.add('cell-mandatory');
+                                            master.querySelector('.item-group-wrapper').classList.remove('hidden');
+                                            master.querySelector('.item-group-wrapper').classList.add('flex');
+                                            master.querySelector('.cell-input-container').classList.add('hidden');
 
-                                        const mapKey = `${day}_${r.timeRange}`;
-                                        if (!timeToGroupMap[mapKey]) timeToGroupMap[mapKey] = mockGroupCounter++;
-                                        master.querySelector('.cell-group-id').value = timeToGroupMap[mapKey];
+                                            const mapKey = `${day}_${r.timeRange}`;
+                                            if (!timeToGroupMap[mapKey]) timeToGroupMap[mapKey] = mockGroupCounter++;
+                                            master.querySelector('.cell-group-id').value = timeToGroupMap[mapKey];
+                                        }
 
-                                        const cacheKey = `W${day}_${r.timeRange}_G${timeToGroupMap[mapKey]}`;
+                                        // 安全挂载进必然随机池
+                                        const grpId = master.querySelector('.cell-group-id').value || "1";
+                                        const cacheKey = `W${day}_${r.timeRange}_G${grpId}`;
                                         if (!MANDATORY_BRANCHES_DATA[cacheKey]) MANDATORY_BRANCHES_DATA[cacheKey] = [];
-                                        MANDATORY_BRANCHES_DATA[cacheKey].push({
-                                            probability: r.probability || 0, area: r.area || "", type: r.type || "rest", action: r.action || ""
-                                        });
+                                        
+                                        // 过滤去重，防止相同内容在分支里重复堆叠
+                                        const isDup = MANDATORY_BRANCHES_DATA[cacheKey].some(b => b.area === r.area && b.action === r.action);
+                                        if (!isDup) {
+                                            MANDATORY_BRANCHES_DATA[cacheKey].push({
+                                                probability: r.probability || 0, area: r.area || "", type: r.type || "rest", action: r.action || ""
+                                            });
+                                        }
                                     }
-                                }
+                                });
                             } else {
+                                // 4. 真随机事件恢复
                                 const tr = document.createElement('tr');
                                 tr.innerHTML = `
                                     <td class="p-1 border-r"><input type="text" value="ev_${idx}" class="w-full border-0 p-0"></td>
@@ -634,6 +646,7 @@
                         });
                     }
 
+                    // 5. 恢复话术池文本
                     if (data.locationRandomActions) {
                         for (const area in data.locationRandomActions) {
                             for (const type in data.locationRandomActions[area]) {
@@ -645,7 +658,7 @@
                     }
 
                     updateAll();
-                    alert("🎯 旧版历史数据已经通过高阶编译兼容算法完美导入回显！");
+                    alert("🎯 全时段数据资产已无损对齐并完美找回！");
                 } catch(e) { alert("导入错误: " + e.message); console.error(e); }
             };
             reader.readAsText(file);
@@ -672,7 +685,7 @@
                 <td class="p-1 border-r"><input type="text" value="work" class="w-full border-0 p-0"></td>
                 <td class="p-1 border-r"><input type="text" value="📖 校园健康讲座" class="w-full border-0 p-0"></td>
                 <td class="p-1 border-r"><input type="text" value="是" class="w-full text-center border-0 p-0"></td>
-                <td class="p-1 border-r"><input type="text" value="✨ 校园卫生安全讲座啦！" class="w-full border-0 p-0"></td>
+                <td class="p-1 border-r"><input type="text" value="✨ 讲座" class="w-full border-0 p-0"></td>
                 <td class="p-1 text-center"><button onclick="deleteRow(this)" class="text-gray-300 hover:text-red-500 font-bold">×</button></td>
             `;
             document.getElementById('tbody-true-random').appendChild(tr);
