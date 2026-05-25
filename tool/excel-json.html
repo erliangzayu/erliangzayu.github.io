@@ -3,161 +3,179 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>OC 角色数据配置工具 - 高级版</title>
+    <title>OC 角色数据配置工具 - 纵向大表版</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        .table-input { @apply border border-gray-300 px-1 py-1 w-full rounded focus:outline-none focus:border-blue-500 text-xs text-center; }
+        .table-input { @apply border border-gray-300 px-1 py-0.5 w-full rounded focus:outline-none focus:border-blue-500 text-xs text-left bg-white text-gray-800; }
+        .table-select { @apply border border-gray-300 px-0.5 py-0.5 w-full rounded focus:outline-none focus:border-blue-500 text-[11px] bg-gray-50; }
         .tab-btn-active { @apply border-b-2 border-blue-500 text-blue-600 font-bold; }
-        /* 针对模块2 Excel 样式格子进行特别美化 */
-        .excel-cell { @apply min-w-[120px] p-1 border; }
+        .excel-cell { @apply p-1 border border-gray-200 transition-colors duration-150; }
+        /* 必然随机事件标黄样式 */
+        .cell-mandatory { @apply bg-amber-100/80; }
     </style>
 </head>
-<body class="bg-gray-100 h-screen flex flex-col font-sans">
+<body class="bg-gray-100 h-screen flex flex-col font-sans overflow-hidden">
 
-    <header class="bg-white shadow px-6 py-2.5 flex justify-between items-center shrink-0">
+    <datalist id="location-list">
+        <option value="福源堂"><option value="九木酒屋"><option value="摸鱼网咖"><option value="LF 一中">
+        <option value="肆的家"><option value="艺术街区"><option value="Valmont Plaza 购物中心"><option value="白日 Livehouse">
+        <option value="警署"><option value="旧港码头"><option value="旧港集市"><option value="小林的算命摊">
+        <option value="八爪胡同"><option value="真辉的公寓"><option value="小林的阁楼"><option value="融大附中">
+        <option value="市民公园"><option value="晴南的家"><option value="6-11 便利店"><option value="幻日乐队排练室">
+        <option value="Wesley 的家"><option value="奶奶的杂货铺"><option value="雾港仓库"><option value="Berlon 家老宅">
+        <option value="渔场"><option value="地下拳场"><option value="能乐町"><option value="悠真的出租屋">
+        <option value="Olivia 的出租屋"><option value="深蓝海岸"><option value="Adriana 的房车"><option value="水怪出没区">
+        <option value="Felix 的住所"><option value="猎人小屋"><option value="Valmont's 会员商店"><option value="CULF/LF 大学城">
+        <option value="凌的单人公寓"><option value="在地铁上"><option value="魔鬼鱼号">
+    </datalist>
+
+    <header class="bg-white shadow px-6 py-2 flex justify-between items-center shrink-0">
         <div class="flex items-center gap-4">
-            <h1 class="text-lg font-bold text-gray-800">🎭 OC 角色数据配置工具 (超宽表格版)</h1>
-            <label class="bg-amber-500 hover:bg-amber-600 text-white px-3 py-1.5 rounded text-xs font-medium cursor-pointer transition">
+            <h1 class="text-base font-bold text-gray-800">🎭 OC 角色数据标准大轴配置工具</h1>
+            <label class="bg-amber-500 hover:bg-amber-600 text-white px-2.5 py-1 rounded text-xs font-medium cursor-pointer transition">
                 📥 导入已有 JSON
                 <input type="file" id="import-file" accept=".json" class="hidden" onchange="importJSON(event)">
             </label>
         </div>
         <div class="space-x-2">
-            <button onclick="copyJSON()" class="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded text-sm font-medium transition">一键复制 JSON</button>
-            <button onclick="downloadJSON()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded text-sm font-medium transition">下载 .json 文件</button>
+            <button onclick="copyJSON()" class="bg-gray-600 hover:bg-gray-700 text-white px-3 py-1.5 rounded text-xs font-medium transition">一键复制 JSON</button>
+            <button onclick="downloadJSON()" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded text-xs font-medium transition">下载 .json 文件</button>
         </div>
     </header>
 
-    <main class="flex-1 flex overflow-hidden p-3 gap-3">
+    <main class="flex-1 flex overflow-hidden p-2 gap-2">
         
         <section class="w-[70%] bg-white rounded-lg shadow flex flex-col overflow-hidden">
             <div class="flex border-b border-gray-200 bg-gray-50 shrink-0 text-xs">
-                <button onclick="switchTab('m1')" id="tab-m1" class="px-4 py-2.5 text-gray-600 hover:text-blue-500 tab-btn-active">1. 基础信息</button>
-                <button onclick="switchTab('m2')" id="tab-m2" class="px-4 py-2.5 text-gray-600 hover:text-blue-500">2. 固定日程表 (Excel 样式)</button>
-                <button onclick="switchTab('m3')" id="tab-m3" class="px-4 py-2.5 text-gray-600 hover:text-blue-500">3. 随机事件表</button>
-                <button onclick="switchTab('m4')" id="tab-m4" class="px-4 py-2.5 text-gray-600 hover:text-blue-500">4. 地点随机话术</button>
+                <button onclick="switchTab('m1')" id="tab-m1" class="px-4 py-2 text-gray-600 hover:text-blue-500 tab-btn-active">1. 基础信息</button>
+                <button onclick="switchTab('m2')" id="tab-m2" class="px-4 py-2 text-gray-600 hover:text-blue-500">2. 全天日程总表 (00:00-24:00)</button>
+                <button onclick="switchTab('m3')" id="tab-m3" class="px-4 py-2 text-gray-600 hover:text-blue-500">3. 必然随机事件库 (联动子表)</button>
+                <button onclick="switchTab('m4')" id="tab-m4" class="px-4 py-2 text-gray-600 hover:text-blue-500">4. 真随机事件 (不绑定死时间)</button>
+                <button onclick="switchTab('m5')" id="tab-m5" class="px-4 py-2 text-gray-600 hover:text-blue-500">5. 地点随机话术池</button>
             </div>
 
             <div class="flex-1 overflow-y-auto p-3 space-y-3">
                 
                 <div id="content-m1" class="tab-content space-y-3">
-                    <h3 class="font-bold text-gray-700 text-sm border-b pb-1">角色全局信息</h3>
+                    <h3 class="font-bold text-gray-700 text-xs border-b pb-1">角色全局信息</h3>
                     <div class="grid grid-cols-2 gap-4">
                         <div>
                             <label class="block text-xs text-gray-500 mb-1">角色名 (name)</label>
-                            <input type="text" id="m1-name" value="陈墨" oninput="updateAll()" class="table-input text-left text-sm font-medium p-2">
+                            <input type="text" id="m1-name" value="肆" oninput="updateAll()" class="table-input text-sm p-2">
                         </div>
                         <div>
                             <label class="block text-xs text-gray-500 mb-1">头像路径 (avatar)</label>
-                            <input type="text" id="m1-avatar" value="images/avatar/chenmo.png" oninput="updateAll()" class="table-input text-left text-sm p-2">
+                            <input type="text" id="m1-avatar" value="./images/avatar/si.png" oninput="updateAll()" class="table-input text-sm p-2">
                         </div>
                     </div>
                 </div>
 
                 <div id="content-m2" class="tab-content hidden space-y-2">
-                    <div class="flex justify-between items-center mb-1">
+                    <div class="flex justify-between items-center">
                         <div>
-                            <h3 class="font-bold text-gray-700 text-sm">🗓️ 固定日程视图</h3>
-                            <p class="text-[11px] text-gray-400">填入格式：<code>地点|类型|动作</code>（留空代表该天此时段无常规日程）。系统会自动为您合并相同周数。</p>
+                            <h3 class="font-bold text-gray-700 text-xs">🗓️ 全天候半小时制排程表</h3>
+                            <p class="text-[11px] text-gray-400">选择“必然随机事件”时对应的格子会自动高亮标黄，并请在“标签页3”中补全具体的分支概率数据。</p>
                         </div>
-                        <button onclick="addRow('m2')" class="bg-green-600 hover:bg-green-700 text-white px-2 py-1 rounded text-xs">+ 增加时间段</button>
                     </div>
-                    <div class="overflow-x-auto border rounded bg-white">
-                        <table class="w-full text-left border-collapse table-fixed min-w-[950px]">
+                    
+                    <div class="overflow-auto border rounded bg-white max-h-[70vh]">
+                        <table class="w-full text-left border-collapse table-fixed min-w-[1400px]">
                             <thead>
-                                <tr class="bg-gray-100 text-[11px] text-gray-600 text-center font-bold">
-                                    <th class="p-1 border w-[110px]">时间范围</th>
-                                    <th class="p-1 border">周日 (W0)</th>
-                                    <th class="p-1 border">周一 (W1)</th>
-                                    <th class="p-1 border">周二 (W2)</th>
-                                    <th class="p-1 border">周三 (W3)</th>
-                                    <th class="p-1 border">周四 (W4)</th>
-                                    <th class="p-1 border">周五 (W5)</th>
-                                    <th class="p-1 border">周六 (W6)</th>
-                                    <th class="p-1 border w-[40px]">操作</th>
+                                <tr class="bg-gray-100 text-[11px] text-gray-600 text-center font-bold sticky top-0 z-10 shadow-sm">
+                                    <th class="p-1 border w-[90px] bg-gray-100">时间段</th>
+                                    <th class="p-1 border bg-gray-100">周日 (W0)</th>
+                                    <th class="p-1 border bg-gray-100">周一 (W1)</th>
+                                    <th class="p-1 border bg-gray-100">周二 (W2)</th>
+                                    <th class="p-1 border bg-gray-100">周三 (W3)</th>
+                                    <th class="p-1 border bg-gray-100">周四 (W4)</th>
+                                    <th class="p-1 border bg-gray-100">周五 (W5)</th>
+                                    <th class="p-1 border bg-gray-100">周六 (W6)</th>
                                 </tr>
                             </thead>
-                            <tbody id="tbody-m2">
-                                <tr class="text-xs">
-                                    <td class="p-1 border"><input type="text" value="00:00-07:00" class="table-input font-mono font-bold" oninput="updateAll()"></td>
-                                    <td class="excel-cell"><input type="text" value="肆的家|sleep|睡觉中" placeholder="地点|类型|动作" class="table-input" oninput="updateAll()"></td>
-                                    <td class="excel-cell"><input type="text" value="肆的家|sleep|睡觉中" class="table-input" oninput="updateAll()"></td>
-                                    <td class="excel-cell"><input type="text" value="肆的家|sleep|睡觉中" class="table-input" oninput="updateAll()"></td>
-                                    <td class="excel-cell"><input type="text" value="肆的家|sleep|睡觉中" class="table-input" oninput="updateAll()"></td>
-                                    <td class="excel-cell"><input type="text" value="肆的家|sleep|睡觉中" class="table-input" oninput="updateAll()"></td>
-                                    <td class="excel-cell"><input type="text" value="肆的家|sleep|睡觉中" class="table-input" oninput="updateAll()"></td>
-                                    <td class="excel-cell"><input type="text" value="肆的家|sleep|睡觉中" class="table-input" oninput="updateAll()"></td>
-                                    <td class="p-1 border text-center"><button onclick="deleteRow(this)" class="text-red-500 hover:text-red-700 font-bold">×</button></td>
-                                </tr>
-                            </tbody>
+                            <tbody id="tbody-timeline">
+                                </tbody>
                         </table>
                     </div>
                 </div>
 
-                <div id="content-m3" class="tab-content hidden space-y-2">
-                    <div class="flex justify-between items-center mb-1">
-                        <h3 class="font-bold text-gray-700 text-sm">⚡ 随机事件横向明细配置</h3>
-                        <button onclick="addRow('m3')" class="bg-green-600 hover:bg-green-700 text-white px-2 py-1 rounded text-xs">+ 增加事件分支</button>
+                <div id="content-m3" class="tab-content hidden space-y-4">
+                    <div>
+                        <h3 class="font-bold text-gray-700 text-xs">⚡ 必然随机事件分支数据池 (独立增删)</h3>
+                        <p class="text-[11px] text-gray-400 mb-2">对应总表中选择的“必然随机事件 1~4”。在此处细化配置各分支的发生概率（同组ID概率相加需为100%）。</p>
                     </div>
+                    
+                    <div class="flex justify-end">
+                        <button onclick="addMandatoryRow()" class="bg-blue-600 hover:bg-blue-700 text-white px-2 py-1 rounded text-xs">+ 添加随机分支条目</button>
+                    </div>
+
                     <div class="overflow-x-auto border rounded">
                         <table class="w-full text-left border-collapse min-w-[950px]">
                             <thead>
                                 <tr class="bg-gray-100 text-[11px] text-gray-600 text-center font-bold">
-                                    <th class="p-1 border w-16">事件组ID</th>
-                                    <th class="p-1 border w-16">触发周数</th>
-                                    <th class="p-1 border w-24">时间范围</th>
-                                    <th class="p-1 border w-12">概率%</th>
-                                    <th class="p-1 border w-16">地点</th>
-                                    <th class="p-1 border w-14">类型</th>
-                                    <th class="p-1 border">动作名称 (actionName)</th>
-                                    <th class="p-1 border w-14">持续</th>
-                                    <th class="p-1 border">剧情提示(tip)</th>
-                                    <th class="p-1 border w-14">必选</th>
-                                    <th class="p-1 border w-10">操作</th>
+                                    <th class="p-1 border w-32">事件组别 (如: 必然随机事件 1)</th>
+                                    <th class="p-1 border w-20">事件序号</th>
+                                    <th class="p-1 border w-24">适用周数 (如: 1-5)</th>
+                                    <th class="p-1 border w-28">时间范围 (对应大表)</th>
+                                    <th class="p-1 border w-16">概率(%)</th>
+                                    <th class="p-1 border w-36">发生地点</th>
+                                    <th class="p-1 border w-20">活动类型</th>
+                                    <th class="p-1 border">动作描述 (action)</th>
+                                    <th class="p-1 border w-12">操作</th>
                                 </tr>
                             </thead>
-                            <tbody id="tbody-m3">
-                                <tr class="text-xs">
-                                    <td class="p-1 border"><input type="text" value="ev_01" class="table-input" oninput="updateAll()"></td>
-                                    <td class="p-1 border"><input type="text" value="1-5" class="table-input font-mono" oninput="updateAll()"></td>
-                                    <td class="p-1 border"><input type="text" value="12:00-13:00" class="table-input font-mono" oninput="updateAll()"></td>
-                                    <td class="p-1 border"><input type="text" value="30" class="table-input" oninput="updateAll()"></td>
-                                    <td class="p-1 border"><input type="text" value="天台" class="table-input" oninput="updateAll()"></td>
-                                    <td class="p-1 border"><input type="text" value="rest" class="table-input" oninput="updateAll()"></td>
-                                    <td class="p-1 border"><input type="text" value="吹风看风景" class="table-input text-left" oninput="updateAll()"></td>
-                                    <td class="p-1 border"><input type="text" value="否" class="table-input" oninput="updateAll()"></td>
-                                    <td class="p-1 border"><input type="text" value="" class="table-input text-left" oninput="updateAll()"></td>
-                                    <td class="p-1 border"><input type="text" value="是" class="table-input" oninput="updateAll()"></td>
-                                    <td class="p-1 border text-center"><button onclick="deleteRow(this)" class="text-red-500 hover:text-red-700 font-bold">×</button></td>
-                                </tr>
-                            </tbody>
+                            <tbody id="tbody-mandatory-details">
+                                </tbody>
                         </table>
                     </div>
                 </div>
 
                 <div id="content-m4" class="tab-content hidden space-y-2">
-                    <div class="flex justify-between items-center mb-1">
-                        <h3 class="font-bold text-gray-700 text-sm">💬 地点随机行为/话术池</h3>
-                        <button onclick="addRow('m4')" class="bg-green-600 hover:bg-green-700 text-white px-2 py-1 rounded text-xs">+ 增加话术项</button>
+                    <div class="flex justify-between items-center">
+                        <div>
+                            <h3 class="font-bold text-gray-700 text-xs">🎲 真随机事件配置（无硬性时间依赖）</h3>
+                            <p class="text-[11px] text-gray-400">仅依赖区域、概率触发，不体现在上述大课表中的特殊剧情事件。</p>
+                        </div>
+                        <button onclick="addTrueRandomRow()" class="bg-green-600 hover:bg-green-700 text-white px-2 py-1 rounded text-xs">+ 增加真随机事件</button>
+                    </div>
+                    <div class="overflow-x-auto border rounded">
+                        <table class="w-full text-left border-collapse min-w-[900px]">
+                            <thead>
+                                <tr class="bg-gray-100 text-[11px] text-gray-600 text-center font-bold">
+                                    <th class="p-1 border w-20">唯一ID</th>
+                                    <th class="p-1 border w-20">触发周数</th>
+                                    <th class="p-1 border w-24">大致时段</th>
+                                    <th class="p-1 border w-14">概率%</th>
+                                    <th class="p-1 border w-32">指定地点</th>
+                                    <th class="p-1 border w-16">类别</th>
+                                    <th class="p-1 border">动作/对话</th>
+                                    <th class="p-1 border w-16">持续保持</th>
+                                    <th class="p-1 border">提示文本(tip)</th>
+                                    <th class="p-1 border w-12">操作</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tbody-true-random">
+                                </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div id="content-m5" class="tab-content hidden space-y-2">
+                    <div class="flex justify-between items-center">
+                        <h3 class="font-bold text-gray-700 text-xs">💬 地点公共基础随机行为池</h3>
+                        <button onclick="addLocationTextRow()" class="bg-green-600 hover:bg-green-700 text-white px-2 py-1 rounded text-xs">+ 增加基础话术</button>
                     </div>
                     <div class="overflow-x-auto border rounded">
                         <table class="w-full text-left border-collapse">
                             <thead>
                                 <tr class="bg-gray-100 text-[11px] text-gray-600 font-bold">
-                                    <th class="p-1 border w-28 text-center">地点 (area)</th>
+                                    <th class="p-1 border w-36 text-center">地点 (area)</th>
                                     <th class="p-1 border w-28 text-center">活动类型 (type)</th>
-                                    <th class="p-1 border px-2">话术/动作内容</th>
+                                    <th class="p-1 border px-2">动作/话术文案</th>
                                     <th class="p-1 border w-12 text-center">操作</th>
                                 </tr>
                             </thead>
-                            <tbody id="tbody-m4">
-                                <tr class="text-xs">
-                                    <td class="p-1 border"><input type="text" value="咖啡厅" class="table-input" oninput="updateAll()"></td>
-                                    <td class="p-1 border"><input type="text" value="rest" class="table-input" oninput="updateAll()"></td>
-                                    <td class="p-1 border"><input type="text" value="靠窗的位置风景不错。" class="table-input text-left px-2" oninput="updateAll()"></td>
-                                    <td class="p-1 border text-center"><button onclick="deleteRow(this)" class="text-red-500 hover:text-red-700 font-bold">×</button></td>
-                                </tr>
-                            </tbody>
+                            <tbody id="tbody-location-texts">
+                                </tbody>
                         </table>
                     </div>
                 </div>
@@ -167,14 +185,72 @@
 
         <section class="w-[30%] bg-gray-900 rounded-lg shadow flex flex-col overflow-hidden text-gray-200 font-mono text-[11px] relative">
             <div id="validator-bar" class="bg-gray-800 px-3 py-1.5 border-b border-gray-700 flex flex-col gap-0.5 shrink-0">
-                <span class="text-green-400 font-bold">✅ 状态正常</span>
+                <span class="text-green-400 font-bold">✅ 实时状态监控正常</span>
             </div>
             <pre class="flex-1 p-3 overflow-auto bg-gray-950 text-emerald-400 select-all" id="json-output"></pre>
         </section>
     </main>
 
     <script>
-        // --- 核心算法：解析周数标记 ---
+        // --- 自动初始化全天48个半小时时间档 ---
+        function initTimelineTable() {
+            const tbody = document.getElementById('tbody-timeline');
+            tbody.innerHTML = "";
+            
+            const timeSlots = [];
+            for (let h = 0; h < 24; h++) {
+                const padH = h.toString().padStart(2, '0');
+                timeSlots.push(`${padH}:00–${padH}:30`);
+                timeSlots.push(`${padH}:30–${(h + 1).toString().padStart(2, '0')}:00`);
+            }
+
+            timeSlots.forEach(slot => {
+                const tr = document.createElement('tr');
+                tr.className = "text-xs";
+                
+                let dayCellsHtml = "";
+                for (let d = 0; d <= 6; d++) {
+                    dayCellsHtml += `
+                        <td class="excel-cell" data-day="${d}" data-slot="${slot}">
+                            <div class="space-y-1">
+                                <select class="table-select" onchange="handleCellTypeChange(this)">
+                                    <option value="fixed">🟢 固定事件</option>
+                                    <option value="必然随机事件 1">🟠 必然随机事件 1</option>
+                                    <option value="必然随机事件 2">🟠 必然随机事件 2</option>
+                                    <option value="必然随机事件 3">🟠 必然随机事件 3</option>
+                                    <option value="必然随机事件 4">🟠 必然随机事件 4</option>
+                                </select>
+                                <input type="text" placeholder="📍 选择/输入地点" list="location-list" class="table-input font-medium cell-area" oninput="updateAll()">
+                                <input type="text" placeholder="📝 活动/类型 (type)" class="table-input cell-type" oninput="updateAll()">
+                                <input type="text" placeholder="🎭 动作描述 (action)" class="table-input cell-action" oninput="updateAll()">
+                            </div>
+                        </td>
+                    `;
+                }
+
+                tr.innerHTML = `
+                    <td class="p-1 border bg-gray-50 text-center font-mono font-bold align-middle">${slot}</td>
+                    ${dayCellsHtml}
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        // 单元格类型变更事件（如果是必然随机事件则标黄）
+        function handleCellTypeChange(selectEl) {
+            const cell = selectEl.closest('.excel-cell');
+            const val = selectEl.value;
+            
+            // 只要不是固定事件，统统高亮标黄
+            if (val !== 'fixed') {
+                cell.classList.add('cell-mandatory');
+            } else {
+                cell.classList.remove('cell-mandatory');
+            }
+            updateAll();
+        }
+
+        // 工具函数：解析周数
         function parseWeeks(weekStr) {
             if (!weekStr) return [];
             let str = weekStr.toString().replace(/\[|\]/g, '').trim();
@@ -187,119 +263,101 @@
             return str.split(/[,，]/).map(item => parseInt(item.trim())).filter(n => !isNaN(n));
         }
 
-        // --- 核心逻辑：从全新 Excel 样式表格生成最终聚合 JSON ---
+        // --- 核心打包编译生成最终游戏 JSON ---
         function generateJSON() {
             const result = {};
             const errors = [];
 
-            // 1. 基础字段
             result.name = document.getElementById('m1-name').value.trim();
             result.avatar = document.getElementById('m1-avatar').value.trim();
             
-            // 2. 高级聚合：扫描 Excel 样式的固定日程表 (把横向 7 列拆解合并)
-            result.baseSchedule = [];
-            const m2Rows = document.querySelectorAll('#tbody-m2 tr');
-            
-            // 核心聚合池：用来打包相同周数数组的 schedule 条目
-            const pool = {}; 
+            // 1. 解析大课表数据 (按 week 物理整合)
+            const schedulePool = {};
+            const cells = document.querySelectorAll('#tbody-timeline .excel-cell');
 
-            m2Rows.forEach(row => {
-                const inputs = row.querySelectorAll('input');
-                if (inputs.length < 8) return;
-                const timeRange = inputs[0].value.trim();
-                if (!timeRange) return;
+            cells.forEach(cell => {
+                const d = parseInt(cell.getAttribute('data-day'), 10);
+                const slot = cell.getAttribute('data-slot');
+                
+                const eventType = cell.querySelector('select').value;
+                const area = cell.querySelector('.cell-area').value.trim();
+                const type = cell.querySelector('.cell-type').value.trim();
+                const actionName = cell.querySelector('.cell-action').value.trim();
 
-                // 建立临时容器，捕获当天这一行里每一种内容的具体周数
-                const contentToWeeks = {};
+                // 只有填了地点或动作才视为有效录入
+                if (!area && !actionName) return;
 
-                for (let w = 0; w <= 6; w++) {
-                    const cellVal = inputs[w + 1].value.trim();
-                    if (!cellVal) continue; // 忽略空单元格
+                const weekKey = JSON.stringify([d]);
 
-                    if (!contentToWeeks[cellVal]) {
-                        contentToWeeks[cellVal] = [];
-                    }
-                    contentToWeeks[cellVal].push(w);
+                if (!schedulePool[weekKey]) {
+                    schedulePool[weekKey] = { week: [d], schedule: [] };
                 }
 
-                // 将捕获到的按内容分好组的周数，分类汇总到全局聚合池中
-                Object.keys(contentToWeeks).forEach(rawContent => {
-                    const weeksArr = contentToWeeks[rawContent];
-                    const weeksKey = JSON.stringify(weeksArr); // 数组形态作为 Key 进行物理聚合
-
-                    const parts = rawContent.split('|');
-                    if (parts.length < 3) {
-                        errors.push(`⚠️ 固定日程 [${timeRange}]：内容格式必须为'地点|类型|动作'`);
-                        return;
-                    }
-
-                    if (!pool[weeksKey]) {
-                        pool[weeksKey] = {
-                            week: weeksArr,
-                            schedule: []
-                        };
-                    }
-
-                    pool[weeksKey].schedule.push({
-                        timeRange: timeRange,
-                        area: parts[0].trim(),
-                        type: parts[1].trim(),
-                        actionName: parts[2].trim()
-                    });
+                // 处理内容展示：如果是必然随机事件，则动作或内容打上特殊标记引导后台
+                const isMandatory = eventType !== 'fixed';
+                
+                schedulePool[weekKey].schedule.push({
+                    timeRange: slot,
+                    area: isMandatory ? eventType : area, // 如果是必然随机事件，直接以事件大类冠名引导系统去库里捞
+                    type: type || (isMandatory ? "mandatory_trigger" : "rest"),
+                    actionName: actionName || (isMandatory ? `触发 ${eventType}` : "")
                 });
             });
-            result.baseSchedule = Object.values(pool);
+            result.baseSchedule = Object.values(schedulePool);
 
-            // 3. 解析随机事件
-            result.randomEvents = [];
-            const m3Rows = document.querySelectorAll('#tbody-m3 tr');
-            const groupProbCounter = {};
+            // 2. 解析必然随机事件详细库
+            result.mandatoryRandomEvents = [];
+            const mRows = document.querySelectorAll('#tbody-mandatory-details tr');
+            mRows.forEach(row => {
+                const inputs = row.querySelectorAll('input, select');
+                if(inputs.length < 7) return;
+                const groupName = inputs[0].value;
+                const subId = inputs[1].value.trim();
+                const rawWeek = inputs[2].value.trim();
+                const timeRange = inputs[3].value.trim();
+                const rate = parseInt(inputs[4].value.trim(), 10) || 0;
+                const area = inputs[5].value.trim();
+                const type = inputs[6].value.trim();
+                const action = inputs[7].value.trim();
 
-            m3Rows.forEach(row => {
-                const inputs = row.querySelectorAll('input');
-                if(inputs.length < 10) return;
-                const id = inputs[0].value.trim();
-                const rawWeek = inputs[1].value.trim();
-                const timeRange = inputs[2].value.trim();
-                const rate = parseInt(inputs[3].value.trim(), 10) || 0;
-                const area = inputs[4].value.trim();
-                const type = inputs[5].value.trim();
-                const actionName = inputs[6].value.trim();
-                const persistStr = inputs[7].value.trim();
-                const tip = inputs[8].value.trim();
-                const mandatoryStr = inputs[9].value.trim();
+                if(!subId && !action) return;
 
-                if (!id && !actionName) return;
-
-                if (id) {
-                    groupProbCounter[id] = (groupProbCounter[id] || 0) + rate;
-                }
-
-                result.randomEvents.push({
-                    id,
+                result.mandatoryRandomEvents.push({
+                    group: groupName,
+                    id: subId,
                     week: parseWeeks(rawWeek),
                     timeRange,
                     rate,
                     area,
                     type,
-                    actionName,
-                    persist: persistStr === '是' || persistStr === 'true',
-                    tip: tip || "",
-                    isMandatory: mandatoryStr === '是' || mandatoryStr === 'true'
+                    action
                 });
             });
 
-            // 校验概率
-            Object.keys(groupProbCounter).forEach(gId => {
-                if (groupProbCounter[gId] !== 100) {
-                    errors.push(`❌ 随机事件组 [${gId}] 概率总和为 ${groupProbCounter[gId]}%，不等于 100%`);
-                }
+            // 3. 解析真随机事件
+            result.randomEvents = [];
+            const trRows = document.querySelectorAll('#tbody-true-random tr');
+            trRows.forEach(row => {
+                const inputs = row.querySelectorAll('input');
+                if (inputs.length < 8) return;
+                
+                result.randomEvents.push({
+                    id: inputs[0].value.trim(),
+                    week: parseWeeks(inputs[1].value.trim()),
+                    timeRange: inputs[2].value.trim(),
+                    rate: parseInt(inputs[3].value.trim(), 10) || 0,
+                    area: inputs[4].value.trim(),
+                    type: inputs[5].value.trim(),
+                    actionName: inputs[6].value.trim(),
+                    persist: inputs[7].value.trim() === '是' || inputs[7].value.trim() === 'true',
+                    tip: inputs[8].value.trim()
+                });
             });
 
-            // 4. 解析地点话术
+            // 4. 解析地点基础随机话术
             result.locationRandomActions = {};
-            const m4Rows = document.querySelectorAll('#tbody-m4 tr');
-            m4Rows.forEach(row => {
+            const locRows = document.querySelectorAll('#tbody-location-texts tr');
+            locRows.forEach(row => {
                 const inputs = row.querySelectorAll('input');
                 if(inputs.length < 3) return;
                 const area = inputs[0].value.trim();
@@ -313,12 +371,11 @@
                 result.locationRandomActions[area][type].push(text);
             });
 
-            // 渲染
+            // 输出到右侧
             document.getElementById('json-output').textContent = JSON.stringify(result, null, 2);
-            renderValidator(errors);
         }
 
-        // --- 核心反向解析：把高度解耦的 JSON 优雅地平铺还原回纵向 7 列 Excel 界面 ---
+        // --- 反向解析反铺机制（全自动适配） ---
         function importJSON(event) {
             const file = event.target.files[0];
             if (!file) return;
@@ -327,118 +384,186 @@
                 try {
                     const data = JSON.parse(e.target.result);
                     
-                    // 1. 基础信息
+                    // 基础复原
                     document.getElementById('m1-name').value = data.name || "";
                     document.getElementById('m1-avatar').value = data.avatar || "";
 
-                    // 2. 核心难点：反向展开还原 Excel 矩阵
-                    const tbodyM2 = document.getElementById('tbody-m2');
-                    tbodyM2.innerHTML = "";
-                    
-                    if (data.baseSchedule && Array.isArray(data.baseSchedule)) {
-                        // 时间段大整合字典：{"00:00-07:00": ["", "", "", ... 7个空位]}
-                        const timeMatrix = {};
+                    // 全局清空重置大课表
+                    initTimelineTable();
 
+                    // 铺设大排程表
+                    if(data.baseSchedule) {
                         data.baseSchedule.forEach(block => {
-                            const activeWeeks = block.week || [];
-                            if(block.schedule && Array.isArray(block.schedule)) {
+                            const dList = block.week || [];
+                            if(block.schedule) {
                                 block.schedule.forEach(item => {
-                                    const tRange = item.timeRange;
-                                    if (!tRange) return;
-
-                                    if(!timeMatrix[tRange]) {
-                                        timeMatrix[tRange] = Array(7).fill("");
-                                    }
-                                    
-                                    // 把散落的数据精准放回周几对应的格子里
-                                    activeWeeks.forEach(wIndex => {
-                                        if(wIndex >= 0 && wIndex <= 6) {
-                                            timeMatrix[tRange][wIndex] = `${item.area || ''}|${item.type || ''}|${item.actionName || ''}`;
+                                    dList.forEach(d => {
+                                        const query = `#tbody-timeline .excel-cell[data-day="${d}"][data-slot="${item.timeRange}"]`;
+                                        const cell = document.querySelector(query);
+                                        if(cell) {
+                                            const select = cell.querySelector('select');
+                                            if(item.area && item.area.startsWith("必然随机事件")) {
+                                                select.value = item.area;
+                                                cell.classList.add('cell-mandatory');
+                                            } else {
+                                                select.value = 'fixed';
+                                                cell.querySelector('.cell-area').value = item.area || "";
+                                            }
+                                            cell.querySelector('.cell-type').value = item.type || "";
+                                            cell.querySelector('.cell-action').value = item.actionName || "";
                                         }
                                     });
                                 });
                             }
                         });
-
-                        // 渲染还原好的 Excel 矩阵行
-                        for (const tRange in timeMatrix) {
-                            const cells = timeMatrix[tRange];
-                            const tr = document.createElement('tr');
-                            tr.className = "text-xs";
-                            tr.innerHTML = `
-                                <td class="p-1 border"><input type="text" value="${tRange}" class="table-input font-mono font-bold" oninput="updateAll()"></td>
-                                ${cells.map(cVal => `<td class="excel-cell"><input type="text" value="${cVal}" class="table-input" oninput="updateAll()"></td>`).join('')}
-                                <td class="p-1 border text-center"><button onclick="deleteRow(this)" class="text-red-500 hover:text-red-700 font-bold">×</button></td>
-                            `;
-                            tbodyM2.appendChild(tr);
-                        }
                     }
 
-                    // 3. 还原随机事件表
-                    const tbodyM3 = document.getElementById('tbody-m3');
-                    tbodyM3.innerHTML = "";
-                    if (data.randomEvents && Array.isArray(data.randomEvents)) {
-                        data.randomEvents.forEach(ev => {
+                    // 铺设必然随机事件子表
+                    const tbodyM = document.getElementById('tbody-mandatory-details');
+                    tbodyM.innerHTML = "";
+                    if(data.mandatoryRandomEvents) {
+                        data.mandatoryRandomEvents.forEach(m => {
                             const tr = document.createElement('tr');
                             tr.className = "text-xs";
                             tr.innerHTML = `
-                                <td class="p-1 border"><input type="text" value="${ev.id || ''}" class="table-input" oninput="updateAll()"></td>
-                                <td class="p-1 border"><input type="text" value="${ev.week ? ev.week.join(',') : ''}" class="table-input font-mono" oninput="updateAll()"></td>
-                                <td class="p-1 border"><input type="text" value="${ev.timeRange || ''}" class="table-input font-mono" oninput="updateAll()"></td>
-                                <td class="p-1 border"><input type="text" value="${ev.rate || 0}" class="table-input" oninput="updateAll()"></td>
-                                <td class="p-1 border"><input type="text" value="${ev.area || ''}" class="table-input" oninput="updateAll()"></td>
-                                <td class="p-1 border"><input type="text" value="${ev.type || ''}" class="table-input" oninput="updateAll()"></td>
-                                <td class="p-1 border"><input type="text" value="${ev.actionName || ''}" class="table-input text-left" oninput="updateAll()"></td>
-                                <td class="p-1 border"><input type="text" value="${ev.persist ? '是' : '否'}" class="table-input" oninput="updateAll()"></td>
-                                <td class="p-1 border"><input type="text" value="${ev.tip || ''}" class="table-input text-left" oninput="updateAll()"></td>
-                                <td class="p-1 border"><input type="text" value="${ev.isMandatory ? '是' : '否'}" class="table-input" oninput="updateAll()"></td>
-                                <td class="p-1 border text-center"><button onclick="deleteRow(this)" class="text-red-500 hover:text-red-700 font-bold">×</button></td>
+                                <td class="p-1 border">
+                                    <select class="table-select font-bold">
+                                        <option value="必然随机事件 1" ${m.group==='必然随机事件 1'?'selected':''}>必然随机事件 1</option>
+                                        <option value="必然随机事件 2" ${m.group==='必然随机事件 2'?'selected':''}>必然随机事件 2</option>
+                                        <option value="必然随机事件 3" ${m.group==='必然随机事件 3'?'selected':''}>必然随机事件 3</option>
+                                        <option value="必然随机事件 4" ${m.group==='必然随机事件 4'?'selected':''}>必然随机事件 4</option>
+                                    </select>
+                                </td>
+                                <td class="p-1 border"><input type="text" value="${m.id||''}" class="table-input" oninput="updateAll()"></td>
+                                <td class="p-1 border"><input type="text" value="${m.week?m.week.join(','):''}" class="table-input font-mono" oninput="updateAll()"></td>
+                                <td class="p-1 border"><input type="text" value="${m.timeRange||''}" class="table-input font-mono" oninput="updateAll()"></td>
+                                <td class="p-1 border"><input type="text" value="${m.rate||''}" class="table-input text-center" oninput="updateAll()"></td>
+                                <td class="p-1 border"><input type="text" value="${m.area||''}" list="location-list" class="table-input" oninput="updateAll()"></td>
+                                <td class="p-1 border"><input type="text" value="${m.type||''}" class="table-input" oninput="updateAll()"></td>
+                                <td class="p-1 border"><input type="text" value="${m.action||''}" class="table-input" oninput="updateAll()"></td>
+                                <td class="p-1 border text-center"><button onclick="deleteRow(this)" class="text-red-500 font-bold">×</button></td>
                             `;
-                            tbodyM3.appendChild(tr);
+                            tbodyM.appendChild(tr);
                         });
                     }
 
-                    // 4. 还原地点话术表
-                    const tbodyM4 = document.getElementById('tbody-m4');
-                    tbodyM4.innerHTML = "";
-                    if (data.locationRandomActions) {
-                        for (const area in data.locationRandomActions) {
-                            for (const type in data.locationRandomActions[area]) {
-                                const actionList = data.locationRandomActions[area][type];
-                                if (Array.isArray(actionList)) {
-                                    actionList.forEach(text => {
-                                        const tr = document.createElement('tr');
-                                        tr.className = "text-xs";
-                                        tr.innerHTML = `
-                                            <td class="p-1 border"><input type="text" value="${area}" class="table-input" oninput="updateAll()"></td>
-                                            <td class="p-1 border"><input type="text" value="${type}" class="table-input" oninput="updateAll()"></td>
-                                            <td class="p-1 border"><input type="text" value="${text}" class="table-input text-left px-2" oninput="updateAll()"></td>
-                                            <td class="p-1 border text-center"><button onclick="deleteRow(this)" class="text-red-500 hover:text-red-700 font-bold">×</button></td>
-                                        `;
-                                        tbodyM4.appendChild(tr);
-                                    });
-                                }
+                    // 铺设真随机事件
+                    const tbodyTR = document.getElementById('tbody-true-random');
+                    tbodyTR.innerHTML = "";
+                    if(data.randomEvents) {
+                        data.randomEvents.forEach(r => {
+                            const tr = document.createElement('tr');
+                            tr.className = "text-xs";
+                            tr.innerHTML = `
+                                <td class="p-1 border"><input type="text" value="${r.id||''}" class="table-input" oninput="updateAll()"></td>
+                                <td class="p-1 border"><input type="text" value="${r.week?r.week.join(','):''}" class="table-input font-mono" oninput="updateAll()"></td>
+                                <td class="p-1 border"><input type="text" value="${r.timeRange||''}" class="table-input font-mono" oninput="updateAll()"></td>
+                                <td class="p-1 border"><input type="text" value="${r.rate||0}" class="table-input text-center" oninput="updateAll()"></td>
+                                <td class="p-1 border"><input type="text" value="${r.area||''}" list="location-list" class="table-input" oninput="updateAll()"></td>
+                                <td class="p-1 border"><input type="text" value="${r.type||''}" class="table-input" oninput="updateAll()"></td>
+                                <td class="p-1 border"><input type="text" value="${r.actionName||''}" class="table-input" oninput="updateAll()"></td>
+                                <td class="p-1 border"><input type="text" value="${r.persist?'是':'否'}" class="table-input text-center" oninput="updateAll()"></td>
+                                <td class="p-1 border"><input type="text" value="${r.tip||''}" class="table-input" oninput="updateAll()"></td>
+                                <td class="p-1 border text-center"><button onclick="deleteRow(this)" class="text-red-500 font-bold">×</button></td>
+                            `;
+                            tbodyTR.appendChild(tr);
+                        });
+                    }
+
+                    // 铺设基础话术池
+                    const tbodyTxt = document.getElementById('tbody-location-texts');
+                    tbodyTxt.innerHTML = "";
+                    if(data.locationRandomActions) {
+                        for(const area in data.locationRandomActions) {
+                            for(const type in data.locationRandomActions[area]) {
+                                data.locationRandomActions[area][type].forEach(txt => {
+                                    const tr = document.createElement('tr');
+                                    tr.className = "text-xs";
+                                    tr.innerHTML = `
+                                        <td class="p-1 border"><input type="text" value="${area}" list="location-list" class="table-input text-center" oninput="updateAll()"></td>
+                                        <td class="p-1 border"><input type="text" value="${type}" class="table-input text-center" oninput="updateAll()"></td>
+                                        <td class="p-1 border"><input type="text" value="${txt}" class="table-input px-2" oninput="updateAll()"></td>
+                                        <td class="p-1 border text-center"><button onclick="deleteRow(this)" class="text-red-500 font-bold">×</button></td>
+                                    `;
+                                    tbodyTxt.appendChild(tr);
+                                });
                             }
                         }
                     }
 
                     updateAll();
-                    alert("📅 成功将高度聚合的 JSON 还原为纵向 Excel 视图表格！");
-                } catch (err) {
-                    alert("❌ 导入解析失败，错误信息: " + err.message);
+                    alert("🎯 成功精准解析并热还原全套大课表结构数据！");
+                } catch(e) {
+                    alert("导入失败，数据异常: " + e.message);
                 }
             };
             reader.readAsText(file);
         }
 
-        // --- UI 控制辅助函数 ---
-        function renderValidator(errors) {
-            const container = document.getElementById('validator-bar');
-            if (errors.length === 0) {
-                container.innerHTML = `<span class="text-green-400 font-bold">✅ 校验通过，数据格式完美契合游戏逻辑！</span>`;
-            } else {
-                container.innerHTML = errors.map(err => `<span class="text-rose-400 font-medium">${err}</span>`).join('');
-            }
+        // --- 子表动态增加接口 ---
+        function addMandatoryRow() {
+            const tbody = document.getElementById('tbody-mandatory-details');
+            const tr = document.createElement('tr');
+            tr.className = "text-xs";
+            tr.innerHTML = `
+                <td class="p-1 border">
+                    <select class="table-select font-bold">
+                        <option value="必然随机事件 1">必然随机事件 1</option>
+                        <option value="必然随机事件 2">必然随机事件 2</option>
+                        <option value="必然随机事件 3">必然随机事件 3</option>
+                        <option value="必然随机事件 4">必然随机事件 4</option>
+                    </select>
+                </td>
+                <td class="p-1 border"><input type="text" placeholder="如 1-1" class="table-input" oninput="updateAll()"></td>
+                <td class="p-1 border"><input type="text" value="1-5" class="table-input font-mono" oninput="updateAll()"></td>
+                <td class="p-1 border"><input type="text" value="12:00–12:30" class="table-input font-mono" oninput="updateAll()"></td>
+                <td class="p-1 border"><input type="text" value="25" class="table-input text-center" oninput="updateAll()"></td>
+                <td class="p-1 border"><input type="text" placeholder="选择地点" list="location-list" class="table-input" oninput="updateAll()"></td>
+                <td class="p-1 border"><input type="text" placeholder="如 work" class="table-input" oninput="updateAll()"></td>
+                <td class="p-1 border"><input type="text" placeholder="输入具体行为动作内容" class="table-input" oninput="updateAll()"></td>
+                <td class="p-1 border text-center"><button onclick="deleteRow(this)" class="text-red-500 font-bold">×</button></td>
+            `;
+            tbody.appendChild(tr);
+            updateAll();
+        }
+
+        function addTrueRandomRow() {
+            const tbody = document.getElementById('tbody-true-random');
+            const tr = document.createElement('tr');
+            tr.className = "text-xs";
+            tr.innerHTML = `
+                <td class="p-1 border"><input type="text" value="ev_rand_01" class="table-input" oninput="updateAll()"></td>
+                <td class="p-1 border"><input type="text" value="1-5" class="table-input font-mono" oninput="updateAll()"></td>
+                <td class="p-1 border"><input type="text" value="18:00-22:00" class="table-input font-mono" oninput="updateAll()"></td>
+                <td class="p-1 border"><input type="text" value="15" class="table-input text-center" oninput="updateAll()"></td>
+                <td class="p-1 border"><input type="text" list="location-list" class="table-input" oninput="updateAll()"></td>
+                <td class="p-1 border"><input type="text" value="rest" class="table-input" oninput="updateAll()"></td>
+                <td class="p-1 border"><input type="text" class="table-input" oninput="updateAll()"></td>
+                <td class="p-1 border"><input type="text" value="否" class="table-input text-center" oninput="updateAll()"></td>
+                <td class="p-1 border"><input type="text" class="table-input" oninput="updateAll()"></td>
+                <td class="p-1 border text-center"><button onclick="deleteRow(this)" class="text-red-500 font-bold">×</button></td>
+            `;
+            tbody.appendChild(tr);
+            updateAll();
+        }
+
+        function addLocationTextRow() {
+            const tbody = document.getElementById('tbody-location-texts');
+            const tr = document.createElement('tr');
+            tr.className = "text-xs";
+            tr.innerHTML = `
+                <td class="p-1 border"><input type="text" placeholder="选择/输入地点" list="location-list" class="table-input text-center" oninput="updateAll()"></td>
+                <td class="p-1 border"><input type="text" placeholder="如 sleep/rest" class="table-input text-center" oninput="updateAll()"></td>
+                <td class="p-1 border"><input type="text" placeholder="输入基础环境话术动作..." class="table-input px-2" oninput="updateAll()"></td>
+                <td class="p-1 border text-center"><button onclick="deleteRow(this)" class="text-red-500 font-bold">×</button></td>
+            `;
+            tbody.appendChild(tr);
+            updateAll();
+        }
+
+        function deleteRow(btn) {
+            btn.closest('tr').remove();
+            updateAll();
         }
 
         function switchTab(tabId) {
@@ -448,73 +573,18 @@
             document.getElementById(`tab-${tabId}`).classList.add('tab-btn-active');
         }
 
-        function addRow(module) {
-            const tbody = document.getElementById(`tbody-${module}`);
-            const tr = document.createElement('tr');
-            tr.className = "text-xs";
-            
-            if (module === 'm2') {
-                tr.innerHTML = `
-                    <td class="p-1 border"><input type="text" value="00:00-00:00" class="table-input font-mono font-bold" oninput="updateAll()"></td>
-                    ${Array(7).fill('<td class="excel-cell"><input type="text" value="" placeholder="地点|类型|动作" class="table-input" oninput="updateAll()"></td>').join('')}
-                    <td class="p-1 border text-center"><button onclick="deleteRow(this)" class="text-red-500 hover:text-red-700 font-bold">×</button></td>
-                `;
-            } else if (module === 'm3') {
-                tr.innerHTML = `
-                    <td class="p-1 border"><input type="text" value="ev_01" class="table-input" oninput="updateAll()"></td>
-                    <td class="p-1 border"><input type="text" value="1-5" class="table-input font-mono" oninput="updateAll()"></td>
-                    <td class="p-1 border"><input type="text" value="00:00-00:00" class="table-input font-mono" oninput="updateAll()"></td>
-                    <td class="p-1 border"><input type="text" value="50" class="table-input" oninput="updateAll()"></td>
-                    <td class="p-1 border"><input type="text" value="" class="table-input" oninput="updateAll()"></td>
-                    <td class="p-1 border"><input type="text" value="" class="table-input" oninput="updateAll()"></td>
-                    <td class="p-1 border"><input type="text" value="" class="table-input text-left" oninput="updateAll()"></td>
-                    <td class="p-1 border"><input type="text" value="否" class="table-input" oninput="updateAll()"></td>
-                    <td class="p-1 border"><input type="text" value="" class="table-input text-left" oninput="updateAll()"></td>
-                    <td class="p-1 border"><input type="text" value="是" class="table-input" oninput="updateAll()"></td>
-                    <td class="p-1 border text-center"><button onclick="deleteRow(this)" class="text-red-500 hover:text-red-700 font-bold">×</button></td>
-                `;
-            } else if (module === 'm4') {
-                tr.innerHTML = `
-                    <td class="p-1 border"><input type="text" value="" class="table-input" oninput="updateAll()"></td>
-                    <td class="p-1 border"><input type="text" value="" class="table-input" oninput="updateAll()"></td>
-                    <td class="p-1 border"><input type="text" value="" class="table-input text-left px-2" oninput="updateAll()"></td>
-                    <td class="p-1 border text-center"><button onclick="deleteRow(this)" class="text-red-500 hover:text-red-700 font-bold">×</button></td>
-                `;
-            }
-            tbody.appendChild(tr);
-            updateAll();
-        }
-
-        function deleteRow(button) {
-            button.closest('tr').remove();
-            updateAll();
-        }
-
-        function updateAll() {
-            generateJSON();
-        }
-
-        function copyJSON() {
-            const jsonText = document.getElementById('json-output').textContent;
-            navigator.clipboard.writeText(jsonText).then(() => {
-                alert('🚀 JSON 已经成功复制到您的剪贴板！');
-            });
-        }
-
+        function updateAll() { generateJSON(); }
+        function copyJSON() { navigator.clipboard.writeText(document.getElementById('json-output').textContent).then(() => alert('🚀 已成功复制到剪贴板！')); }
         function downloadJSON() {
-            const jsonText = document.getElementById('json-output').textContent;
-            const roleName = document.getElementById('m1-name').value.trim() || 'role';
-            const blob = new Blob([jsonText], { type: 'application/json' });
+            const name = document.getElementById('m1-name').value.trim() || 'role';
+            const blob = new Blob([document.getElementById('json-output').textContent], { type: 'application/json' });
             const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `${roleName}.json`;
-            a.click();
-            URL.revokeObjectURL(url);
+            const a = document.createElement('a'); a.href = url; a.download = `${name}_data.json`; a.click(); URL.revokeObjectURL(url);
         }
 
         window.onload = function() {
-            generateJSON();
+            initTimelineTable();
+            updateAll();
         };
     </script>
 </body>
