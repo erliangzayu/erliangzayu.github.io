@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>OC 角色数据配置工具 </title>
+    <title>OC 角色数据配置工具 - 逻辑修正版</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         .table-input { @apply border border-gray-300 px-1 py-0.5 w-full rounded focus:outline-none focus:border-blue-500 text-xs text-left bg-white text-gray-800; }
@@ -97,7 +97,7 @@
 
                 <div id="content-m3" class="tab-content hidden space-y-3">
                     <div class="flex justify-between items-center">
-                        <span class="text-xs text-gray-400">设置并拆解主日程中“必然随机事件 1~4”对应的多分支概率行为。</span>
+                        <span class="text-xs text-gray-400">设置并拆解主日程中选择的“必然随机事件 1~4”的分支数据（这些内容将全部编译进 randomEvents 数组中，且带有 isMandatory: true）。</span>
                         <button onclick="addMandatoryRow()" class="bg-gray-800 text-white px-3 py-1 rounded text-xs hover:bg-gray-700">+ 增加随机分支</button>
                     </div>
                     <div class="border rounded overflow-hidden">
@@ -122,7 +122,7 @@
 
                 <div id="content-m4" class="tab-content hidden space-y-3">
                     <div class="flex justify-between items-center">
-                        <span class="text-xs text-gray-400">此处添加脱离大轴排程的、纯概率触发的真随机事件。</span>
+                        <span class="text-xs text-gray-400">这里是脱离大表固定时段排程的、由概率自主调配的纯真随机事件池。</span>
                         <button onclick="addTrueRandomRow()" class="bg-gray-800 text-white px-3 py-1 rounded text-xs hover:bg-gray-700">+ 增加真随机项</button>
                     </div>
                     <div class="border rounded overflow-hidden">
@@ -148,7 +148,7 @@
 
                 <div id="content-m5" class="tab-content hidden space-y-3">
                     <div class="flex justify-between items-center">
-                        <span class="text-xs text-gray-400">当角色停留在某地且没有排程时，调用的闲聊动作池。</span>
+                        <span class="text-xs text-gray-400">闲聊对白兜底池。</span>
                         <button onclick="addLocationTextRow()" class="bg-gray-800 text-white px-3 py-1 rounded text-xs hover:bg-gray-700">+ 增加地点话术</button>
                     </div>
                     <div class="border rounded overflow-hidden">
@@ -224,7 +224,6 @@
             });
         }
 
-        // --- 基于复选框的点选合并逻辑 ---
         function mergeCheckedRows() {
             const checkedBoxes = document.querySelectorAll('.row-checker:checked');
             if (checkedBoxes.length <= 1) {
@@ -235,7 +234,6 @@
             const targetDay = document.getElementById('target-merge-day').value;
             const indices = Array.from(checkedBoxes).map(cb => parseInt(cb.getAttribute('data-index'))).sort((a, b) => a - b);
             
-            // 验证勾选时段是否连续
             for (let i = 0; i < indices.length - 1; i++) {
                 if (indices[i+1] - indices[i] !== 1) {
                     alert("合并失败：所勾选的时间格必须是完全连续的！");
@@ -250,12 +248,10 @@
                 return;
             }
 
-            // 物理合并
             masterCell.rowSpan = indices.length;
             masterCell.querySelector('.btn-split').classList.remove('hidden');
             masterCell.classList.add('bg-slate-50', 'border-b-2', 'border-b-blue-400');
 
-            // 隐藏下方从格
             const hiddenIds = [];
             for (let i = 1; i < indices.length; i++) {
                 const subCell = document.getElementById(`cell-${targetDay}-${indices[i]}`);
@@ -266,12 +262,10 @@
             }
             masterCell.setAttribute('data-merged-ids', JSON.stringify(hiddenIds));
 
-            // 清理打勾
             checkedBoxes.forEach(cb => cb.checked = false);
             updateAll();
         }
 
-        // --- 拆分单元格功能 ---
         function splitCell(btn) {
             const masterCell = btn.closest('.excel-cell');
             masterCell.rowSpan = 1;
@@ -303,19 +297,19 @@
             updateAll();
         }
 
-        // --- JSON 打包与解析算法 ---
+        // --- 全新核心重构：打包与过滤算法 ---
         function generateJSON() {
             const result = {
                 name: document.getElementById('m1-name').value.trim(),
                 avatar: document.getElementById('m1-avatar').value.trim(),
                 baseSchedule: [],
-                mandatoryRandomEvents: [],
                 randomEvents: [],
                 locationRandomActions: {}
             };
 
             const schedulePool = {};
 
+            // 1. 解析大表（只抓固定日程进入 baseSchedule，必然随机在此处被阻断）
             for (let d = 0; d <= 6; d++) {
                 const weekKey = JSON.stringify([d]);
                 if (!schedulePool[weekKey]) schedulePool[weekKey] = { week: [d], schedule: [] };
@@ -329,6 +323,8 @@
                     const type = cell.querySelector('.cell-type').value.trim();
                     const action = cell.querySelector('.cell-action').value.trim();
 
+                    // 核心修改 1：只要不是 fixed（也就是选择了必然随机事件 1234），就直接跳过，绝不加入 baseSchedule
+                    if (selectVal !== 'fixed') continue; 
                     if (!area && !action) continue;
 
                     let finalTimeRange = cell.getAttribute('data-slot').replace('–', '-');
@@ -338,51 +334,58 @@
                         finalTimeRange = `${startStr}-${endStr}`;
                     }
 
-                    if (selectVal !== 'fixed') {
-                        schedulePool[weekKey].schedule.push({
-                            timeRange: finalTimeRange,
-                            area: selectVal,
-                            type: "mandatory_trigger",
-                            actionName: `触发 ${selectVal}`
-                        });
-                    } else {
-                        schedulePool[weekKey].schedule.push({
-                            timeRange: finalTimeRange,
-                            area: area,
-                            type: type || "rest",
-                            actionName: action
-                        });
-                    }
+                    schedulePool[weekKey].schedule.push({
+                        timeRange: finalTimeRange,
+                        area: area,
+                        type: type || "rest",
+                        action: action
+                    });
                 }
             }
             result.baseSchedule = Object.values(schedulePool).filter(b => b.schedule.length > 0);
 
-            // 必然随机
+            // 2. 解析必然随机事件库（核心修改 2：整体打包合流进入 randomEvents，格式严格规范化）
             document.querySelectorAll('#tbody-mandatory-details tr').forEach(row => {
                 const els = row.querySelectorAll('select, input');
                 if (els.length < 8) return;
-                result.mandatoryRandomEvents.push({
-                    group: els[0].value, id: els[1].value.trim(),
-                    week: parseWeeks(els[2].value), timeRange: els[3].value.trim(),
-                    rate: parseInt(els[4].value, 10) || 0, area: els[5].value.trim(),
-                    type: els[6].value.trim(), action: els[7].value.trim()
+                
+                const areaVal = els[5].value.trim();
+                const actVal = els[7].value.trim();
+                if (!areaVal && !actVal) return; // 没内容不加入
+
+                result.randomEvents.push({
+                    week: parseWeeks(els[2].value),
+                    timeRange: els[3].value.trim(),
+                    probability: parseInt(els[4].value, 10) || 0,
+                    area: areaVal,
+                    type: els[6].value.trim() || "rest",
+                    action: actVal,
+                    isMandatory: true // 强锁定注入
                 });
             });
 
-            // 真随机
+            // 3. 解析真随机事件库（合流进入 randomEvents，规范统一格式案例）
             document.querySelectorAll('#tbody-true-random tr').forEach(row => {
                 const els = row.querySelectorAll('input');
                 if (els.length < 9) return;
+
+                const areaVal = els[4].value.trim();
+                const actVal = els[6].value.trim();
+                if (!areaVal && !actVal) return;
+
                 result.randomEvents.push({
-                    id: els[0].value.trim(), week: parseWeeks(els[1].value),
-                    timeRange: els[2].value.trim(), rate: parseInt(els[3].value, 10) || 0,
-                    area: els[4].value.trim(), type: els[5].value.trim(),
-                    actionName: els[6].value.trim(), persist: els[7].value.trim() === '是',
-                    tip: els[8].value.trim()
+                    week: parseWeeks(els[1].value),
+                    timeRange: els[2].value.trim(),
+                    probability: parseInt(els[3].value, 10) || 0,
+                    area: areaVal,
+                    type: els[5].value.trim() || "rest",
+                    action: actVal,
+                    tip: els[8].value.trim(),
+                    persist: els[7].value.trim() === '是'
                 });
             });
 
-            // 地点话术
+            // 4. 公共地点话术
             document.querySelectorAll('#tbody-location-texts tr').forEach(row => {
                 const els = row.querySelectorAll('input');
                 if (els.length < 3) return;
@@ -396,7 +399,7 @@
             document.getElementById('json-output').textContent = JSON.stringify(result, null, 2);
         }
 
-        // --- 全智能双向复原导入机制 ---
+        // --- 保证完美还原的 JSON 导入器 ---
         function importJSON(event) {
             const file = event.target.files[0];
             if (!file) return;
@@ -409,6 +412,7 @@
 
                     initTimelineTable();
 
+                    // 恢复固定大表
                     if (data.baseSchedule) {
                         data.baseSchedule.forEach(block => {
                             const days = block.week || [];
@@ -449,64 +453,57 @@
                                     const typeIn = master.querySelector('.cell-type');
                                     const actionIn = master.querySelector('.cell-action');
 
-                                    if (item.area && item.area.startsWith('必然随机事件')) {
-                                        select.value = item.area;
-                                        master.classList.add('cell-mandatory');
-                                        areaIn.value = item.area;
-                                        areaIn.disabled = true;
-                                    } else {
-                                        select.value = 'fixed';
-                                        areaIn.value = item.area || "";
-                                        typeIn.value = item.type || "";
-                                        actionIn.value = item.actionName || "";
-                                    }
+                                    select.value = 'fixed';
+                                    areaIn.value = item.area || "";
+                                    typeIn.value = item.type || "";
+                                    actionIn.value = item.action || "";
                                 });
                             });
                         });
                     }
 
-                    // 还原分支子表
+                    // 分解随机事件到对应的子页面中去
                     const tbodyM = document.getElementById('tbody-mandatory-details'); tbodyM.innerHTML = "";
-                    if (data.mandatoryRandomEvents) {
-                        data.mandatoryRandomEvents.forEach(m => {
-                            const tr = document.createElement('tr');
-                            tr.innerHTML = `
-                                <td class="p-1 border-r"><select class="w-full text-center p-0.5"><option value="必然随机事件 1" ${m.group==='必然随机事件 1'?'selected':''}>必然随机事件 1</option><option value="必然随机事件 2" ${m.group==='必然随机事件 2'?'selected':''}>必然随机事件 2</option><option value="必然随机事件 3" ${m.group==='必然随机事件 3'?'selected':''}>必然随机事件 3</option><option value="必然随机事件 4" ${m.group==='必然随机事件 4'?'selected':''}>必然随机事件 4</option></select></td>
-                                <td class="p-1 border-r"><input type="text" value="${m.id||''}" class="w-full text-center border-0 p-0"></td>
-                                <td class="p-1 border-r"><input type="text" value="${m.week?m.week.join(','):''}" class="w-full text-center border-0 p-0 font-mono"></td>
-                                <td class="p-1 border-r"><input type="text" value="${m.timeRange||''}" class="w-full text-center border-0 p-0 font-mono"></td>
-                                <td class="p-1 border-r"><input type="text" value="${m.rate||''}" class="w-full text-center border-0 p-0"></td>
-                                <td class="p-1 border-r"><input type="text" value="${m.area||''}" list="location-list" class="w-full border-0 p-0"></td>
-                                <td class="p-1 border-r"><input type="text" value="${m.type||''}" class="w-full border-0 p-0"></td>
-                                <td class="p-1 border-r"><input type="text" value="${m.action||''}" class="w-full border-0 p-0"></td>
-                                <td class="p-1 text-center"><button onclick="deleteRow(this)" class="text-gray-300 hover:text-red-500 font-bold">×</button></td>
-                            `;
-                            tbodyM.appendChild(tr);
-                        });
-                    }
-
-                    // 还原真随机子表
                     const tbodyTR = document.getElementById('tbody-true-random'); tbodyTR.innerHTML = "";
+
                     if (data.randomEvents) {
-                        data.randomEvents.forEach(r => {
-                            const tr = document.createElement('tr');
-                            tr.innerHTML = `
-                                <td class="p-1 border-r"><input type="text" value="${r.id||''}" class="w-full border-0 p-0"></td>
-                                <td class="p-1 border-r"><input type="text" value="${r.week?r.week.join(','):''}" class="w-full text-center border-0 p-0 font-mono"></td>
-                                <td class="p-1 border-r"><input type="text" value="${r.timeRange||''}" class="w-full text-center border-0 p-0 font-mono"></td>
-                                <td class="p-1 border-r"><input type="text" value="${r.rate||0}" class="w-full text-center border-0 p-0"></td>
-                                <td class="p-1 border-r"><input type="text" value="${r.area||''}" list="location-list" class="w-full border-0 p-0"></td>
-                                <td class="p-1 border-r"><input type="text" value="${r.type||''}" class="w-full border-0 p-0"></td>
-                                <td class="p-1 border-r"><input type="text" value="${r.actionName||''}" class="w-full border-0 p-0"></td>
-                                <td class="p-1 border-r"><input type="text" value="${r.persist?'是':'否'}" class="w-full text-center border-0 p-0"></td>
-                                <td class="p-1 border-r"><input type="text" value="${r.tip||''}" class="w-full border-0 p-0"></td>
-                                <td class="p-1 text-center"><button onclick="deleteRow(this)" class="text-gray-300 hover:text-red-500 font-bold">×</button></td>
-                            `;
-                            tbodyTR.appendChild(tr);
+                        data.randomEvents.forEach((r, idx) => {
+                            if (r.isMandatory) {
+                                // 扔回必然随机库
+                                const tr = document.createElement('tr');
+                                tr.innerHTML = `
+                                    <td class="p-1 border-r"><select class="w-full text-center p-0.5"><option value="必然随机事件 1">必然随机事件 1</option><option value="必然随机事件 2">必然随机事件 2</option><option value="必然随机事件 3">必然随机事件 3</option><option value="必然随机事件 4">必然随机事件 4</option></select></td>
+                                    <td class="p-1 border-r"><input type="text" value="1-${idx}" class="w-full text-center border-0 p-0"></td>
+                                    <td class="p-1 border-r"><input type="text" value="${r.week?r.week.join(','):''}" class="w-full text-center border-0 p-0 font-mono"></td>
+                                    <td class="p-1 border-r"><input type="text" value="${r.timeRange||''}" class="w-full text-center border-0 p-0 font-mono"></td>
+                                    <td class="p-1 border-r"><input type="text" value="${r.probability||0}" class="w-full text-center border-0 p-0"></td>
+                                    <td class="p-1 border-r"><input type="text" value="${r.area||''}" list="location-list" class="w-full border-0 p-0"></td>
+                                    <td class="p-1 border-r"><input type="text" value="${r.type||''}" class="w-full border-0 p-0"></td>
+                                    <td class="p-1 border-r"><input type="text" value="${r.action||''}" class="w-full border-0 p-0"></td>
+                                    <td class="p-1 text-center"><button onclick="deleteRow(this)" class="text-gray-300 hover:text-red-500 font-bold">×</button></td>
+                                `;
+                                tbodyM.appendChild(tr);
+                            } else {
+                                // 扔回真随机库
+                                const tr = document.createElement('tr');
+                                tr.innerHTML = `
+                                    <td class="p-1 border-r"><input type="text" value="ev_${idx}" class="w-full border-0 p-0"></td>
+                                    <td class="p-1 border-r"><input type="text" value="${r.week?r.week.join(','):''}" class="w-full text-center border-0 p-0 font-mono"></td>
+                                    <td class="p-1 border-r"><input type="text" value="${r.timeRange||''}" class="w-full text-center border-0 p-0 font-mono"></td>
+                                    <td class="p-1 border-r"><input type="text" value="${r.probability||0}" class="w-full text-center border-0 p-0"></td>
+                                    <td class="p-1 border-r"><input type="text" value="${r.area||''}" list="location-list" class="w-full border-0 p-0"></td>
+                                    <td class="p-1 border-r"><input type="text" value="${r.type||''}" class="w-full border-0 p-0"></td>
+                                    <td class="p-1 border-r"><input type="text" value="${r.action||''}" class="w-full border-0 p-0"></td>
+                                    <td class="p-1 border-r"><input type="text" value="${r.persist?'是':'否'}" class="w-full text-center border-0 p-0"></td>
+                                    <td class="p-1 border-r"><input type="text" value="${r.tip||''}" class="w-full border-0 p-0"></td>
+                                    <td class="p-1 text-center"><button onclick="deleteRow(this)" class="text-gray-300 hover:text-red-500 font-bold">×</button></td>
+                                `;
+                                tbodyTR.appendChild(tr);
+                            }
                         });
                     }
 
-                    // 还原基础对白池
+                    // 恢复公共地点话术
                     const tbodyTxt = document.getElementById('tbody-location-texts'); tbodyTxt.innerHTML = "";
                     if (data.locationRandomActions) {
                         for (const area in data.locationRandomActions) {
@@ -526,9 +523,9 @@
                     }
 
                     updateAll();
-                    alert("🎯 成功以历史经典大轴外观还原全部合并排程！");
+                    alert("🎯 JSON 成功清洗并逆向解析还原！");
                 } catch(e) {
-                    alert("导入失败: " + e.message);
+                    alert("导入错误: " + e.message);
                 }
             };
             reader.readAsText(file);
@@ -549,12 +546,12 @@
             tr.innerHTML = `
                 <td class="p-1 border-r"><select class="w-full text-center p-0.5"><option value="必然随机事件 1">必然随机事件 1</option><option value="必然随机事件 2">必然随机事件 2</option><option value="必然随机事件 3">必然随机事件 3</option><option value="必然随机事件 4">必然随机事件 4</option></select></td>
                 <td class="p-1 border-r"><input type="text" placeholder="1-1" class="w-full text-center border-0 p-0"></td>
-                <td class="p-1 border-r"><input type="text" value="1-5" class="w-full text-center border-0 p-0 font-mono"></td>
-                <td class="p-1 border-r"><input type="text" value="12:00-12:30" class="w-full text-center border-0 p-0 font-mono"></td>
-                <td class="p-1 border-r"><input type="text" value="50" class="w-full text-center border-0 p-0"></td>
-                <td class="p-1 border-r"><input type="text" list="location-list" class="w-full border-0 p-0"></td>
-                <td class="p-1 border-r"><input type="text" class="w-full border-0 p-0"></td>
-                <td class="p-1 border-r"><input type="text" class="w-full border-0 p-0"></td>
+                <td class="p-1 border-r"><input type="text" value="2" class="w-full text-center border-0 p-0 font-mono"></td>
+                <td class="p-1 border-r"><input type="text" value="20:00-24:00" class="w-full text-center border-0 p-0 font-mono"></td>
+                <td class="p-1 border-r"><input type="text" value="35" class="w-full text-center border-0 p-0"></td>
+                <td class="p-1 border-r"><input type="text" value="能乐町" list="location-list" class="w-full border-0 p-0"></td>
+                <td class="p-1 border-r"><input type="text" value="rest" class="w-full border-0 p-0"></td>
+                <td class="p-1 border-r"><input type="text" value="闲逛中" class="w-full border-0 p-0"></td>
                 <td class="p-1 text-center"><button onclick="deleteRow(this)" class="text-gray-300 hover:text-red-500 font-bold">×</button></td>
             `;
             document.getElementById('tbody-mandatory-details').appendChild(tr);
@@ -565,14 +562,14 @@
             const tr = document.createElement('tr');
             tr.innerHTML = `
                 <td class="p-1 border-r"><input type="text" value="ev_rand" class="w-full border-0 p-0"></td>
-                <td class="p-1 border-r"><input type="text" value="1-5" class="w-full text-center border-0 p-0 font-mono"></td>
-                <td class="p-1 border-r"><input type="text" value="18:00-22:00" class="w-full text-center border-0 p-0 font-mono"></td>
-                <td class="p-1 border-r"><input type="text" value="20" class="w-full text-center border-0 p-0"></td>
-                <td class="p-1 border-r"><input type="text" list="location-list" class="w-full border-0 p-0"></td>
-                <td class="p-1 border-r"><input type="text" class="w-full border-0 p-0"></td>
-                <td class="p-1 border-r"><input type="text" class="w-full border-0 p-0"></td>
-                <td class="p-1 border-r"><input type="text" value="否" class="w-full text-center border-0 p-0"></td>
-                <td class="p-1 border-r"><input type="text" class="w-full border-0 p-0"></td>
+                <td class="p-1 border-r"><input type="text" value="2,4" class="w-full text-center border-0 p-0 font-mono"></td>
+                <td class="p-1 border-r"><input type="text" value="13:00-14:00" class="w-full text-center border-0 p-0 font-mono"></td>
+                <td class="p-1 border-r"><input type="text" value="25" class="w-full text-center border-0 p-0"></td>
+                <td class="p-1 border-r"><input type="text" value="融大附中" list="location-list" class="w-full border-0 p-0"></td>
+                <td class="p-1 border-r"><input type="text" value="work" class="w-full border-0 p-0"></td>
+                <td class="p-1 border-r"><input type="text" value="📖 校园健康讲座" class="w-full border-0 p-0"></td>
+                <td class="p-1 border-r"><input type="text" value="是" class="w-full text-center border-0 p-0"></td>
+                <td class="p-1 border-r"><input type="text" value="✨ Marcel去融大附中做校园卫生安全讲座啦！" class="w-full border-0 p-0"></td>
                 <td class="p-1 text-center"><button onclick="deleteRow(this)" class="text-gray-300 hover:text-red-500 font-bold">×</button></td>
             `;
             document.getElementById('tbody-true-random').appendChild(tr);
@@ -583,7 +580,7 @@
             const tr = document.createElement('tr');
             tr.innerHTML = `
                 <td class="p-1 border-r"><input type="text" list="location-list" class="w-full text-center border-0 p-0"></td>
-                <td class="p-1 border-r"><input type="text" placeholder="如 rest" class="w-full text-center border-0 p-0"></td>
+                <td class="p-1 border-r"><input type="text" class="w-full text-center border-0 p-0"></td>
                 <td class="p-1 border-r"><input type="text" class="w-full border-0 p-0 px-2"></td>
                 <td class="p-1 text-center"><button onclick="deleteRow(this)" class="text-gray-300 hover:text-red-500 font-bold">×</button></td>
             `;
@@ -601,7 +598,7 @@
         }
 
         function updateAll() { generateJSON(); }
-        function copyJSON() { navigator.clipboard.writeText(document.getElementById('json-output').textContent).then(() => alert('数据已复制到剪贴板')); }
+        function copyJSON() { navigator.clipboard.writeText(document.getElementById('json-output').textContent).then(() => alert('数据已复制')); }
         function downloadJSON() {
             const name = document.getElementById('m1-name').value.trim() || 'role';
             const blob = new Blob([document.getElementById('json-output').textContent], { type: 'application/json' });
