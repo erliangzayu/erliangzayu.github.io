@@ -630,12 +630,20 @@
                 ]);
                 
                 // 2. 并发读取每个人的单人 JSON
+                // 遍历花名册
                 const ocPromises = ocNames.map(name => 
-                    fetch(`./rtocdata/${name}.json`).then(r => {
-                        if (!r.ok) throw new Error(`无法加载 ./rtocdata/${name}.json`);
-                        return r.json();
-                    })
+                    fetch(`./rtocdata/${name}.json`)
+                        .then(r => {
+                            if (!r.ok) return null; // 💡 重点：如果找不到文件(404)，不报错，直接返回空
+                            return r.json();
+                        })
+                        .catch(() => null) // 💡 重点：网络有任何其他错误也直接返回空，不连累别人
                 );
+                
+                const allResults = await Promise.all(ocPromises);
+                
+                // 💡 重点：把所有写好了的（不是 null 的）过滤出来，重新组装！
+                ocData = allResults.filter(item => item !== null);
                 
                 ocData = await Promise.all(ocPromises);
                 areaData = areaRes;
