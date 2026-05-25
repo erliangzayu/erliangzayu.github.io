@@ -130,7 +130,7 @@
 
                 <div id="content-m5" class="tab-content hidden space-y-3">
                     <div class="bg-emerald-50 border border-emerald-200 p-2.5 rounded text-xs text-emerald-700">
-                        ✨ <strong>话术池自动监听同步：</strong>无需手动增加地点！系统已自动提取前几页（固定大表、必然随机、真随机）中出现的所有 <strong>地点 + 类别</strong> 组合。你可以在此直接填写各自地点的随机聊天文本。
+                        ✨ <strong>话术池自动监听同步：</strong>无需手动增加地点！系统已自动提取前几页中出现的所有 <strong>地点 + 类别</strong> 组合。你可以在此直接填写各自地点的随机聊天文本。
                     </div>
                     <div class="border rounded overflow-hidden bg-white">
                         <table class="w-full border-collapse text-xs">
@@ -164,9 +164,8 @@
             TIME_SLOTS.push(`${pH}:30–${(h + 1).toString().padStart(2, '0')}:00`);
         }
 
-        // 全局动态暂存：
-        let MANDATORY_BRANCHES_DATA = {};  // 必然随机分支缓存
-        let LOCATION_TEXTS_CACHE = {};     // 话术池文本输入存储器 {"地点_类别": "聊天台词1"}
+        let MANDATORY_BRANCHES_DATA = {};  
+        let LOCATION_TEXTS_CACHE = {};     
 
         function initTimelineTable() {
             const tbody = document.getElementById('tbody-timeline');
@@ -267,7 +266,6 @@
             updateAll();
         }
 
-        // --- 必然随机子时段渲染器 ---
         function syncMandatoryContainersHTML(detectedList) {
             const root = document.getElementById('mandatory-containers-root');
             const badge = document.getElementById('m3-badge');
@@ -362,12 +360,10 @@
             updateAll();
         }
 
-        // --- 核心改动：话术池全自动同步渲染器 ---
         function syncLocationTextsHTML(uniqueLocations) {
             const tbody = document.getElementById('tbody-location-texts');
             const badge = document.getElementById('m5-badge');
             
-            // 收集当前话术池里正在填写的最新文本
             document.querySelectorAll('.loc-text-row').forEach(row => {
                 const k = row.getAttribute('data-loc-key');
                 LOCATION_TEXTS_CACHE[k] = row.querySelector('.loc-input').value.trim();
@@ -385,7 +381,7 @@
             let html = "";
             Array.from(uniqueLocations).sort().forEach(key => {
                 const [area, type] = key.split('|||');
-                const val = LOCATION_TEXTS_CACHE[key] || ""; // 读取缓存里填好的内容
+                const val = LOCATION_TEXTS_CACHE[key] || ""; 
 
                 html += `
                     <tr class="border-b hover:bg-slate-50 loc-text-row" data-loc-key="${key}">
@@ -399,7 +395,6 @@
             });
             tbody.innerHTML = html;
 
-            // 让话术池的输入框也能在敲击时实时更新编译
             tbody.querySelectorAll('.loc-input').forEach(input => {
                 input.addEventListener('input', () => {
                     const row = input.closest('.loc-text-row');
@@ -409,7 +404,6 @@
             });
         }
 
-        // --- 全局核心数据统一编译打包算法 ---
         function generateJSON() {
             const result = {
                 name: document.getElementById('m1-name').value.trim(),
@@ -421,9 +415,8 @@
 
             const schedulePool = {};
             const detectedMandatories = []; 
-            const uniqueLocations = new Set(); // 核心：用于收集全表出现的 地点|||type 唯一组合
+            const uniqueLocations = new Set(); 
 
-            // 1. 扫描大表
             for (let d = 0; d <= 6; d++) {
                 const weekKey = JSON.stringify([d]);
                 if (!schedulePool[weekKey]) schedulePool[weekKey] = { week: [d], schedule: [] };
@@ -452,8 +445,7 @@
                     const action = cell.querySelector('.cell-action').value.trim();
 
                     if (!area && !action) continue;
-
-                    if (area) { uniqueLocations.add(`${area}|||${type}`); } // 捕捉大表地点组合
+                    if (area) { uniqueLocations.add(`${area}|||${type}`); } 
 
                     schedulePool[weekKey].schedule.push({
                         timeRange: finalTimeRange, area: area, type: type, action: action
@@ -462,7 +454,6 @@
             }
             result.baseSchedule = Object.values(schedulePool).filter(b => b.schedule.length > 0);
 
-            // 2. 处理必然随机分支
             detectedMandatories.forEach(item => {
                 const cacheKey = `W${item.day}_${item.timeRange}_G${item.groupId}`;
                 const branches = MANDATORY_BRANCHES_DATA[cacheKey] || [];
@@ -470,7 +461,7 @@
                 branches.forEach(b => {
                     if (!b.area && !b.action) return; 
                     const t = b.type || "rest";
-                    if (b.area) { uniqueLocations.add(`${b.area}|||${t}`); } // 捕捉必然随机分支地点
+                    if (b.area) { uniqueLocations.add(`${b.area}|||${t}`); } 
 
                     result.randomEvents.push({
                         week: [item.day], timeRange: item.timeRange, probability: b.probability,
@@ -479,7 +470,6 @@
                 });
             });
 
-            // 3. 处理真随机事件
             document.querySelectorAll('#tbody-true-random tr').forEach(row => {
                 const els = row.querySelectorAll('input');
                 if (els.length < 9) return;
@@ -488,7 +478,7 @@
                 const actVal = els[6].value.trim();
                 if (!areaVal && !actVal) return;
 
-                if (areaVal) { uniqueLocations.add(`${areaVal}|||${typeVal}`); } // 捕捉真随机事件地点
+                if (areaVal) { uniqueLocations.add(`${areaVal}|||${typeVal}`); } 
 
                 result.randomEvents.push({
                     week: parseWeeks(els[1].value), timeRange: els[2].value.trim(), probability: parseInt(els[3].value, 10) || 0,
@@ -496,13 +486,11 @@
                 });
             });
 
-            // 4. 解析并组装自动生成的地点话术文本内容
             uniqueLocations.forEach(key => {
                 const [area, type] = key.split('|||');
                 const rawText = LOCATION_TEXTS_CACHE[key] || "";
                 if (!rawText) return; 
 
-                // 如果用户输入了话术，按常见的中英文逗号分号智能拆分为多段
                 const textArr = rawText.split(/[,，;；]/).map(t => t.trim()).filter(t => t.length > 0);
                 if (textArr.length === 0) return;
 
@@ -514,14 +502,18 @@
             return { detectedMandatories, uniqueLocations };
         }
 
-        // --- 全面兼容逆向解析的导入器 ---
+        // --- ⭐【核心修复与全能降级兼容导入器】 ⭐ ---
         function importJSON(event) {
             const file = event.target.files[0];
             if (!file) return;
             const reader = new FileReader();
             reader.onload = function(e) {
                 try {
-                    const data = JSON.parse(e.target.result);
+                    let data = JSON.parse(e.target.result);
+                    
+                    // 兼容模式1：处理最外层被包装在单个对象的数组里
+                    if (Array.isArray(data)) { data = data[0]; }
+
                     document.getElementById('m1-name').value = data.name || "";
                     document.getElementById('m1-avatar').value = data.avatar || "";
 
@@ -529,10 +521,37 @@
                     MANDATORY_BRANCHES_DATA = {};
                     LOCATION_TEXTS_CACHE = {};
 
-                    // 恢复大表
+                    // 兼容模式2：⭐ 核心算法——把旧版扁平的 baseSchedule 升级为全新合并大轴数组
+                    if (data.baseSchedule && data.baseSchedule.length > 0) {
+                        const firstItem = data.baseSchedule[0];
+                        // 探测是否是旧版的扁平对象样式：缺少 schedule 键名但存在直接的 area 或 timeRange 属性
+                        if (!firstItem.hasOwnProperty('schedule') && (firstItem.hasOwnProperty('area') || firstItem.hasOwnProperty('timeRange'))) {
+                            console.log("检测到旧版扁平化日程，启动智能升级编译转化引擎...");
+                            const upgradedBase = [];
+                            data.baseSchedule.forEach(oldItem => {
+                                const wKey = oldItem.week ? oldItem.week.sort().join(',') : 'all';
+                                let block = upgradedBase.find(b => (b._wKey === wKey));
+                                if (!block) {
+                                    block = { week: oldItem.week || [], schedule: [], _wKey: wKey };
+                                    upgradedBase.push(block);
+                                }
+                                block.schedule.push({
+                                    timeRange: oldItem.timeRange || "00:00-00:30",
+                                    area: oldItem.area || "",
+                                    type: oldItem.type || "rest",
+                                    action: oldItem.action || ""
+                                });
+                            });
+                            data.baseSchedule = upgradedBase; // 完成内存数据完美升级！
+                        }
+                    }
+
+                    // 恢复新版数据大表
                     if (data.baseSchedule) {
                         data.baseSchedule.forEach(block => {
                             const days = block.week || [];
+                            if (!block.schedule) return; // 容错防止崩溃
+
                             block.schedule.forEach(item => {
                                 const trange = item.timeRange.replace('-', '–');
                                 const parts = trange.split('–');
@@ -615,19 +634,19 @@
                         });
                     }
 
-                    // 恢复话术池文本到缓存器中
                     if (data.locationRandomActions) {
                         for (const area in data.locationRandomActions) {
                             for (const type in data.locationRandomActions[area]) {
                                 const textKey = `${area}|||${type}`;
-                                LOCATION_TEXTS_CACHE[textKey] = data.locationRandomActions[area][type].join(', ');
+                                const val = data.locationRandomActions[area][type];
+                                LOCATION_TEXTS_CACHE[textKey] = Array.isArray(val) ? val.join(', ') : val;
                             }
                         }
                     }
 
                     updateAll();
-                    alert("🎯 成功导入！地点随机话术池全自动同步器已全部就绪！");
-                } catch(e) { alert("导入错误: " + e.message); }
+                    alert("🎯 旧版历史数据已经通过高阶编译兼容算法完美导入回显！");
+                } catch(e) { alert("导入错误: " + e.message); console.error(e); }
             };
             reader.readAsText(file);
         }
@@ -653,7 +672,7 @@
                 <td class="p-1 border-r"><input type="text" value="work" class="w-full border-0 p-0"></td>
                 <td class="p-1 border-r"><input type="text" value="📖 校园健康讲座" class="w-full border-0 p-0"></td>
                 <td class="p-1 border-r"><input type="text" value="是" class="w-full text-center border-0 p-0"></td>
-                <td class="p-1 border-r"><input type="text" value="✨ Marcel去融大附中做校园卫生安全讲座啦！" class="w-full border-0 p-0"></td>
+                <td class="p-1 border-r"><input type="text" value="✨ 校园卫生安全讲座啦！" class="w-full border-0 p-0"></td>
                 <td class="p-1 text-center"><button onclick="deleteRow(this)" class="text-gray-300 hover:text-red-500 font-bold">×</button></td>
             `;
             document.getElementById('tbody-true-random').appendChild(tr);
@@ -671,9 +690,7 @@
 
         function updateAll() { 
             const state = generateJSON(); 
-            // 1. 同步必然随机分支盒子
             syncMandatoryContainersHTML(state.detectedMandatories);
-            // 2. 同步地点话术池捕获列表
             syncLocationTextsHTML(state.uniqueLocations);
         }
 
