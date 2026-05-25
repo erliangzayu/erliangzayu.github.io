@@ -620,12 +620,12 @@
             try {
                 // 重新加载数据
                 const [ocRes, areaRes] = await Promise.all([
-                    fetch('.rtocdata/ocList.json').then(r=>r.json()),
+                    fetch('./rtocdata/ocList.json').then(r=>r.json()),
                     fetch('./areaData.json').then(r=>r.json())
                 ]);
                 const ocPromises = ocNames.map(name => 
-                    fetch(`.rtocdata/${name}.json`).then(r => {
-                        if (!r.ok) throw new Error(`无法加载 ${name}.json`);
+                    fetch('./rtocdata/${name}.json').then(r => {
+                        if (!r.ok) throw new Error('无法加载 ${name}.json');
                         return r.json();
                     })
                 );
@@ -1132,11 +1132,11 @@
             try {
                 // 加载数据
                 const [ocRes, areaRes] = await Promise.all([
-                    fetch('rtocdata/ocList.json.json').then(r => r.json()),
+                    fetch('./rtocdata/ocList.json.json').then(r => r.json()),
                     fetch('./areaData.json').then(r => r.json())
                 ]);
                 const ocPromises = ocNames.map(name => 
-                    fetch(`rtocdata/${name}.json`).then(r => {
+                    fetch(`./rtocdata/${name}.json`).then(r => {
                         if (!r.ok) throw new Error(`无法加载 ${name}.json`);
                         return r.json();
                     })
