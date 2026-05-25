@@ -603,51 +603,56 @@
 
         // ========== 下拉刷新核心逻辑 ==========
         // 执行刷新操作（保存当前选中状态）
+                // 执行刷新操作（保存当前选中状态）
         async function doRefresh() {
             if (isRefreshing) return;
             isRefreshing = true;
             pullRefresh.innerText = '刷新中...';
             pullRefresh.classList.add('loading');
             
-            // ========== 修复点4：刷新时重置随机事件tips标记，允许重新显示 ==========
             randomEventTipShown = false;
             
-            // 保存刷新前的选中状态（关键：避免刷新后重置）
             const savedBigArea = currentBigArea;
             const savedSmallArea = currentSmallArea;
             const savedAreaCode = activeAreaCode;
             
             try {
-                // 重新加载数据
-                const [ocRes, areaRes] = await Promise.all([
-                    fetch('./rtocdata/ocList.json').then(r=>r.json()),
-                    fetch('./areaData.json').then(r=>r.json())
+                // 1. 刷新时并发获取花名册和地点数据
+                const [ocNames, areaRes] = await Promise.all([
+                    fetch('./rtocdata/ocList.json').then(r => {
+                        if (!r.ok) throw new Error('无法读取 ocList.json');
+                        return r.json();
+                    }),
+                    fetch('./areaData.json').then(r => {
+                        if (!r.ok) throw new Error('无法读取 areaData.json');
+                        return r.json();
+                    })
                 ]);
+                
+                // 2. 并发读取每个人的单人 JSON
                 const ocPromises = ocNames.map(name => 
-                    fetch('./rtocdata/${name}.json').then(r => {
-                        if (!r.ok) throw new Error('无法加载 ${name}.json');
+                    fetch(`./rtocdata/${name}.json`).then(r => {
+                        if (!r.ok) throw new Error(`无法加载 ./rtocdata/${name}.json`);
                         return r.json();
                     })
                 );
-                ocData = ocRes;
+                
+                ocData = await Promise.all(ocPromises);
                 areaData = areaRes;
                 
-                // 清空缓存
                 ocActionCache = {};
                 localStorage.clear();
                 sessionStorage.clear();
                 
-                // 恢复选中状态并重新渲染
                 currentBigArea = savedBigArea;
                 await renderSmallArea(currentBigArea, savedSmallArea, savedAreaCode);
                 renderOC();
                 renderOwnerSidebar();
                 renderAreaInfoSidebar();
-                // 刷新提示：使用normal类型，不受一次显示限制
                 showTip('✅ 刷新成功！', 'normal');
             } catch (e) {
                 console.error('刷新失败', e);
-                showTip('❌ 刷新失败，请重试', 'normal');
+                showTip(`❌ 刷新失败: ${e.message}`, 'normal');
             } finally {
                 isRefreshing = false;
                 setTimeout(resetPullState, 800);
@@ -1130,18 +1135,28 @@
             randomEventTipShown = false;
             
             try {
-                // 加载数据
-                const [ocRes, areaRes] = await Promise.all([
-                    fetch('./rtocdata/ocList.json.json').then(r => r.json()),
-                    fetch('./areaData.json').then(r => r.json())
+                // 1. 先读取花名册(ocList.json)和地点数据(areaData.json)
+                const [ocNames, areaRes] = await Promise.all([
+                    fetch('./rtocdata/ocList.json').then(r => {
+                        if (!r.ok) throw new Error('无法读取 ocList.json');
+                        return r.json();
+                    }),
+                    fetch('./areaData.json').then(r => {
+                        if (!r.ok) throw new Error('无法读取 areaData.json');
+                        return r.json();
+                    })
                 ]);
+
+                // 2. 遍历花名册数组，并发去读每个人的单人 json
                 const ocPromises = ocNames.map(name => 
                     fetch(`./rtocdata/${name}.json`).then(r => {
-                        if (!r.ok) throw new Error(`无法加载 ${name}.json`);
+                        if (!r.ok) throw new Error(`无法加载 ./rtocdata/${name}.json`);
                         return r.json();
                     })
                 );
-                ocData = ocRes;
+                
+                // 3. 将所有单人数据拼装回原先的全局变量 ocData 数组中
+                ocData = await Promise.all(ocPromises);
                 areaData = areaRes;
 
                 // 初始化页面
@@ -1159,7 +1174,7 @@
                 }, 60000);
             } catch (e) {
                 console.error('初始化失败', e);
-                document.getElementById('ocContainer').innerHTML = '<div class="empty">加载失败</div>';
+                document.getElementById('ocContainer').innerHTML = `<div class="empty">加载失败: ${e.message}</div>`;
             }
         }
 
