@@ -596,39 +596,35 @@
                 const timeToGroupMap = {};
 
                 if (data.randomEvents) {
-                    data.randomEvents.forEach((r, idx) => {
-                        if (r.isMandatory) {
-                            const days = r.week || [0];
-                            const parts = r.timeRange.split('-');
-                            let startIdx = TIME_SLOTS.findIndex(s => s.startsWith(parts[0].trim()));
+    const tbodyTR = document.getElementById('tbody-true-random'); 
+    tbodyTR.innerHTML = ""; // 清空真随机池
 
-                            days.forEach(day => {
-                                if (startIdx === -1) return;
-                                const master = document.getElementById(`cell-${day}-${startIdx}`);
-                                if (master) {
-                                    const areaInput = master.querySelector('.cell-area');
-                                    // 仅在无固定排班冲突时，把左侧格子状态标为橙色
-                                    if (!areaInput || !areaInput.value.trim()) {
-                                        master.querySelector('.cell-main-dropdown').value = 'mandatory';
-                                        master.classList.add('cell-mandatory');
-                                        master.querySelector('.item-group-wrapper').classList.remove('hidden');
-                                        master.querySelector('.item-group-wrapper').classList.add('flex');
-                                        master.querySelector('.cell-input-container').classList.add('hidden');
+    data.randomEvents.forEach((r, idx) => {
+        // --- 逻辑分支点 ---
+        if (r.isMandatory === true) {
+            // 这是必然随机，才允许进入表格格子
+            const days = r.week || [0];
+            const parts = r.timeRange.split('-');
+            let startIdx = TIME_SLOTS.findIndex(s => s.startsWith(parts[0].trim()));
 
-                                        const mapKey = `${day}_${r.timeRange}`;
-                                        if (!timeToGroupMap[mapKey]) timeToGroupMap[mapKey] = mockGroupCounter++;
-                                        master.querySelector('.cell-group-id').value = timeToGroupMap[mapKey];
-                                    }
+            days.forEach(day => {
+                const master = document.getElementById(`cell-${day}-${startIdx}`);
+                if (master) {
+                    // 设置格子类型为必然随机
+                    master.querySelector('.cell-main-dropdown').value = 'mandatory';
+                    master.classList.add('cell-mandatory');
+                    master.querySelector('.item-group-wrapper').classList.remove('hidden');
+                    master.querySelector('.cell-input-container').classList.add('hidden');
 
-                                    const grpId = master.querySelector('.cell-group-id').value || "1";
-                                    const cacheKey = `W${day}_${r.timeRange}_G${grpId}`;
-                                    if (!MANDATORY_BRANCHES_DATA[cacheKey]) MANDATORY_BRANCHES_DATA[cacheKey] = [];
-                                    
-                                    const isDup = MANDATORY_BRANCHES_DATA[cacheKey].some(b => b.area === r.area && b.action === r.action);
-                                    if (!isDup) {
-                                        MANDATORY_BRANCHES_DATA[cacheKey].push({
-                                            probability: r.probability || 0, area: r.area || "", type: r.type || "rest", action: r.action || ""
-                                        });
+                    // 填充缓存，以便渲染下面的必然随机库
+                    const cacheKey = `W${day}_${r.timeRange}_G${master.querySelector('.cell-group-id').value}`;
+                    if (!MANDATORY_BRANCHES_DATA[cacheKey]) MANDATORY_BRANCHES_DATA[cacheKey] = [];
+                    MANDATORY_BRANCHES_DATA[cacheKey].push({
+                        probability: r.probability || 0, 
+                        area: r.area || "", 
+                        type: r.type || "rest", 
+                        action: r.action || ""
+                    });
                                     }
                                 }
                             });
