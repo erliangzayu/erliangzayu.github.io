@@ -3,84 +3,100 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>OC 角色数据配置工具 - 专业极简版</title>
+    <title>OC 角色数据配置工具 - 清爽点选版</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        /* 极致纯净、无边框感的高级表格输入 */
-        .cell-textarea { @apply w-full h-full min-h-[32px] p-1 text-[11px] bg-transparent resize-none border-0 focus:ring-1 focus:ring-blue-500 focus:outline-none text-gray-700 leading-tight; }
-        .cell-select { @apply text-[10px] text-gray-500 bg-gray-50 border border-gray-200 rounded px-0.5 py-0.5 max-w-full focus:outline-none; }
-        .tab-btn { @apply px-4 py-2 text-gray-500 border-b-2 border-transparent font-medium transition-all; }
-        .tab-btn-active { @apply border-blue-600 text-blue-600 font-bold bg-white shadow-sm; }
-        
-        /* 框选与高亮 */
-        .excel-cell { @apply p-1 border border-gray-200 relative select-none align-top transition-colors; }
-        .excel-cell.selecting { @apply bg-blue-50/70; }
-        .excel-cell.cell-mandatory { @apply bg-amber-50/90 border-amber-200; }
-        
-        /* 隐藏滚动条但保持可用 */
-        .no-scrollbar::-webkit-scrollbar { display: none; }
+        body { background-color: #fcfbfa; }
+        .table-input { @apply border border-gray-200 px-1.5 py-0.5 w-full rounded focus:outline-none focus:border-amber-500 text-[11px] text-left bg-white text-gray-700; }
+        .table-select { @apply border border-gray-200 px-1 py-0.5 w-full rounded focus:outline-none focus:border-amber-500 text-[11px] bg-gray-50 text-gray-600; }
+        .tab-btn { @apply px-4 py-2 text-gray-400 border-b-2 border-transparent text-xs font-medium transition-all; }
+        .tab-btn-active { @apply border-amber-500 text-amber-700 font-bold bg-amber-50/50; }
+        .excel-cell { @apply p-1.5 border border-gray-200/80 transition-colors duration-150 align-top; }
+        /* 温和不刺眼的必然随机标黄 */
+        .cell-mandatory { background-color: #fef3c7; border-color: #fde68a; }
+        /* 隐藏原生滚动条 */
+        .custom-scroll::-webkit-scrollbar { width: 6px; height: 6px; }
+        .custom-scroll::-webkit-scrollbar-thumb { background: #e5e5e5; border-radius: 3px; }
     </style>
 </head>
-<body class="bg-gray-50 h-screen flex flex-col font-sans text-gray-900 overflow-hidden">
+<body class="h-screen flex flex-col font-sans overflow-hidden text-gray-800">
 
     <datalist id="location-list">
-        <option value="福源堂"><option value="九木酒屋"><option value="摸鱼网咖"><option value="LF 一中"><option value="肆的家"><option value="艺术街区"><option value="Valmont Plaza 购物中心"><option value="白日 Livehouse"><option value="警署"><option value="旧港码头"><option value="旧港集市"><option value="小林的算命摊"><option value="八爪胡同"><option value="真辉的公寓"><option value="小林的阁楼"><option value="融大附中"><option value="市民公园"><option value="晴南的家"><option value="6-11 便利店"><option value="幻日乐队排练室"><option value="Wesley 的家"><option value="奶奶的杂货铺"><option value="雾港仓库"><option value="Berlon 家老宅"><option value="渔场"><option value="地下拳场"><option value="能乐町"><option value="悠真的出租屋"><option value="Olivia 的出租屋"><option value="深蓝海岸"><option value="Adriana 的房车"><option value="水怪出没区"><option value="Felix 的住所"><option value="猎人小屋"><option value="Valmont's 会员商店"><option value="CULF/LF 大学城"><option value="凌的单人公寓"><option value="在地铁上"><option value="魔鬼鱼号">
+        <option value="福源堂"><option value="九木酒屋"><option value="摸鱼网咖"><option value="LF 一中">
+        <option value="肆的家"><option value="艺术街区"><option value="Valmont Plaza 购物中心"><option value="白日 Livehouse">
+        <option value="警署"><option value="旧港码头"><option value="旧港集市"><option value="小林的算命摊">
+        <option value="八爪胡同"><option value="真辉的公寓"><option value="小林的阁楼"><option value="融大附中">
+        <option value="市民公园"><option value="晴南的家"><option value="6-11 便利店"><option value="幻日乐队排练室">
+        <option value="Wesley 的家"><option value="奶奶的杂货铺"><option value="雾港仓库"><option value="Berlon 家老宅">
+        <option value="渔场"><option value="地下拳场"><option value="能乐町"><option value="悠真的出租屋">
+        <option value="Olivia 的出租屋"><option value="深蓝海岸"><option value="Adriana 的房车"><option value="水怪出没区">
+        <option value="Felix 的住所"><option value="猎人小屋"><option value="Valmont's 会员商店"><option value="CULF/LF 大学城">
+        <option value="凌的单人公寓"><option value="在地铁上"><option value="魔鬼鱼号">
     </datalist>
 
-    <header class="bg-white border-b border-gray-200 px-6 py-2.5 flex justify-between items-center shrink-0">
+    <header class="bg-white border-b border-gray-100 px-6 py-3 flex justify-between items-center shrink-0 shadow-sm">
         <div class="flex items-center gap-6">
-            <span class="text-sm font-bold tracking-tight text-gray-800">OC 数据控制台</span>
-            <div class="flex items-center gap-2">
-                <label class="bg-gray-100 hover:bg-gray-200 text-gray-600 px-3 py-1 rounded text-xs cursor-pointer font-medium transition">
-                    导入 JSON
+            <h1 class="text-sm font-bold text-gray-700 tracking-wide">✨ OC 课表数据配置台</h1>
+            <div class="flex items-center gap-2 bg-gray-50 border border-gray-100 rounded-lg p-1">
+                <label class="bg-white hover:bg-gray-100 text-gray-600 px-2.5 py-1 rounded text-xs font-medium cursor-pointer shadow-sm transition border">
+                    导入已有 JSON
                     <input type="file" id="import-file" accept=".json" class="hidden" onchange="importJSON(event)">
                 </label>
-                <div id="merge-tools" class="hidden items-center gap-1 bg-blue-50 border border-blue-200 px-2 py-0.5 rounded">
-                    <span class="text-[11px] text-blue-700 font-medium">已连选时段：</span>
-                    <button onclick="mergeSelectedCells()" class="bg-blue-600 hover:bg-blue-700 text-white px-2 py-0.5 rounded text-[10px] font-bold">🔗 合并单元格</button>
-                </div>
+                <div class="h-4 w-px bg-gray-200 mx-1"></div>
+                <span class="text-[11px] text-gray-400">勾选行后，合并到：</span>
+                <select id="target-merge-day" class="text-xs border rounded px-1 py-0.5 bg-white focus:outline-none">
+                    <option value="0">周日 (W0)</option>
+                    <option value="1">周一 (W1)</option>
+                    <option value="2">周二 (W2)</option>
+                    <option value="3">周三 (W3)</option>
+                    <option value="4">周四 (W4)</option>
+                    <option value="5">周五 (W5)</option>
+                    <option value="6">周六 (W6)</option>
+                </select>
+                <button onclick="mergeCheckedRows()" class="bg-amber-500 hover:bg-amber-600 text-white px-3 py-1 rounded text-xs font-bold shadow-sm">🔗 执行合并</button>
             </div>
         </div>
         <div class="flex items-center gap-2">
-            <button onclick="copyJSON()" class="text-gray-600 hover:text-gray-800 text-xs font-medium px-3 py-1.5 rounded">复制 JSON</button>
-            <button onclick="downloadJSON()" class="bg-blue-600 hover:bg-blue-700 text-white text-xs font-medium px-4 py-1.5 rounded transition">下载配置文件</button>
+            <button onclick="copyJSON()" class="text-gray-500 hover:text-gray-700 text-xs font-medium px-2 py-1">复制数据</button>
+            <button onclick="downloadJSON()" class="bg-gray-800 hover:bg-gray-900 text-white text-xs font-medium px-4 py-1.5 rounded-lg transition shadow-sm">导出配置文件</button>
         </div>
     </header>
 
     <main class="flex-1 flex overflow-hidden p-3 gap-3">
         
-        <section class="w-[75%] bg-white rounded-lg border border-gray-200 flex flex-col overflow-hidden">
-            <div class="flex border-b border-gray-200 bg-gray-50 text-xs shrink-0">
-                <button onclick="switchTab('m1')" id="tab-m1" class="tab-btn tab-btn-active">基础信息</button>
-                <button onclick="switchTab('m2')" id="tab-m2" class="tab-btn">全天排程大表</button>
-                <button onclick="switchTab('m3')" id="tab-m3" class="tab-btn">必然随机事件细化表</button>
-                <button onclick="switchTab('m4')" id="tab-m4" class="tab-btn">真随机事件表</button>
-                <button onclick="switchTab('m5')" id="tab-m5" class="tab-btn">公共地点话术</button>
+        <section class="w-[75%] bg-white rounded-xl border border-gray-100 flex flex-col overflow-hidden shadow-sm">
+            <div class="flex border-b border-gray-100 bg-gray-50/50 text-xs shrink-0">
+                <button onclick="switchTab('m1')" id="tab-m1" class="tab-btn tab-btn-active">角色基础</button>
+                <button onclick="switchTab('m2')" id="tab-m2" class="tab-btn">24H 日程大课表</button>
+                <button onclick="switchTab('m3')" id="tab-m3" class="tab-btn">必然随机事件库</button>
+                <button onclick="switchTab('m4')" id="tab-m4" class="tab-btn">真随机事件（无时间依赖）</button>
+                <button onclick="switchTab('m5')" id="tab-m5" class="tab-btn">公用地通话术池</button>
             </div>
 
-            <div class="flex-1 overflow-y-auto p-4">
+            <div class="flex-1 overflow-y-auto p-4 custom-scroll">
                 
                 <div id="content-m1" class="tab-content space-y-4">
                     <div class="grid grid-cols-2 gap-4 max-w-xl">
                         <div>
-                            <label class="block text-[11px] font-medium text-gray-400 uppercase tracking-wider mb-1">角色名 (name)</label>
-                            <input type="text" id="m1-name" value="肆" oninput="updateAll()" class="w-full border border-gray-200 rounded px-3 py-1.5 text-sm focus:outline-none focus:border-blue-500">
+                            <label class="block text-[11px] font-medium text-gray-400 mb-1">角色姓名 (name)</label>
+                            <input type="text" id="m1-name" value="肆" oninput="updateAll()" class="w-full border border-gray-200 rounded px-3 py-1.5 text-xs focus:outline-none focus:border-amber-500">
                         </div>
                         <div>
-                            <label class="block text-[11px] font-medium text-gray-400 uppercase tracking-wider mb-1">头像路径 (avatar)</label>
-                            <input type="text" id="m1-avatar" value="./images/avatar/si.png" oninput="updateAll()" class="w-full border border-gray-200 rounded px-3 py-1.5 text-sm focus:outline-none focus:border-blue-500">
+                            <label class="block text-[11px] font-medium text-gray-400 mb-1">头像资源路径 (avatar)</label>
+                            <input type="text" id="m1-avatar" value="./images/avatar/si.png" oninput="updateAll()" class="w-full border border-gray-200 rounded px-3 py-1.5 text-xs focus:outline-none focus:border-amber-500">
                         </div>
                     </div>
                 </div>
 
                 <div id="content-m2" class="tab-content hidden h-full flex flex-col">
-                    <div class="text-[11px] text-gray-400 mb-2 flex justify-between items-center">
-                        <span>💡 操作提示：在一列中【按住鼠标左键向下拖动】可框选多个格子，松开后在顶部点击“合并单元格”。固定日程填写格式：<code>地点 | 类型 | 动作</code></span>
+                    <div class="text-[11px] text-gray-400 mb-2">
+                        💡 操作指南：先勾选最左侧的【时间复选框】，然后在顶部选择对应的星期，点击“执行合并”即可。合并行支持独立解锁复原。
                     </div>
-                    <div class="flex-1 overflow-auto border border-gray-200 rounded">
-                        <table class="w-full text-left border-collapse table-fixed min-w-[1200px]" id="excel-main-table">
+                    <div class="flex-1 overflow-auto border border-gray-100 rounded-lg bg-white custom-scroll">
+                        <table class="w-full text-left border-collapse table-fixed min-w-[1300px]" id="excel-main-table">
                             <thead>
-                                <tr class="bg-gray-50 text-[11px] font-semibold text-gray-500 text-center border-b border-gray-200 sticky top-0 z-20">
+                                <tr class="bg-gray-50/80 text-[11px] font-medium text-gray-500 text-center border-b border-gray-200 sticky top-0 z-20 backdrop-blur-sm">
+                                    <th class="p-1.5 border-r border-b w-[50px] bg-gray-50">选择</th>
                                     <th class="p-1.5 border-r border-b w-[90px] bg-gray-50">时间段</th>
                                     <th class="p-1.5 border-r border-b bg-gray-50">周日 (W0)</th>
                                     <th class="p-1.5 border-r border-b bg-gray-50">周一 (W1)</th>
@@ -99,21 +115,21 @@
 
                 <div id="content-m3" class="tab-content hidden space-y-3">
                     <div class="flex justify-between items-center">
-                        <span class="text-xs text-gray-400">细化总大表中选定的 <b>必然随机事件1~4</b> 的对应概率及行为分支。</span>
-                        <button onclick="addMandatoryRow()" class="bg-gray-800 text-white px-2.5 py-1 rounded text-xs font-medium hover:bg-gray-700">+ 增加分支项</button>
+                        <span class="text-[11px] text-gray-400">管理在大课表里指定的“必然随机事件 1~4”的具体子项概率和行为描述。</span>
+                        <button onclick="addMandatoryRow()" class="bg-gray-800 text-white px-3 py-1 rounded text-xs font-medium hover:bg-gray-700">+ 增加随机分支</button>
                     </div>
-                    <div class="border rounded overflow-hidden">
+                    <div class="border border-gray-100 rounded-lg overflow-hidden shadow-sm">
                         <table class="w-full border-collapse text-xs">
                             <thead>
-                                <tr class="bg-gray-50 border-b font-medium text-gray-500 text-center">
-                                    <th class="p-1.5 border-r w-36">绑定事件大类</th>
+                                <tr class="bg-gray-50 text-gray-500 font-medium text-center border-b">
+                                    <th class="p-1.5 border-r w-36">大类组别</th>
                                     <th class="p-1.5 border-r w-20">事件序号</th>
-                                    <th class="p-1.5 border-r w-20">触发周数</th>
+                                    <th class="p-1.5 border-r w-20">适用周数</th>
                                     <th class="p-1.5 border-r w-28">时段范围</th>
                                     <th class="p-1.5 border-r w-16">概率(%)</th>
                                     <th class="p-1.5 border-r w-36">发生地点</th>
-                                    <th class="p-1.5 border-r w-20">类型(type)</th>
-                                    <th class="p-1.5 border-r">动作内容(action)</th>
+                                    <th class="p-1.5 border-r w-24">类别(type)</th>
+                                    <th class="p-1.5 border-r">动作描述(action)</th>
                                     <th class="p-1.5 text-center w-12">操作</th>
                                 </tr>
                             </thead>
@@ -124,20 +140,20 @@
 
                 <div id="content-m4" class="tab-content hidden space-y-3">
                     <div class="flex justify-between items-center">
-                        <span class="text-xs text-gray-400">独立于大时间轴之外，完全不绑死确定时间的概率随机触发事件。</span>
-                        <button onclick="addTrueRandomRow()" class="bg-gray-800 text-white px-2.5 py-1 rounded text-xs font-medium hover:bg-gray-700">+ 增加真随机项</button>
+                        <span class="text-[11px] text-gray-400">真随机事件单独存放在此，绝不污染也不体现在上方的固定时间轴大表内。</span>
+                        <button onclick="addTrueRandomRow()" class="bg-gray-800 text-white px-3 py-1 rounded text-xs font-medium hover:bg-gray-700">+ 增加真随机项</button>
                     </div>
-                    <div class="border rounded overflow-hidden">
+                    <div class="border border-gray-100 rounded-lg overflow-hidden shadow-sm">
                         <table class="w-full border-collapse text-xs">
                             <thead>
-                                <tr class="bg-gray-50 border-b font-medium text-gray-500 text-center">
+                                <tr class="bg-gray-50 text-gray-500 font-medium text-center border-b">
                                     <th class="p-1.5 border-r w-24">事件ID</th>
-                                    <th class="p-1.5 border-r w-20">触发周数</th>
-                                    <th class="p-1.5 border-r w-28">时间范围</th>
+                                    <th class="p-1.5 border-r w-20">触发周</th>
+                                    <th class="p-1.5 border-r w-28">时段范围</th>
                                     <th class="p-1.5 border-r w-14">概率%</th>
-                                    <th class="p-1.5 border-r w-36">限定地点</th>
-                                    <th class="p-1.5 border-r w-20">类型</th>
-                                    <th class="p-1.5 border-r">事件动作/对话</th>
+                                    <th class="p-1.5 border-r w-36">指定地点</th>
+                                    <th class="p-1.5 border-r w-20">类别</th>
+                                    <th class="p-1.5 border-r">动作/对话</th>
                                     <th class="p-1.5 border-r w-16">持续</th>
                                     <th class="p-1.5 border-r">剧情提示(tip)</th>
                                     <th class="p-1.5 text-center w-12">操作</th>
@@ -150,16 +166,16 @@
 
                 <div id="content-m5" class="tab-content hidden space-y-3">
                     <div class="flex justify-between items-center">
-                        <span class="text-xs text-gray-400">公共基础行为池，当角色身处某地点没有特殊排程时调用。</span>
-                        <button onclick="addLocationTextRow()" class="bg-gray-800 text-white px-2.5 py-1 rounded text-xs font-medium hover:bg-gray-700">+ 增加基础对话</button>
+                        <span class="text-[11px] text-gray-400">公共基础随缘日常动作。没有死日程安排时备用兜底。</span>
+                        <button onclick="addLocationTextRow()" class="bg-gray-800 text-white px-3 py-1 rounded text-xs font-medium hover:bg-gray-700">+ 增加日常话术</button>
                     </div>
-                    <div class="border rounded overflow-hidden">
+                    <div class="border border-gray-100 rounded-lg overflow-hidden shadow-sm">
                         <table class="w-full border-collapse text-xs">
                             <thead>
-                                <tr class="bg-gray-50 border-b font-medium text-gray-500">
+                                <tr class="bg-gray-50 text-gray-500 font-medium border-b">
                                     <th class="p-1.5 border-r w-40 text-center">地点 (area)</th>
-                                    <th class="p-1.5 border-r w-32 text-center">活动类别 (type)</th>
-                                    <th class="p-1.5 border-r px-3">日常随缘闲聊文本 / 基础动作</th>
+                                    <th class="p-1.5 border-r w-32 text-center">通用活动类别 (type)</th>
+                                    <th class="p-1.5 border-r px-3">行为或对白文案池</th>
                                     <th class="p-1.5 text-center w-12">操作</th>
                                 </tr>
                             </thead>
@@ -171,19 +187,13 @@
             </div>
         </section>
 
-        <section class="w-[25%] bg-gray-900 rounded-lg flex flex-col overflow-hidden text-[11px] border border-gray-800">
-            <div class="bg-gray-800 border-b border-gray-700 px-3 py-2 text-gray-400 font-medium tracking-wide">实时编译 JSON</div>
-            <pre class="flex-1 p-3 overflow-auto bg-gray-950 text-slate-300 font-mono select-all no-scrollbar" id="json-output"></pre>
+        <section class="w-[25%] bg-neutral-900 rounded-xl flex flex-col overflow-hidden border border-neutral-800 shadow-xl">
+            <div class="bg-neutral-800 px-3 py-2 text-neutral-400 font-mono text-[11px] tracking-wide border-b border-neutral-700 shrink-0">JSON LIVE PREVIEW</div>
+            <pre class="flex-1 p-3 overflow-auto bg-neutral-950 text-amber-200/90 font-mono text-[10px] custom-scroll select-all" id="json-output"></pre>
         </section>
     </main>
 
     <script>
-        let isMouseDown = false;
-        let startCell = null;
-        let selectedCells = [];
-        let currentDayColumn = null;
-
-        // 生成时段映射表 48行
         const TIME_SLOTS = [];
         for (let h = 0; h < 24; h++) {
             const pH = h.toString().padStart(2, '0');
@@ -197,24 +207,27 @@
             
             TIME_SLOTS.forEach((slot, index) => {
                 const tr = document.createElement('tr');
-                tr.className = "border-b border-gray-100 hover:bg-gray-50/40";
+                tr.className = "border-b border-gray-100 hover:bg-gray-50/50";
                 
                 let dayCells = "";
                 for (let d = 0; d <= 6; d++) {
                     dayCells += `
-                        <td class="excel-cell" data-day="${d}" data-slot-index="${index}" data-slot="${slot}" 
-                            onmousedown="cellMouseDown(this, event)" onmouseover="cellMouseOver(this)" id="cell-${d}-${index}">
-                            <div class="flex flex-col gap-1 w-full h-full justify-between">
-                                <textarea placeholder="填入：地点 | 类型 | 动作" list="location-list" class="cell-textarea" oninput="updateAll()"></textarea>
-                                <div class="flex justify-between items-center px-1">
-                                    <select class="cell-select" onchange="handleTypeChange(this)">
-                                        <option value="fixed">固定日程</option>
-                                        <option value="必然随机事件 1">必选随机 1</option>
-                                        <option value="必然随机事件 2">必选随机 2</option>
-                                        <option value="必然随机事件 3">必选随机 3</option>
-                                        <option value="必然随机事件 4">必选随机 4</option>
+                        <td class="excel-cell" data-day="${d}" data-slot-index="${index}" data-slot="${slot}" id="cell-${d}-${index}">
+                            <div class="flex flex-col gap-1">
+                                <div class="flex gap-1 items-center">
+                                    <select class="table-select" onchange="handleTypeChange(this)">
+                                        <option value="fixed">🟢 固定事件</option>
+                                        <option value="必然随机事件 1">🟠 必选随机 1</option>
+                                        <option value="必然随机事件 2">🟠 必选随机 2</option>
+                                        <option value="必然随机事件 3">🟠 必选随机 3</option>
+                                        <option value="必然随机事件 4">🟠 必选随机 4</option>
                                     </select>
-                                    <button onclick="splitCell(this)" class="text-[10px] text-gray-300 hover:text-red-500 hidden btn-split" title="拆分复原">🔓</button>
+                                    <button onclick="splitCell(this)" class="text-[10px] text-gray-400 hover:text-red-500 hidden btn-split" title="解开合并">🔓</button>
+                                </div>
+                                <div class="space-y-0.5 container-inputs">
+                                    <input type="text" placeholder="📍 地点" list="location-list" class="table-input font-medium cell-area">
+                                    <input type="text" placeholder="📝 类型 (type)" class="table-input cell-type">
+                                    <input type="text" placeholder="🎭 动作 (action)" class="table-input cell-action">
                                 </div>
                             </div>
                         </td>
@@ -222,94 +235,67 @@
                 }
 
                 tr.innerHTML = `
-                    <td class="p-1 border-r text-center font-mono font-medium text-gray-400 bg-gray-50/50 text-[10px] select-none">${slot}</td>
+                    <td class="p-1 border-r text-center bg-gray-50/50 sticky left-0 z-10"><input type="checkbox" class="row-checker" data-index="${index}"></td>
+                    <td class="p-1 border-r text-center font-mono text-gray-400 text-[10px] select-none bg-gray-50/30">${slot}</td>
                     ${dayCells}
                 `;
                 tbody.appendChild(tr);
             });
-
-            // 监听全局鼠标抬起
-            document.addEventListener('mouseup', () => {
-                isMouseDown = false;
-                if (selectedCells.length > 1) {
-                    document.getElementById('merge-tools').classList.remove('hidden');
-                    document.getElementById('merge-tools').classList.add('flex');
-                }
-            });
         }
 
-        // --- 鼠标拖动框选核心交互 ---
-        function cellMouseDown(cell, e) {
-            if (e.target.tagName === 'TEXTAREA' || e.target.tagName === 'SELECT' || cell.style.display === 'none') return;
-            isMouseDown = true;
-            startCell = cell;
-            currentDayColumn = cell.getAttribute('data-day');
-            selectedCells = [cell];
-            
-            clearSelectionStyles();
-            cell.classList.add('selecting');
-            document.getElementById('merge-tools').classList.add('hidden');
-        }
+        // --- 基于复选框的点选合并功能 ---
+        function mergeCheckedRows() {
+            const checkedBoxes = document.querySelectorAll('.row-checker:checked');
+            if (checkedBoxes.length <= 1) {
+                alert("请先在左侧勾选【两个或两个以上】的时间段复选框！");
+                return;
+            }
 
-        function cellMouseOver(cell) {
-            if (!isMouseDown || cell.getAttribute('data-day') !== currentDayColumn || cell.style.display === 'none') return;
+            const targetDay = document.getElementById('target-merge-day').value;
+            const indices = Array.from(checkedBoxes).map(cb => parseInt(cb.getAttribute('data-index'))).sort((a, b) => a - b);
             
-            clearSelectionStyles();
-            selectedCells = [];
-            
-            const startIndex = parseInt(startCell.getAttribute('data-slot-index'));
-            const currentIndex = parseInt(cell.getAttribute('data-slot-index'));
-            
-            const min = Math.min(startIndex, currentIndex);
-            const max = Math.max(startIndex, currentIndex);
-            
-            for (let i = min; i <= max; i++) {
-                const target = document.getElementById(`cell-${currentDayColumn}-${i}`);
-                if (target && target.style.display !== 'none') {
-                    target.classList.add('selecting');
-                    selectedCells.push(target);
+            // 验证连续性
+            for (let i = 0; i < indices.length - 1; i++) {
+                if (indices[i+1] - indices[i] !== 1) {
+                    alert("合并失败：所勾选的时间段必须是连续排布的，不能中间漏选！");
+                    return;
                 }
             }
-        }
 
-        function clearSelectionStyles() {
-            document.querySelectorAll('.excel-cell').forEach(c => c.classList.remove('selecting'));
-        }
+            const startIdx = indices[0];
+            const masterCell = document.getElementById(`cell-${targetDay}-${startIdx}`);
+            if (!masterCell || masterCell.style.display === 'none') {
+                alert("合并目标单元格异常或已被其他合并覆盖，请先拆分。");
+                return;
+            }
 
-        // --- 执行合并单元格 ---
-        function mergeSelectedCells() {
-            if (selectedCells.length <= 1) return;
-            
-            // 按索引升序排列
-            selectedCells.sort((a, b) => parseInt(a.getAttribute('data-slot-index')) - parseInt(b.getAttribute('data-slot-index')));
-            
-            const masterCell = selectedCells[0];
-            const rowSpanCount = selectedCells.length;
-            
-            // 设置跨行合并
-            masterCell.rowSpan = rowSpanCount;
-            masterCell.querySelector('.btn-split').classList.remove('hidden'); // 显示拆分按钮
-            masterCell.classList.add('border-b-2', 'border-b-blue-200');
+            // 执行物理层跨行合并
+            masterCell.rowSpan = indices.length;
+            masterCell.querySelector('.btn-split').classList.remove('hidden');
+            masterCell.classList.add('bg-gray-50/80', 'border-b-2', 'border-b-amber-300');
 
-            // 隐藏其余格子并记录归属关系
+            // 隐藏下方多余的表格槽位，记录归属
             const hiddenIds = [];
-            for (let i = 1; i < selectedCells.length; i++) {
-                selectedCells[i].style.display = 'none';
-                hiddenIds.push(selectedCells[i].id);
+            for (let i = 1; i < indices.length; i++) {
+                const subCell = document.getElementById(`cell-${targetDay}-${indices[i]}`);
+                if (subCell) {
+                    subCell.style.display = 'none';
+                    hiddenIds.push(subCell.id);
+                }
             }
             masterCell.setAttribute('data-merged-ids', JSON.stringify(hiddenIds));
-            
-            clearSelectionStyles();
-            document.getElementById('merge-tools').classList.add('hidden');
+
+            // 清理勾选
+            checkedBoxes.forEach(cb => cb.checked = false);
             updateAll();
         }
 
-        // --- 拆分还原单元格 ---
+        // --- 拆分还原 ---
         function splitCell(btn) {
             const masterCell = btn.closest('.excel-cell');
             masterCell.rowSpan = 1;
             btn.classList.add('hidden');
-            masterCell.classList.remove('border-b-2', 'border-b-blue-200');
+            masterCell.classList.remove('bg-gray-50/80', 'border-b-2', 'border-b-amber-300');
 
             const hiddenIds = JSON.parse(masterCell.getAttribute('data-merged-ids') || '[]');
             hiddenIds.forEach(id => {
@@ -322,20 +308,22 @@
 
         function handleTypeChange(select) {
             const cell = select.closest('.excel-cell');
-            const txt = cell.querySelector('.cell-textarea');
+            const inputContainer = cell.querySelector('.container-inputs');
+            const areaInput = cell.querySelector('.cell-area');
+
             if (select.value !== 'fixed') {
                 cell.classList.add('cell-mandatory');
-                txt.value = select.value; // 自动填充组名，避免混淆
-                txt.disabled = true;
+                areaInput.value = select.value;
+                areaInput.disabled = true;
             } else {
                 cell.classList.remove('cell-mandatory');
-                txt.value = "";
-                txt.disabled = false;
+                areaInput.value = "";
+                areaInput.disabled = false;
             }
             updateAll();
         }
 
-        // --- 核心 JSON 编译打包算法 ---
+        // --- 核心 JSON 编译打包引擎 ---
         function generateJSON() {
             const result = {
                 name: document.getElementById('m1-name').value.trim(),
@@ -348,32 +336,27 @@
 
             const schedulePool = {};
 
-            // 扫描全天排程大表
             for (let d = 0; d <= 6; d++) {
                 const weekKey = JSON.stringify([d]);
                 if (!schedulePool[weekKey]) schedulePool[weekKey] = { week: [d], schedule: [] };
 
                 for (let i = 0; i < TIME_SLOTS.length; i++) {
                     const cell = document.getElementById(`cell-${d}-${i}`);
-                    // 如果该格子被物理合并隐藏了，向上寻源或者跳过（这里跳过，因为在主格统一处理）
-                    if (!cell || cell.style.display === 'none') continue; 
+                    if (!cell || cell.style.display === 'none') continue;
 
                     const selectVal = cell.querySelector('select').value;
-                    const textVal = cell.querySelector('.cell-textarea').value.trim();
-                    if (!textVal) continue;
+                    const area = cell.querySelector('.cell-area').value.trim();
+                    const type = cell.querySelector('.cell-type').value.trim();
+                    const action = cell.querySelector('.cell-action').value.trim();
 
-                    // 获取它覆盖的时间段
-                    const currentSlot = cell.getAttribute('data-slot');
-                    let finalTimeRange = currentSlot;
-                    
+                    if (!area && !action) continue;
+
+                    // 计算时间段跨度
+                    let finalTimeRange = cell.getAttribute('data-slot').replace('–', '-');
                     if (cell.rowSpan > 1) {
-                        const startIndex = i;
-                        const endIndex = i + cell.rowSpan - 1;
-                        const startStr = TIME_SLOTS[startIndex].split('–')[0];
-                        const endStr = TIME_SLOTS[endIndex].split('–')[1];
+                        const startStr = TIME_SLOTS[i].split('–')[0];
+                        const endStr = TIME_SLOTS[i + cell.rowSpan - 1].split('–')[1];
                         finalTimeRange = `${startStr}-${endStr}`;
-                    } else {
-                        finalTimeRange = currentSlot.replace('–', '-');
                     }
 
                     if (selectVal !== 'fixed') {
@@ -384,19 +367,18 @@
                             actionName: `触发 ${selectVal}`
                         });
                     } else {
-                        const parts = textVal.split('|');
                         schedulePool[weekKey].schedule.push({
                             timeRange: finalTimeRange,
-                            area: parts[0] ? parts[0].trim() : "",
-                            type: parts[1] ? parts[1].trim() : "rest",
-                            actionName: parts[2] ? parts[2].trim() : ""
+                            area: area,
+                            type: type || "rest",
+                            actionName: action
                         });
                     }
                 }
             }
             result.baseSchedule = Object.values(schedulePool).filter(b => b.schedule.length > 0);
 
-            // 扫描解析必然随机子表
+            // 必然随机子表解析
             document.querySelectorAll('#tbody-mandatory-details tr').forEach(row => {
                 const els = row.querySelectorAll('select, input');
                 if (els.length < 8) return;
@@ -408,7 +390,7 @@
                 });
             });
 
-            // 扫描解析真随机
+            // 真随机子表解析
             document.querySelectorAll('#tbody-true-random tr').forEach(row => {
                 const els = row.querySelectorAll('input');
                 if (els.length < 9) return;
@@ -421,7 +403,7 @@
                 });
             });
 
-            // 扫描地点话术
+            // 地点公共话术
             document.querySelectorAll('#tbody-location-texts tr').forEach(row => {
                 const els = row.querySelectorAll('input');
                 if (els.length < 3) return;
@@ -435,7 +417,7 @@
             document.getElementById('json-output').textContent = JSON.stringify(result, null, 2);
         }
 
-        // --- 反向智能反解析导入机制 ---
+        // --- 全双工智能导入还原 ---
         function importJSON(event) {
             const file = event.target.files[0];
             if (!file) return;
@@ -446,7 +428,7 @@
                     document.getElementById('m1-name').value = data.name || "";
                     document.getElementById('m1-avatar').value = data.avatar || "";
 
-                    initTimelineTable(); // 重组大表
+                    initTimelineTable();
 
                     if (data.baseSchedule) {
                         data.baseSchedule.forEach(block => {
@@ -458,22 +440,19 @@
                                 const parts = trange.split('–');
                                 if (parts.length < 2) return;
 
-                                // 寻找契合的时间跨度
                                 let startIdx = TIME_SLOTS.findIndex(s => s.startsWith(parts[0]));
                                 let endIdx = TIME_SLOTS.findIndex(s => s.endsWith(parts[1]));
 
                                 days.forEach(d => {
                                     if (startIdx === -1 || endIdx === -1) return;
-
                                     const master = document.getElementById(`cell-${d}-${startIdx}`);
                                     if (!master) return;
 
-                                    // 如果跨度大于1，需要在这里自动模拟并执行物理单元格合并
                                     if (endIdx > startIdx) {
                                         const count = endIdx - startIdx + 1;
                                         master.rowSpan = count;
                                         master.querySelector('.btn-split').classList.remove('hidden');
-                                        master.classList.add('border-b-2', 'border-b-blue-200');
+                                        master.classList.add('bg-gray-50/80', 'border-b-2', 'border-b-amber-300');
 
                                         const hiddenIds = [];
                                         for (let k = startIdx + 1; k <= endIdx; k++) {
@@ -486,31 +465,35 @@
                                         master.setAttribute('data-merged-ids', JSON.stringify(hiddenIds));
                                     }
 
-                                    // 填入核心数据
                                     const select = master.querySelector('select');
-                                    const text = master.querySelector('.cell-textarea');
+                                    const areaIn = master.querySelector('.cell-area');
+                                    const typeIn = master.querySelector('.cell-type');
+                                    const actionIn = master.querySelector('.cell-action');
+
                                     if (item.area && item.area.startsWith('必然随机事件')) {
                                         select.value = item.area;
                                         master.classList.add('cell-mandatory');
-                                        text.value = item.area;
-                                        text.disabled = true;
+                                        areaIn.value = item.area;
+                                        areaIn.disabled = true;
                                     } else {
                                         select.value = 'fixed';
-                                        text.value = `${item.area || ''} | ${item.type || ''} | ${item.actionName || ''}`;
+                                        areaIn.value = item.area || "";
+                                        typeIn.value = item.type || "";
+                                        actionIn.value = item.actionName || "";
                                     }
                                 });
                             });
                         });
                     }
 
-                    // 还原其他子表
+                    // 还原分支子表
                     const tbodyM = document.getElementById('tbody-mandatory-details'); tbodyM.innerHTML = "";
                     if (data.mandatoryRandomEvents) {
                         data.mandatoryRandomEvents.forEach(m => {
                             const tr = document.createElement('tr');
                             tr.innerHTML = `
                                 <td class="p-1 border-r"><select class="w-full text-center p-0.5"><option value="必然随机事件 1" ${m.group==='必然随机事件 1'?'selected':''}>必然随机事件 1</option><option value="必然随机事件 2" ${m.group==='必然随机事件 2'?'selected':''}>必然随机事件 2</option><option value="必然随机事件 3" ${m.group==='必然随机事件 3'?'selected':''}>必然随机事件 3</option><option value="必然随机事件 4" ${m.group==='必然随机事件 4'?'selected':''}>必然随机事件 4</option></select></td>
-                                <td class="p-1 border-r"><input type="text" value="${m.id||''}" class="w-full text-center border-0 p-0 focus:ring-0"></td>
+                                <td class="p-1 border-r"><input type="text" value="${m.id||''}" class="w-full text-center border-0 p-0"></td>
                                 <td class="p-1 border-r"><input type="text" value="${m.week?m.week.join(','):''}" class="w-full text-center border-0 p-0 font-mono"></td>
                                 <td class="p-1 border-r"><input type="text" value="${m.timeRange||''}" class="w-full text-center border-0 p-0 font-mono"></td>
                                 <td class="p-1 border-r"><input type="text" value="${m.rate||''}" class="w-full text-center border-0 p-0"></td>
@@ -523,7 +506,7 @@
                         });
                     }
 
-                    // 还原真随机
+                    // 还原真随机子表
                     const tbodyTR = document.getElementById('tbody-true-random'); tbodyTR.innerHTML = "";
                     if (data.randomEvents) {
                         data.randomEvents.forEach(r => {
@@ -544,7 +527,7 @@
                         });
                     }
 
-                    // 还原公共话术
+                    // 还原基础话术
                     const tbodyTxt = document.getElementById('tbody-location-texts'); tbodyTxt.innerHTML = "";
                     if (data.locationRandomActions) {
                         for (const area in data.locationRandomActions) {
@@ -564,15 +547,14 @@
                     }
 
                     updateAll();
-                    alert("导入并成功完成了多单元格的空间跨度合并还原！");
+                    alert("🎯 成功以合并单元格模式导入并铺齐配置文件！");
                 } catch(e) {
-                    alert("导入报错: " + e.message);
+                    alert("导入解析错误: " + e.message);
                 }
             };
             reader.readAsText(file);
         }
 
-        // --- 辅助增删函数 ---
         function parseWeeks(str) {
             if(!str) return [];
             let s = str.toString().replace(/\[|\]/g, '').trim();
@@ -631,14 +613,16 @@
         }
 
         function deleteRow(btn) { btn.closest('tr').remove(); updateAll(); }
+        
         function switchTab(id) {
             document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
             document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('tab-btn-active'));
             document.getElementById(`content-${id}`).classList.remove('hidden');
             document.getElementById(`tab-${id}`).classList.add('tab-btn-active');
         }
+
         function updateAll() { generateJSON(); }
-        function copyJSON() { navigator.clipboard.writeText(document.getElementById('json-output').textContent).then(() => alert('已复制到剪贴板')); }
+        function copyJSON() { navigator.clipboard.writeText(document.getElementById('json-output').textContent).then(() => alert('已成功复制最新 JSON 数据')); }
         function downloadJSON() {
             const name = document.getElementById('m1-name').value.trim() || 'role';
             const blob = new Blob([document.getElementById('json-output').textContent], { type: 'application/json' });
@@ -648,7 +632,7 @@
 
         window.onload = function() {
             initTimelineTable();
-            // 给所有动态生成的普通 input、textarea 绑定实时刷新
+            // 全局事件监听代理自动编译
             document.getElementById('excel-main-table').addEventListener('input', updateAll);
             document.getElementById('tbody-mandatory-details').addEventListener('input', updateAll);
             document.getElementById('tbody-true-random').addEventListener('input', updateAll);
