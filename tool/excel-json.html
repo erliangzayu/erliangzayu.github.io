@@ -130,15 +130,15 @@
 
                 <div id="content-m5" class="tab-content hidden space-y-3">
                     <div class="bg-emerald-50 border border-emerald-200 p-2.5 rounded text-xs text-emerald-700">
-                        ✨ <strong>话术池自动监听同步：</strong>无需手动增加地点！系统已自动提取前几页中出现的所有 <strong>地点 + 类别</strong> 组合。你可以在此直接填写各自地点的随机聊天文本。
+                        ✨ <strong>话术池管理：</strong>系统已自动提取您在排程中使用的所有 <strong>地点 + 类别</strong> 组合。您可以为每个组合灵活添加任意多条独立对白，无需再用逗号隔开！
                     </div>
                     <div class="border rounded overflow-hidden bg-white">
                         <table class="w-full border-collapse text-xs">
                             <thead>
                                 <tr class="bg-gray-50 border-b text-gray-500 font-medium">
-                                    <th class="p-1 border-r w-48 text-center">捕捉到的地点 (area)</th>
-                                    <th class="p-1 border-r w-36 text-center">触发活动类别 (type)</th>
-                                    <th class="p-1 border-r px-2">对白文本/基础闲聊动作 (输入后多条自动并入 JSON 数组)</th>
+                                    <th class="p-1.5 border-r w-40 text-center bg-gray-50">捕捉到的地点 (area)</th>
+                                    <th class="p-1.5 border-r w-28 text-center bg-gray-50">活动类别 (type)</th>
+                                    <th class="p-1.5 px-3 text-left bg-gray-50">随机话术独立配置列表（点击右侧按钮新增）</th>
                                 </tr>
                             </thead>
                             <tbody id="tbody-location-texts">
@@ -165,7 +165,7 @@
         }
 
         let MANDATORY_BRANCHES_DATA = {};  
-        let LOCATION_TEXTS_CACHE = {};     
+        let LOCATION_TEXTS_CACHE = {}; // 结构变更为: { "地点|||类别": ["话术1", "话术2"] }
 
         function initTimelineTable() {
             const tbody = document.getElementById('tbody-timeline');
@@ -360,13 +360,16 @@
             updateAll();
         }
 
+        // --- ⭐【重写：话术池动态增减DOM渲染逻辑】⭐ ---
         function syncLocationTextsHTML(uniqueLocations) {
             const tbody = document.getElementById('tbody-location-texts');
             const badge = document.getElementById('m5-badge');
             
+            // 在重构渲染前，先把当前页面上用户已经在输入框里修改的新话术状态同步进内存 CACHE
             document.querySelectorAll('.loc-text-row').forEach(row => {
                 const k = row.getAttribute('data-loc-key');
-                LOCATION_TEXTS_CACHE[k] = row.querySelector('.loc-input').value.trim();
+                const textInputs = row.querySelectorAll('.loc-text-input');
+                LOCATION_TEXTS_CACHE[k] = Array.from(textInputs).map(input => input.value.trim()).filter(v => v !== "");
             });
 
             if (uniqueLocations.size === 0) {
@@ -381,27 +384,70 @@
             let html = "";
             Array.from(uniqueLocations).sort().forEach(key => {
                 const [area, type] = key.split('|||');
-                const val = LOCATION_TEXTS_CACHE[key] || ""; 
+                const textList = LOCATION_TEXTS_CACHE[key] || [""]; // 如果是空的，默认给一条空话术输入框
+                if (textList.length === 0) textList.push("");
+
+                let inputsHtml = `<div class="space-y-1.5 py-1.5 text-list-container" data-loc-key="${key}">`;
+                textList.forEach((textVal, tIdx) => {
+                    inputsHtml += `
+                        <div class="flex items-center gap-2 text-item-row">
+                            <span class="text-[10px] text-gray-400 font-mono w-5 shrink-0 text-right">#${tIdx+1}</span>
+                            <input type="text" value="${textVal.replace(/"/g, '&quot;')}" placeholder="请输入一句完整的独立话术内容" 
+                                   class="flex-1 border border-gray-200 rounded px-2 py-1 text-xs focus:outline-none focus:border-blue-500 bg-slate-50/50 focus:bg-white loc-text-input">
+                            <button onclick="deleteTextRow(this)" class="text-gray-300 hover:text-red-500 text-sm px-1 font-bold transition" title="删除这句">×</button>
+                        </div>
+                    `;
+                });
+                inputsHtml += `</div>`;
 
                 html += `
-                    <tr class="border-b hover:bg-slate-50 loc-text-row" data-loc-key="${key}">
-                        <td class="p-2 border-r font-medium text-gray-700 text-center bg-gray-50/50">${area}</td>
-                        <td class="p-2 border-r text-center font-mono text-blue-600">${type}</td>
-                        <td class="p-1 border-r px-2">
-                            <input type="text" value="${val}" placeholder="例如：闲逛中对白1（输入多条可以英文逗号或分号隔开，配置端会自动解析为数组）" class="w-full border-0 focus:outline-none p-1 text-xs text-slate-800 bg-transparent font-sans loc-input">
+                    <tr class="border-b hover:bg-slate-50/40 loc-text-row align-top" data-loc-key="${key}">
+                        <td class="p-2.5 border-r font-medium text-gray-700 text-center bg-gray-50/30 select-none">${area}</td>
+                        <td class="p-2.5 border-r text-center font-mono text-blue-600 bg-gray-50/30 select-none">${type}</td>
+                        <td class="p-2 px-3 flex items-start gap-4">
+                            <div class="flex-1">${inputsHtml}</div>
+                            <button onclick="addTextRow(this, '${key}')" class="shrink-0 bg-blue-50 text-blue-600 hover:bg-blue-100 px-2 py-1 rounded text-[11px] font-medium transition mt-1 border border-blue-200">+ 新增话术</button>
                         </td>
                     </tr>
                 `;
             });
             tbody.innerHTML = html;
 
-            tbody.querySelectorAll('.loc-input').forEach(input => {
-                input.addEventListener('input', () => {
-                    const row = input.closest('.loc-text-row');
-                    LOCATION_TEXTS_CACHE[row.getAttribute('data-loc-key')] = input.value.trim();
-                    generateJSON();
-                });
+            // 给所有文本框绑定实时编译监听事件
+            tbody.querySelectorAll('.loc-text-input').forEach(input => {
+                input.addEventListener('input', generateJSON);
             });
+        }
+
+        // 动态添加一句话术输入框
+        function addTextRow(btn, key) {
+            const container = btn.closest('td').querySelector('.text-list-container');
+            const currentIndex = container.querySelectorAll('.text-item-row').length;
+            
+            const div = document.createElement('div');
+            div.className = "flex items-center gap-2 text-item-row mt-1.5";
+            div.innerHTML = `
+                <span class="text-[10px] text-gray-400 font-mono w-5 shrink-0 text-right">#${currentIndex + 1}</span>
+                <input type="text" value="" placeholder="请输入一句完整的独立话术内容" 
+                       class="flex-1 border border-gray-200 rounded px-2 py-1 text-xs focus:outline-none focus:border-blue-500 bg-slate-50/50 focus:bg-white loc-text-input">
+                <button onclick="deleteTextRow(this)" class="text-gray-300 hover:text-red-500 text-sm px-1 font-bold transition" title="删除这句">×</button>
+            `;
+            container.appendChild(div);
+            div.querySelector('.loc-text-input').addEventListener('input', generateJSON);
+            generateJSON();
+        }
+
+        // 动态删除一句话术输入框
+        function deleteTextRow(btn) {
+            const container = btn.closest('.text-list-container');
+            const row = btn.closest('.text-item-row');
+            row.remove();
+            
+            // 重新刷新编号序列号
+            container.querySelectorAll('.text-item-row').forEach((el, index) => {
+                el.querySelector('span').textContent = `#${index + 1}`;
+            });
+            generateJSON();
         }
 
         function generateJSON() {
@@ -486,23 +532,31 @@
                 });
             });
 
+            // --- ⭐【编译逻辑：提取并拼接生成纯正的 JSON String Array 数组】⭐ ---
             uniqueLocations.forEach(key => {
                 const [area, type] = key.split('|||');
-                const rawText = LOCATION_TEXTS_CACHE[key] || "";
-                if (!rawText) return; 
+                
+                // 从当前DOM节点中提取对应位置所有输入框的内容
+                const rowEl = document.querySelector(`.text-list-container[data-loc-key="${key.replace(/"/g, '\\"')}"]`);
+                let textArr = [];
+                if (rowEl) {
+                    textArr = Array.from(rowEl.querySelectorAll('.loc-text-input'))
+                                   .map(input => input.value.trim())
+                                   .filter(t => t.length > 0);
+                } else {
+                    textArr = LOCATION_TEXTS_CACHE[key] || [];
+                }
 
-                const textArr = rawText.split(/[,，;；]/).map(t => t.trim()).filter(t => t.length > 0);
                 if (textArr.length === 0) return;
 
                 if (!result.locationRandomActions[area]) result.locationRandomActions[area] = {};
-                result.locationRandomActions[area][type] = textArr;
+                result.locationRandomActions[area][type] = textArr; // 这边直接放入原生数组，在底部的 JSON 视图中直接生成标准的方括号
             });
 
             document.getElementById('json-output').textContent = JSON.stringify(result, null, 2);
             return { detectedMandatories, uniqueLocations };
         }
 
-        // --- ⭐【核心修复与全能降级兼容导入器】 ⭐ ---
         function importJSON(event) {
             const file = event.target.files[0];
             if (!file) return;
@@ -510,8 +564,6 @@
             reader.onload = function(e) {
                 try {
                     let data = JSON.parse(e.target.result);
-                    
-                    // 兼容模式1：处理最外层被包装在单个对象的数组里
                     if (Array.isArray(data)) { data = data[0]; }
 
                     document.getElementById('m1-name').value = data.name || "";
@@ -521,12 +573,9 @@
                     MANDATORY_BRANCHES_DATA = {};
                     LOCATION_TEXTS_CACHE = {};
 
-                    // 兼容模式2：⭐ 核心算法——把旧版扁平的 baseSchedule 升级为全新合并大轴数组
                     if (data.baseSchedule && data.baseSchedule.length > 0) {
                         const firstItem = data.baseSchedule[0];
-                        // 探测是否是旧版的扁平对象样式：缺少 schedule 键名但存在直接的 area 或 timeRange 属性
                         if (!firstItem.hasOwnProperty('schedule') && (firstItem.hasOwnProperty('area') || firstItem.hasOwnProperty('timeRange'))) {
-                            console.log("检测到旧版扁平化日程，启动智能升级编译转化引擎...");
                             const upgradedBase = [];
                             data.baseSchedule.forEach(oldItem => {
                                 const wKey = oldItem.week ? oldItem.week.sort().join(',') : 'all';
@@ -542,15 +591,14 @@
                                     action: oldItem.action || ""
                                 });
                             });
-                            data.baseSchedule = upgradedBase; // 完成内存数据完美升级！
+                            data.baseSchedule = upgradedBase;
                         }
                     }
 
-                    // 恢复新版数据大表
                     if (data.baseSchedule) {
                         data.baseSchedule.forEach(block => {
                             const days = block.week || [];
-                            if (!block.schedule) return; // 容错防止崩溃
+                            if (!block.schedule) return;
 
                             block.schedule.forEach(item => {
                                 const trange = item.timeRange.replace('-', '–');
@@ -584,7 +632,6 @@
                         });
                     }
 
-                    // 恢复随机事件与缓存
                     const tbodyTR = document.getElementById('tbody-true-random'); tbodyTR.innerHTML = "";
                     let mockGroupCounter = 1;
                     const timeToGroupMap = {};
@@ -634,18 +681,19 @@
                         });
                     }
 
+                    // 兼容模式升级：如果导入的文件已经是原生 JSON 数组话术格式，完美承接导入
                     if (data.locationRandomActions) {
                         for (const area in data.locationRandomActions) {
                             for (const type in data.locationRandomActions[area]) {
                                 const textKey = `${area}|||${type}`;
                                 const val = data.locationRandomActions[area][type];
-                                LOCATION_TEXTS_CACHE[textKey] = Array.isArray(val) ? val.join(', ') : val;
+                                LOCATION_TEXTS_CACHE[textKey] = Array.isArray(val) ? val : [val];
                             }
                         }
                     }
 
                     updateAll();
-                    alert("🎯 旧版历史数据已经通过高阶编译兼容算法完美导入回显！");
+                    alert("🎯 数据已经导入回显！");
                 } catch(e) { alert("导入错误: " + e.message); console.error(e); }
             };
             reader.readAsText(file);
