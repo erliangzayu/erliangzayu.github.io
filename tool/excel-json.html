@@ -3,34 +3,80 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>OC 角色数据配置工具 - 智能多轴联动版</title>
+    <title>OC 角色数据配置工具 - 智能多轴联动终极版</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
-        .table-input { @apply border border-gray-300 px-1 py-0.5 w-full rounded focus:outline-none focus:border-blue-500 text-xs text-left bg-white text-gray-800; }
-        .table-select { @apply border border-gray-300 px-0.5 py-0.5 rounded focus:outline-none focus:border-blue-500 text-[11px] bg-gray-50 w-full; }
-        .tab-btn-active { @apply border-b-2 border-blue-500 text-blue-600 font-bold; }
-        .excel-cell { @apply p-1 border border-gray-200 transition-colors duration-150 align-top h-full min-h-[95px]; }
-        .cell-mandatory { @apply bg-amber-50/90 border-amber-300; }
+        /* 精细化表格与输入框样式 */
+        .table-input { 
+            @apply border border-gray-200 px-1 py-0.5 w-full rounded focus:outline-none focus:border-blue-500 text-[11px] text-center bg-transparent text-gray-800 placeholder-gray-400 transition-colors; 
+        }
+        .table-input:focus {
+            @apply bg-white shadow-sm border-blue-400;
+        }
+        .table-select { 
+            @apply border border-gray-200 px-0.5 py-0.5 rounded focus:outline-none focus:border-blue-500 text-[10px] bg-gray-50/80 text-gray-700 font-medium text-center; 
+        }
+        .tab-btn-active { @apply border-b-2 border-blue-600 text-blue-600 font-bold bg-white; }
+        .excel-cell { 
+            @apply p-1 border-r border-b border-gray-200 transition-all duration-150 align-top bg-white/50 relative; 
+        }
+        .excel-cell:hover {
+            @apply bg-slate-50/80;
+        }
+        .cell-mandatory { @apply bg-amber-50/60 border-amber-200; }
+        .cell-mandatory:hover { @apply bg-amber-50/90; }
+        
         .custom-scroll::-webkit-scrollbar { width: 6px; height: 6px; }
         .custom-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+
+        /* 🔒 核心重构：实现完美多列左侧固定（Sticky） 纵向横向互不干扰 */
+        .sticky-col-check {
+            position: sticky;
+            left: 0;
+            z-index: 10;
+            background-color: #f8fafc !important;
+            box-shadow: 2px 0 5px -2px rgba(0,0,0,0.1);
+        }
+        .sticky-col-time {
+            position: sticky;
+            left: 40px; /* 紧跟在选择框后面 */
+            z-index: 10;
+            background-color: #f1f5f9 !important;
+            box-shadow: 3px 0 6px -2px rgba(0,0,0,0.12);
+        }
+        
+        /* 表头固定处理 */
+        thead tr th.sticky-col-check { z-index: 30; top: 0; }
+        thead tr th.sticky-col-time { z-index: 30; top: 0; }
+        
+        /* PDF 导出专属打印排版样式样式 */
+        @media print {
+            .no-print { display: none !important; }
+            .print-padding { padding: 20px !important; }
+            .page-break { page-break-after: always; }
+        }
     </style>
 </head>
-<body class="bg-gray-100 h-screen flex flex-col font-sans overflow-hidden">
+<body class="bg-slate-100 h-screen flex flex-col font-sans overflow-hidden text-slate-800">
 
     <datalist id="location-list">
         <option value="福源堂"><option value="九木酒屋"><option value="摸鱼网咖"><option value="LF 一中"><option value="肆的家"><option value="艺术街区"><option value="Valmont Plaza 购物中心"><option value="白日 Livehouse"> <option value="警署"><option value="旧港码头"><option value="旧港集市"><option value="小林的算命摊"> <option value="八爪胡同"><option value="真辉的公寓"><option value="小林的阁楼"><option value="融大附中"> <option value="市民公园"><option value="晴南的家"><option value="6-11 便利店"><option value="幻日乐队排练室"> <option value="Wesley 的家"><option value="奶奶的杂货铺"><option value="雾港仓库"><option value="Berlon 家老宅"> <option value="渔场"><option value="地下拳场"><option value="能乐町"><option value="悠真的出租屋"> <option value="Olivia 的出租屋"><option value="深蓝海岸"><option value="Adriana 的房车"><option value="水怪出没区"> <option value="Felix 的住所"><option value="猎人小屋"><option value="Valmont's 会员商店"><option value="CULF/LF 大学城"> <option value="凌的单人公寓"><option value="在地铁上"><option value="魔鬼鱼号">
     </datalist>
 
-    <header class="bg-white shadow px-6 py-2 flex justify-between items-center shrink-0">
+    <header class="bg-white border-b border-slate-200 px-6 py-2.5 flex justify-between items-center shrink-0 shadow-sm z-30">
         <div class="flex items-center gap-4">
-            <h1 class="text-base font-bold text-gray-800">🎭 OC 角色数据标准大轴配置工具</h1>
-            <label class="bg-amber-500 hover:bg-amber-600 text-white px-2.5 py-1 rounded text-xs font-medium cursor-pointer transition">
-                📥 导入已有 JSON <input type="file" id="import-file" accept=".json" class="hidden" onchange="importJSON(event)">
+            <div class="flex items-center gap-2">
+                <span class="text-xl">🎭</span>
+                <h1 class="text-sm font-bold bg-gradient-to-r from-slate-900 to-slate-700 bg-clip-text text-transparent">OC 角色标准大轴智能配置台</h1>
+            </div>
+            <label class="bg-slate-700 hover:bg-slate-800 text-white px-2.5 py-1 rounded text-xs font-medium cursor-pointer transition shadow-sm flex items-center gap-1">
+                <span>📥 导入 JSON</span> <input type="file" id="import-file" accept=".json" class="hidden" onchange="importJSON(event)">
             </label>
-            <div class="h-4 w-px bg-gray-300 mx-2"></div>
-            <div class="flex items-center gap-1 bg-gray-50 border border-gray-200 px-2 py-1 rounded">
-                <span class="text-xs text-gray-500">勾选行合并到：</span>
-                <select id="target-merge-day" class="text-xs border rounded px-1 bg-white focus:outline-none">
+            <div class="h-4 w-px bg-slate-200 mx-1"></div>
+            <div class="flex items-center gap-1.5 bg-slate-50 border border-slate-200 px-2 py-1 rounded-md shadow-inner">
+                <span class="text-[11px] font-medium text-slate-500">将勾选行合并至：</span>
+                <select id="target-merge-day" class="text-xs border border-slate-200 rounded px-1.5 py-0.5 bg-white focus:outline-none font-medium">
                     <option value="0">周日 (W0)</option>
                     <option value="1">周一 (W1)</option>
                     <option value="2">周二 (W2)</option>
@@ -39,110 +85,120 @@
                     <option value="5">周五 (W5)</option>
                     <option value="6">周六 (W6)</option>
                 </select>
-                <button onclick="mergeCheckedRows()" class="bg-blue-500 hover:bg-blue-600 text-white px-2.5 py-0.5 rounded text-xs font-medium transition shadow-sm">执行合并</button>
+                <button onclick="mergeCheckedRows()" class="bg-blue-600 hover:bg-blue-700 text-white px-2.5 py-0.5 rounded text-xs font-medium transition shadow-sm">执行合并</button>
             </div>
         </div>
-        <div class="space-x-2">
-            <button onclick="copyJSON()" class="bg-gray-600 hover:bg-gray-700 text-white px-3 py-1.5 rounded text-xs font-medium transition">一键复制 JSON</button>
-            <button onclick="downloadJSON()" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded text-xs font-medium transition">下载 .json 文件</button>
+        <div class="flex items-center gap-2">
+            <button onclick="exportToPDF()" class="bg-rose-600 hover:bg-rose-700 text-white px-3 py-1.5 rounded-md text-xs font-medium transition shadow-sm flex items-center gap-1">
+                <span>📊 一键下载 PDF 留档</span>
+            </button>
+            <button onclick="copyJSON()" class="bg-slate-600 hover:bg-slate-700 text-white px-3 py-1.5 rounded-md text-xs font-medium transition shadow-sm">复制 JSON</button>
+            <button onclick="downloadJSON()" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded-md text-xs font-medium transition shadow-sm">下载配置文件</button>
         </div>
     </header>
 
     <main class="flex-1 flex overflow-hidden p-2 gap-2">
-        <section class="w-[70%] bg-white rounded-lg shadow flex flex-col overflow-hidden">
-            <div class="flex border-b border-gray-200 bg-gray-50 shrink-0 text-xs">
-                <button onclick="switchTab('m1')" id="tab-m1" class="px-4 py-2 text-gray-600 hover:text-blue-500 tab-btn-active">1. 基础信息</button>
-                <button onclick="switchTab('m2')" id="tab-m2" class="px-4 py-2 text-gray-600 hover:text-blue-500">2. 全天日程总表 (00:00-24:00)</button>
-                <button onclick="switchTab('m3')" id="tab-m3" class="px-4 py-2 text-gray-600 hover:text-blue-500 flex items-center gap-1">3. 必然随机事件库 <span id="m3-badge" class="bg-amber-500 text-white font-mono rounded-full px-1.5 py-0.2 text-[10px] hidden">0</span></button>
-                <button onclick="switchTab('m4')" id="tab-m4" class="px-4 py-2 text-gray-600 hover:text-blue-500">4. 真随机事件 (不绑定死时间)</button>
-                <button onclick="switchTab('m5')" id="tab-m5" class="px-4 py-2 text-gray-600 hover:text-blue-500 flex items-center gap-1">5. 地点随机话术池 <span id="m5-badge" class="bg-blue-500 text-white font-mono rounded-full px-1.5 py-0.2 text-[10px] hidden">0</span></button>
+        <section class="w-[72%] bg-white rounded-xl shadow-sm border border-slate-200/80 flex flex-col overflow-hidden">
+            <div class="flex border-b border-slate-200 bg-slate-50 shrink-0 text-xs font-medium text-slate-600">
+                <button onclick="switchTab('m1')" id="tab-m1" class="px-4 py-2.5 hover:text-blue-600 tab-btn-active border-r border-slate-200 transition-all">1. 基础资料</button>
+                <button onclick="switchTab('m2')" id="tab-m2" class="px-4 py-2.5 hover:text-blue-600 border-r border-slate-200 transition-all">2. 全天日程总表 (00:00-24:00)</button>
+                <button onclick="switchTab('m3')" id="tab-m3" class="px-4 py-2.5 hover:text-blue-600 border-r border-slate-200 transition-all flex items-center gap-1.5">3. 必然随机事件库 <span id="m3-badge" class="bg-amber-500 text-white font-mono rounded-full px-1.5 text-[10px] scale-90 hidden">0</span></button>
+                <button onclick="switchTab('m4')" id="tab-m4" class="px-4 py-2.5 hover:text-blue-600 border-r border-slate-200 transition-all">4. 真随机事件池</button>
+                <button onclick="switchTab('m5')" id="tab-m5" class="px-4 py-2.5 hover:text-blue-600 transition-all flex items-center gap-1.5">5. 地点随机话术池 <span id="m5-badge" class="bg-indigo-500 text-white font-mono rounded-full px-1.5 text-[10px] scale-90 hidden">0</span></button>
             </div>
 
-            <div class="flex-1 overflow-y-auto p-4 custom-scroll">
+            <div class="flex-1 overflow-y-auto p-4 custom-scroll bg-slate-50/30">
+                
                 <div id="content-m1" class="tab-content space-y-4">
-                    <div class="grid grid-cols-2 gap-4 max-w-xl">
-                        <div>
-                            <label class="block text-xs font-medium text-gray-500 mb-1">角色姓名 (name)</label>
-                            <input type="text" id="m1-name" value="肆" oninput="updateAll()" class="w-full border border-gray-300 rounded px-3 py-1.5 text-xs focus:outline-none focus:border-blue-500">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-medium text-gray-500 mb-1">头像路径 (avatar)</label>
-                            <input type="text" id="m1-avatar" value="./images/avatar/si.png" oninput="updateAll()" class="w-full border border-gray-300 rounded px-3 py-1.5 text-xs focus:outline-none focus:border-blue-500">
+                    <div class="bg-white p-4 rounded-lg border border-slate-200 shadow-sm max-w-xl space-y-4">
+                        <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider">角色核心参数</h3>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-600 mb-1">角色姓名 (name)</label>
+                                <input type="text" id="m1-name" value="肆" oninput="updateAll()" class="w-full border border-slate-200 rounded px-3 py-1.5 text-xs focus:outline-none focus:border-blue-500 bg-slate-50 text-center">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-600 mb-1">头像路径 (avatar)</label>
+                                <input type="text" id="m1-avatar" value="./images/avatar/si.png" oninput="updateAll()" class="w-full border border-slate-200 rounded px-3 py-1.5 text-xs focus:outline-none focus:border-blue-500 bg-slate-50 text-center">
+                            </div>
                         </div>
                     </div>
                 </div>
 
                 <div id="content-m2" class="tab-content hidden h-full flex flex-col">
-                    <div class="flex-1 overflow-auto border border-gray-200 rounded custom-scroll bg-white">
-                        <table class="w-full text-left border-collapse table-fixed min-w-[1250px]" id="excel-main-table">
+                    <div class="flex-1 overflow-auto border border-slate-200 rounded-lg custom-scroll bg-white shadow-inner relative">
+                        <table class="w-full text-left border-collapse table-fixed min-w-[1350px]" id="excel-main-table">
                             <thead>
-                                <tr class="bg-gray-100 text-xs font-medium text-gray-600 text-center border-b border-gray-300 sticky top-0 z-20">
-                                    <th class="p-1 border-r border-b w-[45px] bg-gray-100">选择</th>
-                                    <th class="p-1 border-r border-b w-[90px] bg-gray-100">时间段</th>
-                                    <th class="p-1 border-r border-b bg-gray-100">周日 (W0)</th>
-                                    <th class="p-1 border-r border-b bg-gray-100">周一 (W1)</th>
-                                    <th class="p-1 border-r border-b bg-gray-100">周二 (W2)</th>
-                                    <th class="p-1 border-r border-b bg-gray-100">周三 (W3)</th>
-                                    <th class="p-1 border-r border-b bg-gray-100">周四 (W4)</th>
-                                    <th class="p-1 border-r border-b bg-gray-100">周五 (W5)</th>
-                                    <th class="p-1 border-r border-b bg-gray-100">周六 (W6)</th>
+                                <tr class="bg-slate-100 text-[11px] font-bold text-slate-600 text-center border-b border-slate-300 sticky top-0 z-30 shadow-sm">
+                                    <th class="p-1.5 w-[40px] sticky-col-check bg-slate-100 border-r border-b">选择</th>
+                                    <th class="p-1.5 w-[95px] sticky-col-time bg-slate-100 border-r border-b">时间范围</th>
+                                    <th class="p-1.5 border-r border-b bg-slate-50">周日 (W0)</th>
+                                    <th class="p-1.5 border-r border-b bg-slate-50">周一 (W1)</th>
+                                    <th class="p-1.5 border-r border-b bg-slate-50">周二 (W2)</th>
+                                    <th class="p-1.5 border-r border-b bg-slate-50">周三 (W3)</th>
+                                    <th class="p-1.5 border-r border-b bg-slate-50">周四 (W4)</th>
+                                    <th class="p-1.5 border-r border-b bg-slate-50">周五 (W5)</th>
+                                    <th class="p-1.5 border-r border-b bg-slate-50">周六 (W6)</th>
                                 </tr>
                             </thead>
-                            <tbody id="tbody-timeline"></tbody>
+                            <tbody id="tbody-timeline" class="divide-y divide-slate-100"></tbody>
                         </table>
                     </div>
                 </div>
 
                 <div id="content-m3" class="tab-content hidden space-y-4">
-                    <div class="bg-blue-50 border border-blue-200 p-2.5 rounded text-xs text-blue-700">
-                        💡 <strong>智能时段联动：</strong>下方列表是根据你在大表中选择的随机时间段自动生成的独立事件盒。直接在各时间盒中点击增加小事件分支即可。
+                    <div class="bg-amber-50 border border-amber-200 p-3 rounded-lg text-xs text-amber-800 shadow-sm flex items-start gap-2">
+                        <span class="text-base">💡</span>
+                        <div>
+                            <strong>智能多周聚合机制：</strong>下方列表已自动将你在大轴中选择的<strong>相同时间范围 + 相同组号</strong>事件跨周合并（如 week: [1,2,3,4] 汇聚在同一个盒子内），你在这里增删的分支会自动复用到对应的全部日期中。
+                        </div>
                     </div>
                     <div id="mandatory-containers-root" class="space-y-4">
-                        <div class="text-center py-8 text-gray-400 text-xs">暂无联动数据，请先去大表中选择“必然随机事件”</div>
+                        <div class="text-center py-8 text-slate-400 text-xs">暂无联动数据，请先去大表中选择“必然随机事件”</div>
                     </div>
                 </div>
 
                 <div id="content-m4" class="tab-content hidden space-y-3">
-                    <div class="flex justify-between items-center">
-                        <span class="text-xs text-gray-400">脱离大轴固定排程的纯概率真随机事件池。</span>
-                        <button onclick="addTrueRandomRow()" class="bg-gray-800 text-white px-3 py-1 rounded text-xs hover:bg-gray-700">+ 增加真随机项</button>
+                    <div class="flex justify-between items-center bg-white p-2 rounded-lg border border-slate-200 shadow-sm">
+                        <span class="text-xs text-slate-400">💡 脱离大轴固定排程的纯概率真随机事件池。</span>
+                        <button onclick="addTrueRandomRow()" class="bg-slate-800 text-white px-3 py-1 rounded-md text-xs hover:bg-slate-700 transition">+ 增加真随机项</button>
                     </div>
-                    <div class="border rounded overflow-hidden">
-                        <table class="w-full border-collapse text-xs">
+                    <div class="border rounded-lg overflow-hidden bg-white shadow-sm">
+                        <table class="w-full border-collapse text-xs text-center" id="true-random-table">
                             <thead>
-                                <tr class="bg-gray-50 border-b text-gray-500 font-medium text-center">
-                                    <th class="p-1 border-r w-24">事件ID</th>
-                                    <th class="p-1 border-r w-20">触发周</th>
-                                    <th class="p-1 border-r w-28">时间范围</th>
-                                    <th class="p-1 border-r w-14">概率%</th>
-                                    <th class="p-1 border-r w-36">指定地点</th>
-                                    <th class="p-1 border-r w-20">类别</th>
-                                    <th class="p-1 border-r">动作描述/对话文本</th>
-                                    <th class="p-1 border-r w-16">持续</th>
-                                    <th class="p-1 border-r">剧情提示(tip)</th>
-                                    <th class="p-1 w-12">操作</th>
+                                <tr class="bg-slate-50 border-b border-slate-200 text-slate-500 font-semibold">
+                                    <th class="p-2 border-r w-24">事件ID</th>
+                                    <th class="p-2 border-r w-20">触发周</th>
+                                    <th class="p-2 border-r w-28">时间范围</th>
+                                    <th class="p-2 border-r w-14">概率%</th>
+                                    <th class="p-2 border-r w-36">指定地点</th>
+                                    <th class="p-2 border-r w-20">类别</th>
+                                    <th class="p-2 border-r text-center px-3">动作描述/对话文本</th>
+                                    <th class="p-2 border-r w-16">持续</th>
+                                    <th class="p-2 border-r">剧情提示(tip)</th>
+                                    <th class="p-2 w-12">操作</th>
                                 </tr>
                             </thead>
-                            <tbody id="tbody-true-random"></tbody>
+                            <tbody id="tbody-true-random" class="divide-y divide-slate-100"></tbody>
                         </table>
                     </div>
                 </div>
 
                 <div id="content-m5" class="tab-content hidden space-y-3">
-                    <div class="bg-emerald-50 border border-emerald-200 p-2.5 rounded text-xs text-emerald-700">
-                        ✨ <strong>话术池管理：</strong>系统已自动提取您在排程中使用的所有 <strong>地点 + 类别</strong> 组合。您可以为每个组合灵活添加任意多条独立对白，无需再用逗号隔开！
+                    <div class="bg-indigo-50 border border-indigo-200 p-3 rounded-lg text-xs text-indigo-800 shadow-sm">
+                        ✨ <strong>话术池自动捕捉：</strong>系统会实时抓取大表、必选随机及真随机中出现的 <strong>地点 (area) + 类别 (type)</strong> 组合，您可以在右侧无缝扩展任意条数的具体对话文本。
                     </div>
-                    <div class="border rounded overflow-hidden bg-white">
-                        <table class="w-full border-collapse text-xs">
+                    <div class="border rounded-lg overflow-hidden bg-white shadow-sm">
+                        <table class="w-full border-collapse text-xs" id="location-text-table">
                             <thead>
-                                <tr class="bg-gray-50 border-b text-gray-500 font-medium">
-                                    <th class="p-1.5 border-r w-40 text-center bg-gray-50">捕捉到的地点 (area)</th>
-                                    <th class="p-1.5 border-r w-28 text-center bg-gray-50">活动类别 (type)</th>
-                                    <th class="p-1.5 px-3 text-left bg-gray-50">随机话术独立配置列表（点击右侧按钮新增）</th>
+                                <tr class="bg-slate-50 border-b border-slate-200 text-slate-500 font-semibold text-center">
+                                    <th class="p-2 border-r w-40 bg-slate-50">捕捉地点 (area)</th>
+                                    <th class="p-2 border-r w-28 bg-slate-50">类别 (type)</th>
+                                    <th class="p-2 px-3 text-center bg-slate-50">独立对话话术列表（支持无限追加）</th>
                                 </tr>
                             </thead>
-                            <tbody id="tbody-location-texts">
-                                <tr class="text-center text-gray-400"><td colspan="3" class="p-4">暂无被捕获的地点数据，请先在其他页面填写内容。</td></tr>
+                            <tbody id="tbody-location-texts" class="divide-y divide-slate-100">
+                                <tr class="text-center text-slate-400"><td colspan="3" class="p-4">暂无被捕获的地点数据，请先在其他页面填写内容。</td></tr>
                             </tbody>
                         </table>
                     </div>
@@ -150,11 +206,16 @@
             </div>
         </section>
 
-        <section class="w-[30%] bg-gray-900 rounded-lg flex flex-col overflow-hidden text-xs text-slate-300 font-mono shadow">
-            <div class="bg-gray-800 px-3 py-2 text-gray-400 font-medium border-b border-gray-700 select-none">实时数据编译预览 (JSON)</div>
-            <pre class="flex-1 p-3 overflow-auto bg-gray-950 text-emerald-400 custom-scroll select-all" id="json-output"></pre>
+        <section class="w-[28%] bg-slate-900 rounded-xl flex flex-col overflow-hidden text-xs text-slate-300 font-mono shadow-md border border-slate-950">
+            <div class="bg-slate-800/90 px-3 py-2.5 text-slate-400 font-semibold border-b border-slate-950 flex justify-between items-center select-none">
+                <span>实时配置编译数据 (JSON)</span>
+                <span class="text-[10px] bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 px-1.5 py-0.2 rounded">LIVE</span>
+            </div>
+            <pre class="flex-1 p-3 overflow-auto bg-slate-950 text-emerald-400 custom-scroll select-all" id="json-output"></pre>
         </section>
     </main>
+
+    <div id="pdf-export-container" class="absolute left-[-9999px] top-0 bg-white p-6 text-slate-900 space-y-8 text-xs" style="width: 1100px;"></div>
 
     <script>
         const TIME_SLOTS = [];
@@ -173,28 +234,28 @@
             
             TIME_SLOTS.forEach((slot, index) => {
                 const tr = document.createElement('tr');
-                tr.className = "border-b border-gray-100 hover:bg-gray-50/60";
+                tr.className = "hover:bg-slate-50/80 transition-colors";
                 
                 let dayCells = "";
                 for (let d = 0; d <= 6; d++) {
                     dayCells += `
                         <td class="excel-cell" data-day="${d}" data-slot-index="${index}" data-slot="${slot}" id="cell-${d}-${index}">
-                            <div class="flex flex-col gap-1 h-full justify-between">
-                                <div class="flex gap-1 items-center w-full">
-                                    <select class="table-select cell-main-dropdown" onchange="handleTypeChange(this)">
-                                        <option value="fixed">固定日程</option>
-                                        <option value="mandatory">必然随机事件</option>
+                            <div class="flex flex-col gap-1 items-center justify-center">
+                                <div class="flex gap-1 items-center justify-between w-full">
+                                    <select class="table-select cell-main-dropdown mx-auto" onchange="handleTypeChange(this)">
+                                        <option value="fixed">固定</option>
+                                        <option value="mandatory">必选随机</option>
                                     </select>
-                                    <div class="hidden item-group-wrapper items-center gap-0.5 shrink-0">
-                                        <span class="text-[10px] text-amber-600 font-bold">组</span>
-                                        <input type="number" value="1" min="1" class="w-8 text-center border border-amber-300 bg-amber-50 text-amber-900 rounded text-[11px] font-bold cell-group-id" oninput="updateAll()">
+                                    <div class="hidden item-group-wrapper items-center gap-0.5 mx-auto">
+                                        <span class="text-[9px] text-amber-600 font-bold bg-amber-100 px-1 rounded">G</span>
+                                        <input type="number" value="1" min="1" class="w-6 text-center border border-amber-300 bg-amber-50 text-amber-900 rounded font-bold text-[10px] cell-group-id" oninput="updateAll()">
                                     </div>
-                                    <button onclick="splitCell(this)" class="text-[10px] text-gray-400 hover:text-red-500 hidden btn-split shrink-0" title="拆分复原">🔓</button>
+                                    <button onclick="splitCell(this)" class="text-[9px] text-slate-400 hover:text-red-500 hidden btn-split" title="拆分复原">🔓</button>
                                 </div>
-                                <div class="space-y-1 cell-input-container w-full mt-1">
-                                    <input type="text" placeholder="地点" list="location-list" class="table-input font-medium cell-area">
-                                    <input type="text" placeholder="类别 (type)" class="table-input cell-type">
-                                    <input type="text" placeholder="动作 (action)" class="table-input cell-action">
+                                <div class="space-y-0.5 cell-input-container w-full">
+                                    <input type="text" placeholder="地点" list="location-list" class="table-input cell-area">
+                                    <input type="text" placeholder="类别(type)" class="table-input cell-type">
+                                    <input type="text" placeholder="动作(action)" class="table-input cell-action">
                                 </div>
                             </div>
                         </td>
@@ -202,8 +263,8 @@
                 }
 
                 tr.innerHTML = `
-                    <td class="p-1 border-r text-center bg-gray-50 sticky left-0 z-10"><input type="checkbox" class="row-checker" data-index="${index}"></td>
-                    <td class="p-1 border-r text-center font-mono text-gray-400 text-[10px] bg-gray-50/50 select-none">${slot}</td>
+                    <td class="p-1 border-r text-center sticky-col-check"><input type="checkbox" class="row-checker w-3.5 h-3.5 rounded accent-blue-600 mx-auto block" data-index="${index}"></td>
+                    <td class="p-1 border-r text-center font-mono text-slate-500 font-medium text-[10px] sticky-col-time select-none">${slot}</td>
                     ${dayCells}
                 `;
                 tbody.appendChild(tr);
@@ -217,51 +278,49 @@
 
             if (select.value === 'mandatory') {
                 cell.classList.add('cell-mandatory');
-                groupWrapper.style.display = 'flex';
-                inputContainer.style.setProperty('display', 'none', 'important');
+                groupWrapper.classList.remove('hidden');
+                groupWrapper.classList.add('flex');
+                inputContainer.classList.add('hidden');
             } else {
                 cell.classList.remove('cell-mandatory');
-                groupWrapper.style.display = 'none';
-                inputContainer.style.removeProperty('display');
+                groupWrapper.classList.add('hidden');
+                groupWrapper.classList.remove('flex');
+                inputContainer.classList.remove('hidden');
             }
             updateAll();
         }
 
         function mergeCheckedRows() {
             const checkedBoxes = document.querySelectorAll('.row-checker:checked');
-            if (checkedBoxes.length <= 1) { alert("请在左侧勾选 2 个或以上的时间时段！"); return; }
+            if (checkedBoxes.length <= 1) { alert("请在左侧固定列勾选 2 个或以上连续的时间段！"); return; }
             const targetDay = document.getElementById('target-merge-day').value;
             const indices = Array.from(checkedBoxes).map(cb => parseInt(cb.getAttribute('data-index'))).sort((a, b) => a - b);
             for (let i = 0; i < indices.length - 1; i++) {
-                if (indices[i+1] - indices[i] !== 1) { alert("合并失败：所勾选的时间格必须是完全连续的！"); return; }
+                if (indices[i+1] - indices[i] !== 1) { alert("合并失败：选择的时间格必须是完全连续的！"); return; }
             }
             const startIdx = indices[0];
-            executeMergeOnUI(targetDay, startIdx, indices.length);
-            checkedBoxes.forEach(cb => cb.checked = false);
-            updateAll();
-        }
-
-        function executeMergeOnUI(targetDay, startIdx, length) {
             const masterCell = document.getElementById(`cell-${targetDay}-${startIdx}`);
-            if (!masterCell || masterCell.style.display === 'none') return;
+            if (!masterCell || masterCell.style.display === 'none') { alert("所选位置发生重叠冲突，请先拆分已有单元格。"); return; }
 
-            masterCell.rowSpan = length;
+            masterCell.rowSpan = indices.length;
             masterCell.querySelector('.btn-split').classList.remove('hidden');
-            masterCell.classList.add('bg-slate-50', 'border-b-2', 'border-b-blue-400');
+            masterCell.classList.add('bg-slate-50/90', 'border-b-2', 'border-b-blue-500', 'shadow-sm');
 
             const hiddenIds = [];
-            for (let i = 1; i < length; i++) {
-                const subCell = document.getElementById(`cell-${targetDay}-${startIdx + i}`);
+            for (let i = 1; i < indices.length; i++) {
+                const subCell = document.getElementById(`cell-${targetDay}-${indices[i]}`);
                 if (subCell) { subCell.style.display = 'none'; hiddenIds.push(subCell.id); }
             }
             masterCell.setAttribute('data-merged-ids', JSON.stringify(hiddenIds));
+            checkedBoxes.forEach(cb => cb.checked = false);
+            updateAll();
         }
 
         function splitCell(btn) {
             const masterCell = btn.closest('.excel-cell');
             masterCell.rowSpan = 1;
             btn.classList.add('hidden');
-            masterCell.classList.remove('bg-slate-50', 'border-b-2', 'border-b-blue-400');
+            masterCell.classList.remove('bg-slate-50/90', 'border-b-2', 'border-b-blue-500', 'shadow-sm');
             const hiddenIds = JSON.parse(masterCell.getAttribute('data-merged-ids') || '[]');
             hiddenIds.forEach(id => { const cell = document.getElementById(id); if (cell) cell.style.display = ''; });
             masterCell.removeAttribute('data-merged-ids');
@@ -271,31 +330,19 @@
         function syncMandatoryContainersHTML(detectedList) {
             const root = document.getElementById('mandatory-containers-root');
             const badge = document.getElementById('m3-badge');
-            
-            const uniqueBoxes = [];
-            const seenKeys = new Set();
-            
-            detectedList.forEach(item => {
-                const boxFeatureKey = `T${item.timeRange}_G${item.groupId}`;
-                if(!seenKeys.has(boxFeatureKey)) {
-                    seenKeys.add(boxFeatureKey);
-                    uniqueBoxes.push(item);
-                }
-            });
-
-            if (uniqueBoxes.length === 0) {
-                root.innerHTML = `<div class="text-center py-8 text-gray-400 text-xs">暂无联动数据，请先去大表中选择“必然随机事件”</div>`;
+            if (detectedList.length === 0) {
+                root.innerHTML = `<div class="text-center py-8 text-slate-400 text-xs">暂无联动数据，请先去大表中选择“必然随机事件”并赋予相同的组号</div>`;
                 badge.classList.add('hidden');
                 return;
             }
-            badge.textContent = uniqueBoxes.length;
+            badge.textContent = detectedList.length;
             badge.classList.remove('hidden');
 
             saveAllCurrentBranchInputs();
 
             let html = "";
-            uniqueBoxes.forEach(item => {
-                const cacheKey = `T${item.timeRange}_G${item.groupId}`;
+            detectedList.forEach(item => {
+                const cacheKey = `TIME_${item.timeRange.replace(/:/g, '-')}_G${item.groupId}`;
                 const branches = MANDATORY_BRANCHES_DATA[cacheKey] || [ {probability: 50, area: '', type: 'rest', action: ''} ];
                 MANDATORY_BRANCHES_DATA[cacheKey] = branches;
 
@@ -303,39 +350,39 @@
                 branches.forEach((b, bIdx) => {
                     rowsHtml += `
                         <tr class="branch-row" data-cache-key="${cacheKey}">
-                            <td class="p-1 border-r text-center font-bold text-amber-700 bg-amber-50/50">分枝 ${bIdx + 1}</td>
-                            <td class="p-1 border-r"><input type="number" value="${b.probability}" class="w-full text-center border-0 p-0 b-prob"></td>
-                            <td class="p-1 border-r"><input type="text" value="${b.area || ''}" list="location-list" class="w-full border-0 p-0 b-area"></td>
-                            <td class="p-1 border-r"><input type="text" value="${b.type || 'rest'}" class="w-full border-0 p-0 b-type"></td>
-                            <td class="p-1 border-r"><input type="text" value="${b.action || ''}" class="w-full border-0 p-0 b-action"></td>
-                            <td class="p-1 text-center"><button onclick="deleteBranchRow(this, '${cacheKey}', ${bIdx})" class="text-gray-300 hover:text-red-500 font-bold text-sm">×</button></td>
+                            <td class="p-1.5 border-r text-center font-bold text-amber-700 bg-amber-50/50">分支 ${bIdx + 1}</td>
+                            <td class="p-1.5 border-r"><input type="number" value="${b.probability}" class="w-full text-center border border-slate-200 rounded px-1 b-prob"></td>
+                            <td class="p-1.5 border-r"><input type="text" value="${b.area || ''}" list="location-list" class="w-full border border-slate-200 rounded px-1 text-center b-area"></td>
+                            <td class="p-1.5 border-r"><input type="text" value="${b.type || 'rest'}" class="w-full border border-slate-200 rounded px-1 text-center b-type"></td>
+                            <td class="p-1.5 border-r"><input type="text" value="${b.action || ''}" class="w-full border border-slate-200 rounded px-1 text-center b-action"></td>
+                            <td class="p-1.5 text-center"><button onclick="deleteBranchRow(this, '${cacheKey}', ${bIdx})" class="text-slate-300 hover:text-red-500 font-bold text-base transition">×</button></td>
                         </tr>
                     `;
                 });
 
-                const tiedWeeks = detectedList.filter(x => x.timeRange === item.timeRange && x.groupId === item.groupId).map(x => `周${x.day}`).join(', ');
+                const weekStr = item.days.map(d => `周${d === 0 ? '日' : d === 1 ? '一' : d === 2 ? '二' : d === 3 ? '三' : d === 4 ? '四' : d === 5 ? '五' : '六'}`).join(' / ');
 
                 html += `
-                    <div class="bg-white border border-amber-200 rounded shadow-sm overflow-hidden" id="box-${cacheKey}">
-                        <div class="bg-amber-100/70 px-3 py-1.5 flex justify-between items-center border-b border-amber-200">
+                    <div class="bg-white border border-amber-200 rounded-xl shadow-sm overflow-hidden" id="box-${cacheKey}">
+                        <div class="bg-amber-50 px-4 py-2 flex justify-between items-center border-b border-amber-100">
                             <div class="flex items-center gap-3">
-                                <span class="bg-amber-600 text-white font-bold rounded px-1.5 py-0.5 text-[10px]">必然随机组 ${item.groupId}</span>
-                                <span class="text-xs font-semibold text-gray-700">联动范围：[ ${tiedWeeks} ] 的 (${item.timeRange})</span>
+                                <span class="bg-amber-600 text-white font-bold rounded-md px-2 py-0.5 text-[10px]">必选随机事件组 ${item.groupId}</span>
+                                <span class="text-xs font-bold text-slate-700">${weekStr} 🕒 ${item.timeRange}</span>
                             </div>
-                            <button onclick="addBranchRow('${cacheKey}')" class="bg-amber-600 hover:bg-amber-700 text-white font-medium px-2 py-0.5 rounded text-[11px] transition">+ 增加小事件分支</button>
+                            <button onclick="addBranchRow('${cacheKey}')" class="bg-amber-600 hover:bg-amber-700 text-white font-medium px-2.5 py-1 rounded-md text-[11px] transition shadow-sm">+ 增加事件分支</button>
                         </div>
-                        <table class="w-full text-xs">
+                        <table class="w-full text-xs text-center border-collapse">
                             <thead>
-                                <tr class="bg-gray-50 border-b text-gray-500 font-medium text-center">
-                                    <th class="p-1 border-r w-20">分支</th>
-                                    <th class="p-1 border-r w-20">概率(%)</th>
-                                    <th class="p-1 border-r w-44">发生地点</th>
-                                    <th class="p-1 border-r w-24">类别(type)</th>
-                                    <th class="p-1 border-r px-2 text-left">具体动作描述 (action)</th>
-                                    <th class="p-1 w-12">操作</th>
+                                <tr class="bg-slate-50 border-b border-slate-100 text-slate-500 font-medium">
+                                    <th class="p-1.5 border-r w-20">分支</th>
+                                    <th class="p-1.5 border-r w-20">概率(%)</th>
+                                    <th class="p-1.5 border-r w-48">目标发生地点</th>
+                                    <th class="p-1.5 border-r w-28">类别(type)</th>
+                                    <th class="p-1.5 border-r px-3 text-center">具体动作/剧情话术说明 (action)</th>
+                                    <th class="p-1.5 w-12">操作</th>
                                 </tr>
                             </thead>
-                            <tbody>${rowsHtml}</tbody>
+                            <tbody class="divide-y divide-slate-100">${rowsHtml}</tbody>
                         </table>
                     </div>
                 `;
@@ -363,7 +410,7 @@
         function addBranchRow(cacheKey) {
             saveAllCurrentBranchInputs();
             if (!MANDATORY_BRANCHES_DATA[cacheKey]) MANDATORY_BRANCHES_DATA[cacheKey] = [];
-            MANDATORY_BRANCHES_DATA[cacheKey].push({probability: 10, area: '', type: 'rest', action: ''});
+            MANDATORY_BRANCHES_DATA[cacheKey].push({probability: 20, area: '', type: 'rest', action: ''});
             updateAll();
         }
 
@@ -371,7 +418,7 @@
             saveAllCurrentBranchInputs();
             if (MANDATORY_BRANCHES_DATA[cacheKey]) {
                 MANDATORY_BRANCHES_DATA[cacheKey].splice(idx, 1);
-                if (MANDATORY_BRANCHES_DATA[cacheKey].length === 0) MANDATORY_BRANCHES_DATA[cacheKey] = [{probability: 10, area: '', type: 'rest', action: ''}];
+                if (MANDATORY_BRANCHES_DATA[cacheKey].length === 0) MANDATORY_BRANCHES_DATA[cacheKey] = [{probability: 50, area: '', type: 'rest', action: ''}];
             }
             updateAll();
         }
@@ -387,7 +434,7 @@
             });
 
             if (uniqueLocations.size === 0) {
-                tbody.innerHTML = `<tr class="text-center text-gray-400"><td colspan="3" class="p-4">暂无被捕获的地点数据，请先在其他页面填写内容。</td></tr>`;
+                tbody.innerHTML = `<tr class="text-center text-slate-400"><td colspan="3" class="p-4">暂无被捕获的地点数据，系统会自动检索所有的特定地点。</td></tr>`;
                 badge.classList.add('hidden');
                 return;
             }
@@ -398,38 +445,35 @@
             let html = "";
             Array.from(uniqueLocations).sort().forEach(key => {
                 const [area, type] = key.split('|||');
-                const textList = LOCATION_TEXTS_CACHE[key] || [""];
+                const textList = LOCATION_TEXTS_CACHE[key] || [""]; 
                 if (textList.length === 0) textList.push("");
 
-                let inputsHtml = `<div class="space-y-1.5 py-1.5 text-list-container" data-loc-key="${key}">`;
+                let inputsHtml = `<div class="space-y-1.5 py-1 text-list-container" data-loc-key="${key}">`;
                 textList.forEach((textVal, tIdx) => {
                     inputsHtml += `
                         <div class="flex items-center gap-2 text-item-row">
-                            <span class="text-[10px] text-gray-400 font-mono w-5 shrink-0 text-right">#${tIdx+1}</span>
-                            <input type="text" value="${textVal.replace(/"/g, '&quot;')}" placeholder="请输入一句完整的独立话术内容" 
-                                   class="flex-1 border border-gray-200 rounded px-2 py-1 text-xs focus:outline-none focus:border-blue-500 bg-slate-50/50 focus:bg-white loc-text-input">
-                            <button onclick="deleteTextRow(this)" class="text-gray-300 hover:text-red-500 text-sm px-1 font-bold transition" title="删除这句">×</button>
+                            <span class="text-[10px] text-slate-400 font-mono w-5 shrink-0 text-right">#${tIdx+1}</span>
+                            <input type="text" value="${textVal.replace(/"/g, '&quot;')}" placeholder="请输入独立话术内容" 
+                                   class="flex-1 border border-slate-200 rounded px-2 py-1 text-xs focus:outline-none focus:border-blue-500 bg-slate-50/50 focus:bg-white loc-text-input text-center transition-all">
+                            <button onclick="deleteTextRow(this)" class="text-slate-300 hover:text-red-500 text-sm px-1 font-bold transition">×</button>
                         </div>
                     `;
                 });
                 inputsHtml += `</div>`;
 
                 html += `
-                    <tr class="border-b hover:bg-slate-50/40 loc-text-row align-top" data-loc-key="${key}">
-                        <td class="p-2.5 border-r font-medium text-gray-700 text-center bg-gray-50/30 select-none">${area}</td>
-                        <td class="p-2.5 border-r text-center font-mono text-blue-600 bg-gray-50/30 select-none">${type}</td>
-                        <td class="p-2 px-3 flex items-start gap-4">
+                    <tr class="loc-text-row align-top" data-loc-key="${key}">
+                        <td class="p-2 border-r font-semibold text-slate-700 text-center bg-slate-50/50 select-none">${area}</td>
+                        <td class="p-2 border-r text-center font-mono text-blue-600 bg-slate-50/20 select-none">${type}</td>
+                        <td class="p-2 px-3 flex items-start gap-4 bg-white">
                             <div class="flex-1">${inputsHtml}</div>
-                            <button onclick="addTextRow(this, '${key}')" class="shrink-0 bg-blue-50 text-blue-600 hover:bg-blue-100 px-2 py-1 rounded text-[11px] font-medium transition mt-1 border border-blue-200">+ 新增话术</button>
+                            <button onclick="addTextRow(this, '${key}')" class="shrink-0 bg-slate-100 text-slate-600 hover:bg-blue-50 hover:text-blue-600 hover:border-blue-200 px-2 py-0.5 rounded border border-slate-200 text-[11px] font-medium transition mt-1">+ 新增句</button>
                         </td>
                     </tr>
                 `;
             });
             tbody.innerHTML = html;
-
-            tbody.querySelectorAll('.loc-text-input').forEach(input => {
-                input.addEventListener('input', generateJSON);
-            });
+            tbody.querySelectorAll('.loc-text-input').forEach(input => { input.addEventListener('input', generateJSON); });
         }
 
         function addTextRow(btn, key) {
@@ -439,10 +483,10 @@
             const div = document.createElement('div');
             div.className = "flex items-center gap-2 text-item-row mt-1.5";
             div.innerHTML = `
-                <span class="text-[10px] text-gray-400 font-mono w-5 shrink-0 text-right">#${currentIndex + 1}</span>
-                <input type="text" value="" placeholder="请输入一句完整的独立话术内容" 
-                       class="flex-1 border border-gray-200 rounded px-2 py-1 text-xs focus:outline-none focus:border-blue-500 bg-slate-50/50 focus:bg-white loc-text-input">
-                <button onclick="deleteTextRow(this)" class="text-gray-300 hover:text-red-500 text-sm px-1 font-bold transition" title="删除这句">×</button>
+                <span class="text-[10px] text-slate-400 font-mono w-5 shrink-0 text-right">#${currentIndex + 1}</span>
+                <input type="text" value="" placeholder="请输入独立话术内容" 
+                       class="flex-1 border border-slate-200 rounded px-2 py-1 text-xs focus:outline-none focus:border-blue-500 bg-slate-50/50 focus:bg-white loc-text-input text-center transition-all">
+                <button onclick="deleteTextRow(this)" class="text-slate-300 hover:text-red-500 text-sm px-1 font-bold transition">×</button>
             `;
             container.appendChild(div);
             div.querySelector('.loc-text-input').addEventListener('input', generateJSON);
@@ -451,12 +495,8 @@
 
         function deleteTextRow(btn) {
             const container = btn.closest('.text-list-container');
-            const row = btn.closest('.text-item-row');
-            row.remove();
-            
-            container.querySelectorAll('.text-item-row').forEach((el, index) => {
-                el.querySelector('span').textContent = `#${index + 1}`;
-            });
+            btn.closest('.text-item-row').remove();
+            container.querySelectorAll('.text-item-row').forEach((el, index) => { el.querySelector('span').textContent = `#${index + 1}`; });
             generateJSON();
         }
 
@@ -469,11 +509,14 @@
                 locationRandomActions: {}
             };
 
-            const detectedMandatories = []; 
+            const schedulePool = {};
+            const groupMap = {}; 
             const uniqueLocations = new Set(); 
-            const baseScheduleMergeMap = {};
 
             for (let d = 0; d <= 6; d++) {
+                const weekKey = JSON.stringify([d]);
+                if (!schedulePool[weekKey]) schedulePool[weekKey] = { week: [d], schedule: [] };
+
                 for (let i = 0; i < TIME_SLOTS.length; i++) {
                     const cell = document.getElementById(`cell-${d}-${i}`);
                     if (!cell || cell.style.display === 'none') continue;
@@ -489,7 +532,11 @@
                     }
 
                     if (selectVal === 'mandatory') {
-                        detectedMandatories.push({ day: d, timeRange: finalTimeRange, groupId: groupId });
+                        const key = `${finalTimeRange}_G${groupId}`;
+                        if (!groupMap[key]) {
+                            groupMap[key] = { timeRange: finalTimeRange, groupId: groupId, days: [] };
+                        }
+                        if (!groupMap[key].days.includes(d)) groupMap[key].days.push(d);
                         continue; 
                     }
 
@@ -500,69 +547,30 @@
                     if (!area && !action) continue;
                     if (area) { uniqueLocations.add(`${area}|||${type}`); } 
 
-                    const scheduleFingerprint = `${finalTimeRange}|||${area}|||${type}|||${action}`;
-
-                    if (!baseScheduleMergeMap[scheduleFingerprint]) {
-                        baseScheduleMergeMap[scheduleFingerprint] = {
-                            weeks: new Set([d]),
-                            timeRange: finalTimeRange, area: area, type: type, action: action
-                        };
-                    } else {
-                        baseScheduleMergeMap[scheduleFingerprint].weeks.add(d);
-                    }
+                    schedulePool[weekKey].schedule.push({
+                        timeRange: finalTimeRange, area: area, type: type, action: action
+                    });
                 }
             }
+            result.baseSchedule = Object.values(schedulePool).filter(b => b.schedule.length > 0);
 
-            const groupedByWeeks = {};
-            for (const finger in baseScheduleMergeMap) {
-                const item = baseScheduleMergeMap[finger];
-                const sortedWeekStr = Array.from(item.weeks).sort((a,b)=>a-b).join(',');
-                
-                if (!groupedByWeeks[sortedWeekStr]) {
-                    groupedByWeeks[sortedWeekStr] = {
-                        week: Array.from(item.weeks).sort((a,b)=>a-b),
-                        schedule: []
-                    };
-                }
-                groupedByWeeks[sortedWeekStr].schedule.push({
-                    timeRange: item.timeRange, area: item.area, type: item.type, action: item.action
-                });
-            }
-            result.baseSchedule = Object.values(groupedByWeeks);
-
-            const mandatoryMergeMap = {};
+            const detectedMandatories = Object.values(groupMap);
             detectedMandatories.forEach(item => {
-                const boxCacheKey = `T${item.timeRange}_G${item.groupId}`;
-                const branches = MANDATORY_BRANCHES_DATA[boxCacheKey] || [];
+                const cacheKey = `TIME_${item.timeRange.replace(/:/g, '-')}_G${item.groupId}`;
+                const branches = MANDATORY_BRANCHES_DATA[cacheKey] || [];
 
                 branches.forEach(b => {
                     if (!b.area && !b.action) return; 
                     const t = b.type || "rest";
                     if (b.area) { uniqueLocations.add(`${b.area}|||${t}`); } 
 
-                    const branchFingerprint = `${item.timeRange}|||${b.probability}|||${b.area}|||${t}|||${b.action}|||${item.groupId}`;
-
-                    if (!mandatoryMergeMap[branchFingerprint]) {
-                        mandatoryMergeMap[branchFingerprint] = {
-                            week: new Set([item.day]),
-                            timeRange: item.timeRange,
-                            probability: b.probability,
-                            area: b.area,
-                            type: t,
-                            action: b.action,
-                            isMandatory: true
-                        };
-                    } else {
-                        mandatoryMergeMap[branchFingerprint].week.add(item.day);
-                    }
+                    result.randomEvents.push({
+                        week: [...item.days].sort(), 
+                        timeRange: item.timeRange, probability: b.probability,
+                        area: b.area, type: t, action: b.action, isMandatory: true
+                    });
                 });
             });
-
-            for (const key in mandatoryMergeMap) {
-                const obj = mandatoryMergeMap[key];
-                obj.week = Array.from(obj.week).sort((a, b) => a - b); 
-                result.randomEvents.push(obj);
-            }
 
             document.querySelectorAll('#tbody-true-random tr').forEach(row => {
                 const els = row.querySelectorAll('input');
@@ -582,27 +590,23 @@
 
             uniqueLocations.forEach(key => {
                 const [area, type] = key.split('|||');
-                const rowEl = document.querySelector(`.text-list-container[data-loc-key="${key.replace(/"/g, '\\"')}"]`);
+                const rowEl = document.querySelector(`.text-list-container[data-loc-key="${key.replace(/"/g, '\"')}"]`);
                 let textArr = [];
                 if (rowEl) {
-                    textArr = Array.from(rowEl.querySelectorAll('.loc-text-input'))
-                                   .map(input => input.value.trim())
-                                   .filter(t => t.length > 0);
+                    textArr = Array.from(rowEl.querySelectorAll('.loc-text-input')).map(input => input.value.trim()).filter(t => t.length > 0);
                 } else {
                     textArr = LOCATION_TEXTS_CACHE[key] || [];
                 }
-
                 if (textArr.length === 0) return;
 
                 if (!result.locationRandomActions[area]) result.locationRandomActions[area] = {};
-                result.locationRandomActions[area][type] = textArr;
+                result.locationRandomActions[area][type] = textArr; 
             });
 
             document.getElementById('json-output').textContent = JSON.stringify(result, null, 2);
             return { detectedMandatories, uniqueLocations };
         }
 
-        // --- ⭐【全能修复版反向导入：完美兼容多重独立必选随机事件盒与行合并还原】---
         function importJSON(event) {
             const file = event.target.files[0];
             if (!file) return;
@@ -619,10 +623,25 @@
                     MANDATORY_BRANCHES_DATA = {};
                     LOCATION_TEXTS_CACHE = {};
 
-                    // 1. 固定排程回显
+                    if (data.baseSchedule && data.baseSchedule.length > 0) {
+                        const firstItem = data.baseSchedule[0];
+                        if (!firstItem.hasOwnProperty('schedule') && (firstItem.hasOwnProperty('area') || firstItem.hasOwnProperty('timeRange'))) {
+                            const upgradedBase = [];
+                            data.baseSchedule.forEach(oldItem => {
+                                const wKey = oldItem.week ? oldItem.week.sort().join(',') : 'all';
+                                let block = upgradedBase.find(b => (b._wKey === wKey));
+                                if (!block) { block = { week: oldItem.week || [], schedule: [], _wKey: wKey }; upgradedBase.push(block); }
+                                block.schedule.push({
+                                    timeRange: oldItem.timeRange || "00:00-00:30", area: oldItem.area || "", type: oldItem.type || "rest", action: oldItem.action || ""
+                                });
+                            });
+                            data.baseSchedule = upgradedBase;
+                        }
+                    }
+
                     if (data.baseSchedule) {
                         data.baseSchedule.forEach(block => {
-                            const days = Array.isArray(block.week) ? block.week : [];
+                            const days = block.week || [];
                             if (!block.schedule) return;
 
                             block.schedule.forEach(item => {
@@ -631,91 +650,93 @@
                                 let startIdx = TIME_SLOTS.findIndex(s => s.startsWith(parts[0]));
                                 let endIdx = TIME_SLOTS.findIndex(s => s.endsWith(parts[1]));
 
-                                if (startIdx === -1 || endIdx === -1) return;
-
                                 days.forEach(d => {
-                                    executeMergeOnUI(d, startIdx, (endIdx - startIdx + 1));
+                                    if (startIdx === -1 || endIdx === -1) return;
                                     const master = document.getElementById(`cell-${d}-${startIdx}`);
-                                    if (master) {
-                                        master.querySelector('.cell-main-dropdown').value = 'fixed';
-                                        master.querySelector('.cell-area').value = item.area || "";
-                                        master.querySelector('.cell-type').value = item.type || "";
-                                        master.querySelector('.cell-action').value = item.action || "";
+                                    if (!master) return;
+
+                                    if (endIdx > startIdx) {
+                                        master.rowSpan = endIdx - startIdx + 1;
+                                        master.querySelector('.btn-split').classList.remove('hidden');
+                                        master.classList.add('bg-slate-50/90', 'border-b-2', 'border-b-blue-500', 'shadow-sm');
+                                        const hiddenIds = [];
+                                        for (let k = startIdx + 1; k <= endIdx; k++) {
+                                            const subCell = document.getElementById(`cell-${d}-${k}`);
+                                            if (subCell) { subCell.style.display = 'none'; hiddenIds.push(subCell.id); }
+                                        }
+                                        master.setAttribute('data-merged-ids', JSON.stringify(hiddenIds));
                                     }
+
+                                    master.querySelector('.cell-main-dropdown').value = 'fixed';
+                                    master.querySelector('.cell-area').value = item.area || "";
+                                    master.querySelector('.cell-type').value = item.type || "";
+                                    master.querySelector('.cell-action').value = item.action || "";
                                 });
                             });
                         });
                     }
 
-                    // 2. 必然随机事件：多时段、多组并行精准回显核心算法
                     const tbodyTR = document.getElementById('tbody-true-random'); tbodyTR.innerHTML = "";
-                    
-                    // 用时间段特征对所有的必然随机事件做聚合组划分，确保不同时间段能被划分为独立的组ID
-                    let groupCounter = 1;
-                    const groupKeyMap = {}; 
+                    let globalGroupCounter = 1;
+                    const timeRangeToGroupMap = {};
 
                     if (data.randomEvents) {
                         data.randomEvents.forEach((r, idx) => {
                             if (r.isMandatory) {
-                                const targetDays = Array.isArray(r.week) ? r.week : [0];
+                                const targetWeeks = Array.isArray(r.week) ? r.week : [0];
                                 const parts = r.timeRange.split('-');
                                 let startIdx = TIME_SLOTS.findIndex(s => s.startsWith(parts[0]));
                                 let endIdx = TIME_SLOTS.findIndex(s => s.endsWith(parts[1]));
-
+                                
                                 if (startIdx !== -1 && endIdx !== -1) {
-                                    // 识别特征：以时间段本身作为独立盒子标志。
-                                    const featureKey = r.timeRange;
-                                    if (!groupKeyMap[featureKey]) {
-                                        groupKeyMap[featureKey] = groupCounter++;
+                                    const mapKey = `${r.timeRange}`;
+                                    if (!timeRangeToGroupMap[mapKey]) { timeRangeToGroupMap[mapKey] = globalGroupCounter++; }
+                                    const currentGroupId = timeRangeToGroupMap[mapKey];
+                                    const cacheKey = `TIME_${r.timeRange.replace(/:/g, '-')}_G${currentGroupId}`;
+
+                                    if (!MANDATORY_BRANCHES_DATA[cacheKey]) MANDATORY_BRANCHES_DATA[cacheKey] = [];
+                                    const isDuplicate = MANDATORY_BRANCHES_DATA[cacheKey].some(b => b.probability === r.probability && b.area === r.area && b.action === r.action && b.type === r.type);
+                                    if (!isDuplicate) {
+                                        MANDATORY_BRANCHES_DATA[cacheKey].push({ probability: r.probability || 0, area: r.area || "", type: r.type || "rest", action: r.action || "" });
                                     }
-                                    const assignedGroupId = groupKeyMap[featureKey];
 
-                                    // 轮询点亮此事件盒中声明的所有星期的格子
-                                    targetDays.forEach(day => {
-                                        // 高阶回显还原：必然随机事件如果也跨越了多行，将其 rowSpan 合并展现！
-                                        executeMergeOnUI(day, startIdx, (endIdx - startIdx + 1));
-
+                                    targetWeeks.forEach(day => {
                                         const master = document.getElementById(`cell-${day}-${startIdx}`);
                                         if (master) {
-                                            const dropdown = master.querySelector('.cell-main-dropdown');
-                                            dropdown.value = 'mandatory';
-                                            
-                                            // 触发状态改变 UI 变换
+                                            if (endIdx > startIdx) {
+                                                master.rowSpan = endIdx - startIdx + 1;
+                                                master.querySelector('.btn-split').classList.remove('hidden');
+                                                master.classList.add('bg-slate-50/90', 'border-b-2', 'border-b-blue-500', 'shadow-sm');
+                                                const hiddenIds = JSON.parse(master.getAttribute('data-merged-ids') || '[]');
+                                                for (let k = startIdx + 1; k <= endIdx; k++) {
+                                                    const subCell = document.getElementById(`cell-${day}-${k}`);
+                                                    if (subCell) { subCell.style.display = 'none'; if (!hiddenIds.includes(subCell.id)) hiddenIds.push(subCell.id); }
+                                                }
+                                                master.setAttribute('data-merged-ids', JSON.stringify(hiddenIds));
+                                            }
+
+                                            master.querySelector('.cell-main-dropdown').value = 'mandatory';
                                             master.classList.add('cell-mandatory');
-                                            master.querySelector('.item-group-wrapper').style.display = 'flex';
-                                            master.querySelector('.cell-input-container').style.setProperty('display', 'none', 'important');
-                                            master.querySelector('.cell-group-id').value = assignedGroupId;
+                                            master.querySelector('.item-group-wrapper').classList.remove('hidden');
+                                            master.querySelector('.item-group-wrapper').classList.add('flex');
+                                            master.querySelector('.cell-input-container').classList.add('hidden');
+                                            master.querySelector('.cell-group-id').value = currentGroupId; 
                                         }
                                     });
-
-                                    // 将分支填回联动内存块
-                                    const cacheKey = `T${r.timeRange}_G${assignedGroupId}`;
-                                    if (!MANDATORY_BRANCHES_DATA[cacheKey]) MANDATORY_BRANCHES_DATA[cacheKey] = [];
-                                    
-                                    // 避免完全一模一样的重复分支被推入
-                                    const isDuplicate = MANDATORY_BRANCHES_DATA[cacheKey].some(b => 
-                                        b.probability === r.probability && b.area === r.area && b.action === r.action && b.type === r.type
-                                    );
-                                    if (!isDuplicate) {
-                                        MANDATORY_BRANCHES_DATA[cacheKey].push({
-                                            probability: r.probability || 0, area: r.area || "", type: r.type || "rest", action: r.action || ""
-                                        });
-                                    }
                                 }
                             } else {
-                                // 恢复纯粹真随机普通表格行
                                 const tr = document.createElement('tr');
                                 tr.innerHTML = `
-                                    <td class="p-1 border-r"><input type="text" value="ev_${idx}" class="w-full border-0 p-0"></td>
+                                    <td class="p-1 border-r"><input type="text" value="ev_${idx}" class="w-full border-0 p-0 text-center"></td>
                                     <td class="p-1 border-r"><input type="text" value="${r.week?r.week.join(','):''}" class="w-full text-center border-0 p-0 font-mono"></td>
                                     <td class="p-1 border-r"><input type="text" value="${r.timeRange||''}" class="w-full text-center border-0 p-0 font-mono"></td>
                                     <td class="p-1 border-r"><input type="text" value="${r.probability||0}" class="w-full text-center border-0 p-0"></td>
-                                    <td class="p-1 border-r"><input type="text" value="${r.area||''}" list="location-list" class="w-full border-0 p-0"></td>
-                                    <td class="p-1 border-r"><input type="text" value="${r.type||''}" class="w-full border-0 p-0"></td>
-                                    <td class="p-1 border-r"><input type="text" value="${r.action||''}" class="w-full border-0 p-0"></td>
+                                    <td class="p-1 border-r"><input type="text" value="${r.area||''}" list="location-list" class="w-full border-0 p-0 text-center"></td>
+                                    <td class="p-1 border-r"><input type="text" value="${r.type||''}" class="w-full border-0 p-0 text-center"></td>
+                                    <td class="p-1 border-r"><input type="text" value="${r.action||''}" class="w-full border-0 p-0 text-center px-1"></td>
                                     <td class="p-1 border-r"><input type="text" value="${r.persist?'是':'否'}" class="w-full text-center border-0 p-0"></td>
-                                    <td class="p-1 border-r"><input type="text" value="${r.tip||''}" class="w-full border-0 p-0"></td>
-                                    <td class="p-1 text-center"><button onclick="deleteRow(this)" class="text-gray-300 hover:text-red-500 font-bold">×</button></td>
+                                    <td class="p-1 border-r"><input type="text" value="${r.tip||''}" class="w-full border-0 p-0 text-center"></td>
+                                    <td class="p-1 text-center"><button onclick="deleteRow(this)" class="text-slate-300 hover:text-red-500 font-bold">×</button></td>
                                 `;
                                 tbodyTR.appendChild(tr);
                             }
@@ -733,7 +754,7 @@
                     }
 
                     updateAll();
-                    alert("🎯 UI样式及多时段必然随机事件独立映射已完美修复还原！");
+                    alert("🎯 数据完美导入！跨周多组随机事件已成功合拢还原！");
                 } catch(e) { alert("导入错误: " + e.message); console.error(e); }
             };
             reader.readAsText(file);
@@ -742,26 +763,23 @@
         function parseWeeks(str) {
             if(!str) return [];
             let s = str.toString().replace(/\[|\]/g, '').trim();
-            if (s.includes('-')) {
-                const [start, end] = s.split('-').map(Number);
-                const arr = []; for (let i = start; i <= end; i++) arr.push(i); return arr;
-            }
+            if (s.includes('-')) { const [start, end] = s.split('-').map(Number); const arr = []; for (let i = start; i <= end; i++) arr.push(i); return arr; }
             return s.split(/[,，]/).map(item => parseInt(item.trim())).filter(n => !isNaN(n));
         }
 
         function addTrueRandomRow() {
             const tr = document.createElement('tr');
             tr.innerHTML = `
-                <td class="p-1 border-r"><input type="text" value="ev_rand" class="w-full border-0 p-0"></td>
-                <td class="p-1 border-r"><input type="text" value="2,4" class="w-full text-center border-0 p-0 font-mono"></td>
-                <td class="p-1 border-r"><input type="text" value="13:00-14:00" class="w-full text-center border-0 p-0 font-mono"></td>
-                <td class="p-1 border-r"><input type="text" value="25" class="w-full text-center border-0 p-0"></td>
-                <td class="p-1 border-r"><input type="text" value="融大附中" list="location-list" class="w-full border-0 p-0"></td>
-                <td class="p-1 border-r"><input type="text" value="work" class="w-full border-0 p-0"></td>
-                <td class="p-1 border-r"><input type="text" value="📖 校园健康讲座" class="w-full border-0 p-0"></td>
-                <td class="p-1 border-r"><input type="text" value="是" class="w-full text-center border-0 p-0"></td>
-                <td class="p-1 border-r"><input type="text" value="✨ 校园卫生安全讲座啦！" class="w-full border-0 p-0"></td>
-                <td class="p-1 text-center"><button onclick="deleteRow(this)" class="text-gray-300 hover:text-red-500 font-bold">×</button></td>
+                <td class="p-1 border-r"><input type="text" value="ev_rand" class="w-full border-0 p-0 text-center"></td>
+                <td class="p-1 border-r"><input type="text" value="1,2,3" class="w-full text-center border-0 p-0 font-mono"></td>
+                <td class="p-1 border-r"><input type="text" value="12:00-13:00" class="w-full text-center border-0 p-0 font-mono"></td>
+                <td class="p-1 border-r"><input type="text" value="30" class="w-full text-center border-0 p-0"></td>
+                <td class="p-1 border-r"><input type="text" value="摸鱼网咖" list="location-list" class="w-full border-0 p-0 text-center"></td>
+                <td class="p-1 border-r"><input type="text" value="game" class="w-full border-0 p-0 text-center"></td>
+                <td class="p-1 border-r"><input type="text" value="🎮 偶然碰到熟人连麦开黑" class="w-full border-0 p-0 text-center px-1"></td>
+                <td class="p-1 border-r"><input type="text" value="否" class="w-full text-center border-0 p-0"></td>
+                <td class="p-1 border-r"><input type="text" value="开黑啦" class="w-full border-0 p-0 text-center"></td>
+                <td class="p-1 text-center"><button onclick="deleteRow(this)" class="text-slate-300 hover:text-red-500 font-bold">×</button></td>
             `;
             document.getElementById('tbody-true-random').appendChild(tr);
             updateAll();
@@ -771,7 +789,7 @@
         
         function switchTab(id) {
             document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
-            document.querySelectorAll('.tab-btn-active').forEach(el => el.classList.remove('tab-btn-active'));
+            document.querySelectorAll('[id^="tab-"]').forEach(el => el.classList.remove('tab-btn-active'));
             document.getElementById(`content-${id}`).classList.remove('hidden');
             document.getElementById(`tab-${id}`).classList.add('tab-btn-active');
         }
@@ -782,7 +800,190 @@
             syncLocationTextsHTML(state.uniqueLocations);
         }
 
-        function copyJSON() { navigator.clipboard.writeText(document.getElementById('json-output').textContent).then(() => alert('数据已复制')); }
+        // --- 📊【终极 PDF 完美留档排版引擎】---
+        function exportToPDF() {
+            const charName = document.getElementById('m1-name').value.trim() || "未知角色";
+            const container = document.getElementById('pdf-export-container');
+            container.innerHTML = ""; // 清空虚拟区
+
+            // 构造精美打印文档
+            let htmlStr = `
+                <div style="font-family: sans-serif; color: #1e293b; max-width: 1100px; margin: 0 auto;">
+                    <div style="text-align: center; border-bottom: 3px double #cbd5e1; padding-bottom: 20px; margin-bottom: 30px;">
+                        <h1 style="font-size: 26px; font-weight: bold; margin: 0 0 10px 0; color: #0f172a;">🎭 OC 角色设定大轴配置留档总表</h1>
+                        <p style="font-size: 14px; color: #64748b; margin: 0;">角色对象：<strong>${charName}</strong> &nbsp;|&nbsp; 导出时间：${new Date().toLocaleString()}</p>
+                    </div>
+
+                    <div class="page-break" style="margin-bottom: 40px;">
+                        <h2 style="font-size: 16px; font-weight: bold; color: #2563eb; border-left: 4px solid #2563eb; padding-left: 8px; margin-bottom: 15px;">一、24小时全天日程总大轴</h2>
+                        <table style="width: 100%; border-collapse: collapse; font-size: 10px; text-align: center; background-color: #ffffff;">
+                            <thead>
+                                <tr style="background-color: #f1f5f9; border-top: 1px solid #cbd5e1; border-bottom: 2px solid #94a3b8;">
+                                    <th style="padding: 6px; border: 1px solid #cbd5e1; width: 80px; text-align:center;">时间范围</th>
+                                    <th style="padding: 6px; border: 1px solid #cbd5e1;">周日 (W0)</th>
+                                    <th style="padding: 6px; border: 1px solid #cbd5e1;">周一 (W1)</th>
+                                    <th style="padding: 6px; border: 1px solid #cbd5e1;">周二 (W2)</th>
+                                    <th style="padding: 6px; border: 1px solid #cbd5e1;">周三 (W3)</th>
+                                    <th style="padding: 6px; border: 1px solid #cbd5e1;">周四 (W4)</th>
+                                    <th style="padding: 6px; border: 1px solid #cbd5e1;">周五 (W5)</th>
+                                    <th style="padding: 6px; border: 1px solid #cbd5e1;">周六 (W6)</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+            `;
+
+            // 循环大表各行
+            for (let i = 0; i < TIME_SLOTS.length; i++) {
+                htmlStr += `<tr style="border-bottom: 1px solid #e2e8f0; ${i % 2 === 1 ? 'background-color: #f8fafc;' : ''}">`;
+                htmlStr += `<td style="padding: 5px; border: 1px solid #cbd5e1; font-family: monospace; text-align:center; font-weight: bold; background-color: #f1f5f9;">${TIME_SLOTS[i]}</td>`;
+                
+                for (let d = 0; d <= 6; d++) {
+                    const cell = document.getElementById(`cell-${d}-${i}`);
+                    if (!cell) continue;
+                    if (cell.style.display === 'none') continue; // 被合并的格子隐藏
+
+                    let rSpan = cell.rowSpan || 1;
+                    let cType = cell.querySelector('.cell-main-dropdown').value;
+                    let bgStyle = cType === 'mandatory' ? 'background-color: #fffbeb; color: #b45309;' : '';
+                    
+                    let contentText = "";
+                    if (cType === 'mandatory') {
+                        contentText = `[必选随机组 ${cell.querySelector('.cell-group-id').value}]`;
+                    } else {
+                        let area = cell.querySelector('.cell-area').value.trim();
+                        let act = cell.querySelector('.cell-action').value.trim();
+                        let type = cell.querySelector('.cell-type').value.trim();
+                        if (area || act) contentText = `📍${area} | ${type ? type : ''}<br>📝${act}`;
+                    }
+
+                    htmlStr += `
+                        <td rowspan="${rSpan}" style="padding: 5px; border: 1px solid #cbd5e1; font-size: 9px; vertical-align: top; text-align: center; ${bgStyle}">
+                            ${contentText ? contentText : '<span style="color:#cbd5e1;">-</span>'}
+                        </td>
+                    `;
+                }
+                htmlStr += `</tr>`;
+            }
+
+            htmlStr += `
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="page-break" style="margin-bottom: 40px;">
+                        <h2 style="font-size: 16px; font-weight: bold; color: #d97706; border-left: 4px solid #d97706; padding-left: 8px; margin-bottom: 15px;">二、必选随机事件联动库 (分支明细)</h2>
+            `;
+
+            const mandatoryBoxes = document.querySelectorAll('#mandatory-containers-root > div');
+            if (mandatoryBoxes.length === 0 || mandatoryBoxes[0].textContent.includes("暂无")) {
+                htmlStr += `<p style="font-size:12px; color:#64748b; font-style:italic;">暂无任何激活的必然随机联动配置。</p>`;
+            } else {
+                mandatoryBoxes.forEach(box => {
+                    const titleText = box.querySelector('.text-xs').textContent;
+                    const groupTitle = box.querySelector('.bg-amber-600').textContent;
+                    
+                    htmlStr += `
+                        <div style="margin-bottom: 15px; border: 1px solid #fcd34d; border-radius: 6px; overflow: hidden; background-color: #ffffff;">
+                            <div style="background-color: #fef3c7; padding: 6px 12px; font-size: 11px; font-weight: bold; border-bottom: 1px solid #fcd34d;">
+                                <span style="background-color: #d97706; color: #ffffff; padding: 1px 5px; border-radius: 3px; font-size: 9px; margin-right: 8px;">${groupTitle}</span>
+                                <span>${titleText}</span>
+                            </div>
+                            <table style="width:100%; border-collapse:collapse; font-size: 10px; text-align: center;">
+                                <tr style="background-color: #fafafa; border-bottom: 1px solid #fcd34d; color: #64748b;">
+                                    <th style="padding: 5px; text-align: center; width: 60px;">分支</th>
+                                    <th style="padding: 5px; text-align: center; width: 60px;">概率</th>
+                                    <th style="padding: 5px; width: 140px;">发生地点</th>
+                                    <th style="padding: 5px; width: 90px;">类别</th>
+                                    <th style="padding: 5px; text-align: center;">动作描述 / 剧情台词</th>
+                                </tr>
+                    `;
+                    
+                    box.querySelectorAll('tbody tr').forEach(row => {
+                        const inputs = row.querySelectorAll('input');
+                        htmlStr += `
+                            <tr style="border-bottom: 1px solid #f1f5f9;">
+                                <td style="padding: 5px; text-align: center; font-weight: bold; color: #b45309;">${row.cells[0].textContent}</td>
+                                <td style="padding: 5px; text-align: center;">${inputs[0].value}%</td>
+                                <td style="padding: 5px;">📍 ${inputs[1].value}</td>
+                                <td style="padding: 5px; font-family: monospace; color:#2563eb;">${inputs[2].value}</td>
+                                <td style="padding: 5px; text-align: center;">${inputs[3].value}</td>
+                            </tr>
+                        `;
+                    });
+                    htmlStr += `</table></div>`;
+                });
+            }
+
+            htmlStr += `
+                    </div>
+
+                    <div style="margin-bottom: 40px;">
+                        <h2 style="font-size: 16px; font-weight: bold; color: #4f46e5; border-left: 4px solid #4f46e5; padding-left: 8px; margin-bottom: 15px;">三、纯触发概率真随机事件库</h2>
+                        <table style="width: 100%; border-collapse: collapse; font-size: 10px; text-align: center; background-color: #ffffff; border: 1px solid #e2e8f0;">
+                            <thead>
+                                <tr style="background-color: #f8fafc; border-bottom: 2px solid #e2e8f0; color: #475569;">
+                                    <th style="padding: 6px; border: 1px solid #cbd5e1;">事件ID</th>
+                                    <th style="padding: 6px; border: 1px solid #cbd5e1; width: 60px;">触发周</th>
+                                    <th style="padding: 6px; border: 1px solid #cbd5e1; width: 90px;">时间范围</th>
+                                    <th style="padding: 6px; border: 1px solid #cbd5e1; width: 50px;">概率</th>
+                                    <th style="padding: 6px; border: 1px solid #cbd5e1; width: 120px;">指定地点</th>
+                                    <th style="padding: 6px; border: 1px solid #cbd5e1; width: 60px;">类别</th>
+                                    <th style="padding: 6px; border: 1px solid #cbd5e1; text-align: center;">具体描述 / 对话文本</th>
+                                    <th style="padding: 6px; border: 1px solid #cbd5e1; width: 40px;">持续</th>
+                                    <th style="padding: 6px; border: 1px solid #cbd5e1;">剧情提示 (tip)</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+            `;
+
+            const trRows = document.querySelectorAll('#tbody-true-random tr');
+            if (trRows.length === 0) {
+                htmlStr += `<tr><td colspan="9" style="padding: 15px; color: #94a3b8; font-style: italic;">暂无任何真随机独立数据配置。</td></tr>`;
+            } else {
+                trRows.forEach(row => {
+                    const inputs = row.querySelectorAll('input');
+                    htmlStr += `
+                        <tr style="border-bottom: 1px solid #e2e8f0;">
+                            <td style="padding: 5px; border: 1px solid #e2e8f0; color:#64748b;">${inputs[0].value}</td>
+                            <td style="padding: 5px; border: 1px solid #e2e8f0; font-family: monospace;">W[${inputs[1].value}]</td>
+                            <td style="padding: 5px; border: 1px solid #e2e8f0; font-family: monospace;">${inputs[2].value}</td>
+                            <td style="padding: 5px; border: 1px solid #e2e8f0; font-weight:bold;">${inputs[3].value}%</td>
+                            <td style="padding: 5px; border: 1px solid #e2e8f0;">📍 ${inputs[4].value}</td>
+                            <td style="padding: 5px; border: 1px solid #e2e8f0; font-family: monospace; color:#4f46e5;">${inputs[5].value}</td>
+                            <td style="padding: 5px; border: 1px solid #e2e8f0;">${inputs[6].value}</td>
+                            <td style="padding: 5px; border: 1px solid #e2e8f0;">${inputs[7].value}</td>
+                            <td style="padding: 5px; border: 1px solid #e2e8f0; color:#64748b;">${inputs[8].value}</td>
+                        </tr>
+                    `;
+                });
+            }
+
+            htmlStr += `
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            `;
+
+            // 将构造好的文档置入虚拟节点
+            container.innerHTML = htmlStr;
+
+            // html2pdf 配置选项参数
+            const opt = {
+                margin:       [10, 10, 10, 10],
+                filename:     `${charName}_标准大轴数据配置表.pdf`,
+                image:        { type: 'jpeg', quality: 0.98 },
+                html2canvas:  { scale: 2, useCORS: true },
+                jsPDF:        { unit: 'mm', format: 'a4', orientation: 'landscape' } // 横向宽屏排版
+            };
+
+            // 执行生成下载
+            html2pdf().set(opt).from(container).save().then(() => {
+                alert("📊 PDF 完美打印留档成功！");
+            });
+        }
+
+        function copyJSON() { navigator.clipboard.writeText(document.getElementById('json-output').textContent).then(() => alert('配置数据已一键复制到剪贴板！')); }
         function downloadJSON() {
             const name = document.getElementById('m1-name').value.trim() || 'role';
             const blob = new Blob([document.getElementById('json-output').textContent], { type: 'application/json' });
