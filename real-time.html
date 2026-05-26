@@ -127,10 +127,10 @@
             font-size: 14px;
             color: var(--text2);
         }
-        /* ========== 修复点1：调整tips位置到页面底部 ========== */
+        
         .tip-bar {
             position: fixed;
-            bottom: 20px; /* 从top改为bottom，移到页面底部 */
+            bottom: 20px; 
             left: 50%;
             transform: translateX(-50%);
             background: var(--primary);
@@ -263,7 +263,7 @@
             display: none;
         }
 
-        /* 主人栏（上）- 无分隔线，仅间距 */
+        /* 主人栏（上） */
         .owner-sidebar {
             margin-bottom: 20px;
             padding-bottom: 0;
@@ -338,7 +338,7 @@
             transform: translateY(-3px);
         }
         
-        /* 随机事件标签 - 区分必选/可选 */
+        /* 随机事件标签 */
         .oc-random-tag {
             position: absolute;
             top: 10px;
@@ -448,10 +448,7 @@
     </style>
 </head>
 <body>
-    <!-- 下拉刷新提示 -->
     <div class="pull-refresh" id="pullRefresh">下拉刷新...</div>
-
-    <!-- 全局提示条 -->
     <div class="tip-bar" id="tipBar"></div>
 
     <div class="header">
@@ -460,14 +457,14 @@
             <div class="mode-toggle" id="modeToggle">🌙</div>
         </div>
         <div class="real-clock" id="clock">加载系统时间…</div>
-        <div class="area-path" id="areaPath">1区 > 居酒屋</div>
+        <div class="area-path" id="areaPath">加载中...</div>
     </div>
 
     <div class="big-area-scroll" id="bigAreaWrap"></div>
 
     <div class="small-area-drawer-wrap">
         <div class="small-area-drawer-header" id="drawerHeader">
-            <div class="small-area-drawer-title" id="drawerTitle">目前地点·居酒屋</div>
+            <div class="small-area-drawer-title" id="drawerTitle">目前地点...</div>
             <div class="small-area-drawer-arrow" id="drawerArrow">▼</div>
         </div>
         <div class="small-area-drawer-content" id="drawerContent">
@@ -479,7 +476,6 @@
         <div class="oc-container" id="ocContainer">
             <div class="empty">加载中...</div>
         </div>
-        <!-- 合并后的侧边栏（主人+地点介绍） -->
         <div class="combined-sidebar" id="combinedSidebar">
             <div class="owner-sidebar" id="ownerSidebar">
                 <div class="owner-title">📍 地点主人</div>
@@ -493,7 +489,6 @@
     </div>
 
     <script>
-        // 全局数据
         let ocData = [];
         let areaData = [];
         let currentBigArea = "";
@@ -501,28 +496,22 @@
         let ocActionCache = {};
         let activeAreaCode = null;
 
-        // 下拉刷新核心变量
         let pullStartY = 0;    
         let pullDistance = 0;  
         let isPulling = false; 
         let isRefreshing = false; 
         const pullRefresh = document.getElementById('pullRefresh');
 
-        // 模式切换变量
         let isDark = true;
         const modeToggle = document.getElementById('modeToggle');
         const savedTheme = localStorage.getItem('themeMode');
 
-        // ========== 修复点2：新增全局标记，控制随机事件tips仅显示一次 ==========
-        let randomEventTipShown = false; // 标记随机事件tips是否已显示
+        let randomEventTipShown = false; 
 
-        // ========== 基础工具函数 ==========
-        // 更新抽屉标题
         function updateDrawerTitle() {
             document.getElementById('drawerTitle').innerText = `目前地点·${currentSmallArea}`;
         }
 
-        // 切换深色模式
         function setDark() {
             document.body.classList.remove('light-mode');
             modeToggle.innerText = '🌙';
@@ -530,7 +519,6 @@
             localStorage.setItem('themeMode','dark');
         }
 
-        // 切换浅色模式
         function setLight() {
             document.body.classList.add('light-mode');
             modeToggle.innerText = '☀️';
@@ -538,7 +526,6 @@
             localStorage.setItem('themeMode','light');
         }
 
-        // 重置下拉刷新状态
         function resetPullState() {
             pullStartY = 0;
             pullDistance = 0;
@@ -547,7 +534,6 @@
             pullRefresh.innerText = '下拉刷新...';
         }
 
-        // 更新合并侧边栏显示状态
         function updateCombinedSidebar() {
             const combined = document.getElementById('combinedSidebar');
             const ownerSidebar = document.getElementById('ownerSidebar');
@@ -556,7 +542,10 @@
             combined.style.display = hasContent ? 'block' : 'none';
         }
 
-        // 获取当前时间（格式化）
+        // 修改：确保读取你本地的带有后缀的文件 `ocData-4.json` 
+        const TARGET_OC_DATA_URL = './ocData-4.json'; 
+        const TARGET_AREA_DATA_URL = './areaData.json';
+
         function getRealTime() {
             const d = new Date();
             const wd = ['周日','周一','周二','周三','周四','周五','周六'][d.getDay()];
@@ -570,74 +559,58 @@
             };
         }
 
-        // 更新页面时间显示
         function updateRealTime() {
             document.getElementById('clock').innerText = `当前时间 · ${getRealTime().str}`;
         }
 
-        // 仅更新时间（无其他操作）
         function updateRealTimeOnly() {
             document.getElementById('clock').innerText = `当前时间 · ${getRealTime().str}`;
         }
 
-        // 更新地点路径显示
         function updateAreaPath() {
             document.getElementById('areaPath').innerText = `${currentBigArea} > ${currentSmallArea}`;
         }
 
-        // ========== 修复点3：优化showTip函数，区分刷新提示和随机事件提示 ==========
-        // 显示全局提示
         function showTip(text, type = 'normal') {
             const tipBar = document.getElementById('tipBar');
-            
-            // 随机事件提示：仅在未显示过时才显示
             if (type === 'random') {
                 if (randomEventTipShown) return;
-                randomEventTipShown = true; // 显示后标记为已显示
+                randomEventTipShown = true; 
             }
-            
             tipBar.innerText = text;
             tipBar.classList.add('show');
             setTimeout(() => tipBar.classList.remove('show'), 4000);
         }
 
-        // ========== 下拉刷新核心逻辑 ==========
-        // 执行刷新操作（保存当前选中状态）
         async function doRefresh() {
             if (isRefreshing) return;
             isRefreshing = true;
             pullRefresh.innerText = '刷新中...';
             pullRefresh.classList.add('loading');
             
-            // ========== 修复点4：刷新时重置随机事件tips标记，允许重新显示 ==========
             randomEventTipShown = false;
             
-            // 保存刷新前的选中状态（关键：避免刷新后重置）
             const savedBigArea = currentBigArea;
             const savedSmallArea = currentSmallArea;
             const savedAreaCode = activeAreaCode;
             
             try {
-                // 重新加载数据
                 const [ocRes, areaRes] = await Promise.all([
-                    fetch('./ocData.json').then(r=>r.json()),
-                    fetch('./areaData.json').then(r=>r.json())
+                    fetch(TARGET_OC_DATA_URL).then(r=>r.json()),
+                    fetch(TARGET_AREA_DATA_URL).then(r=>r.json())
                 ]);
                 ocData = ocRes;
                 areaData = areaRes;
                 
-                // 清空缓存
                 ocActionCache = {};
                 localStorage.clear();
                 sessionStorage.clear();
                 
-                // 恢复选中状态并重新渲染
                 currentBigArea = savedBigArea;
                 await renderSmallArea(currentBigArea, savedSmallArea, savedAreaCode);
                 renderOC();
                 renderOwnerSidebar();
                 renderAreaInfoSidebar();
-                // 刷新提示：使用normal类型，不受一次显示限制
                 showTip('✅ 刷新成功！', 'normal');
             } catch (e) {
                 console.error('刷新失败', e);
@@ -648,14 +621,11 @@
             }
         }
 
-        // ========== 数据渲染函数 ==========
-        // 渲染小地点列表（支持恢复选中状态）
         async function renderSmallArea(big, savedSmallArea = '', savedAreaCode = '') {
             const list = document.getElementById('smallAreaList');
             const areas = areaData.filter(x => x.bigArea === big);
             const ocAreas = await getCurrentOcAreas();
 
-            // 生成小地点列表HTML
             list.innerHTML = areas.map(item => {
                 const isPermanent = item.isPermanent !== false;
                 const hasOC = ocAreas.includes(item.areaCode);
@@ -664,7 +634,6 @@
                 return `<div class="small-area-item ${hotClass} ${hideClass}" data-area="${item.smallArea}" data-areaCode="${item.areaCode||''}">${item.smallArea}</div>`;
             }).join('');
 
-            // 优先恢复保存的小地点，否则选第一个常驻地点
             let defaultArea;
             if (savedSmallArea && areas.some(item => item.smallArea === savedSmallArea)) {
                 defaultArea = areas.find(item => item.smallArea === savedSmallArea) || areas[0];
@@ -672,11 +641,9 @@
                 defaultArea = areas.find(item => item.isPermanent !== false) || areas[0];
             }
             
-            // 更新全局选中状态
             currentSmallArea = defaultArea.smallArea;
             activeAreaCode = savedAreaCode || defaultArea.areaCode;
             
-            // 设置选中样式
             const activeItem = document.querySelector(`[data-area="${currentSmallArea}"]`);
             if (activeItem) {
                 activeItem.classList.add('active');
@@ -684,14 +651,12 @@
                 document.querySelector(`[data-area="${defaultArea.smallArea}"]`)?.classList.add('active');
             }
             
-            // 同步更新页面
             updateAreaPath();
             updateDrawerTitle();
             renderOwnerSidebar();
             renderAreaInfoSidebar();
             await setAreaHighlight(ocAreas);
 
-            // 绑定小地点点击事件
             document.querySelectorAll('.small-area-item').forEach(item => {
                 item.onclick = async e => {
                     document.querySelectorAll('.small-area-item').forEach(x => x.classList.remove('active'));
@@ -709,7 +674,6 @@
             });
         }
 
-        // 渲染地点介绍侧边栏
         function renderAreaInfoSidebar() {
             const info = areaData.find(x => x.smallArea === currentSmallArea && x.bigArea === currentBigArea);
             const side = document.getElementById('areaInfoSidebar');
@@ -724,7 +688,6 @@
             updateCombinedSidebar();
         }
 
-        // 渲染主人侧边栏
         function renderOwnerSidebar() {
             const area = areaData.find(x => x.smallArea === currentSmallArea && x.bigArea === currentBigArea);
             const side = document.getElementById('ownerSidebar');
@@ -757,12 +720,10 @@
             updateCombinedSidebar();
         }
 
-        // 渲染OC卡片列表
         function renderOC() {
             const now = getRealTime();
             const container = document.getElementById('ocContainer');
             
-            // 筛选当前地点的OC
             const ocList = ocData.map(oc => {
                 const randomResult = checkRandomEvent(oc, now);
                 const {isRandom, schedule: rSched, isMandatory} = randomResult;
@@ -780,13 +741,11 @@
                 };
             }).filter(Boolean);
 
-            // 空状态处理
             if (!ocList.length) {
                 container.innerHTML = '<div class="empty">当前地点暂无OC</div>';
                 return;
             }
 
-            // 渲染OC卡片
             container.innerHTML = `
             <div class="oc-grid">
                 ${ocList.map(item => {
@@ -817,20 +776,15 @@
             </div>`;
         }
 
-        // ========== 业务逻辑函数 ==========
-        // 初始化大区导航
         function initAreaNav() {
             const wrap = document.getElementById('bigAreaWrap');
             const bigAreas = [...new Set(areaData.map(x => x.bigArea))];
             
-            // 渲染大区标签
             wrap.innerHTML = bigAreas.map(area => `<div class="big-area-tab" data-area="${area}">${area}</div>`).join('');
             
-            // 默认选中第一个大区
             currentBigArea = bigAreas[0];
             document.querySelector(`[data-area="${currentBigArea}"]`).classList.add('active');
 
-            // 绑定大区点击事件
             document.querySelectorAll('.big-area-tab').forEach(tab => {
                 tab.onclick = async e => {
                     document.querySelectorAll('.big-area-tab').forEach(x => x.classList.remove('active'));
@@ -843,7 +797,6 @@
                 }
             });
 
-            // 绑定抽屉展开/收起事件
             const drawerHeader = document.getElementById('drawerHeader');
             const drawerContent = document.getElementById('drawerContent');
             const drawerArrow = document.getElementById('drawerArrow');
@@ -854,11 +807,9 @@
                 drawerArrow.innerText = drawerContent.classList.contains('show') ? '▲' : '▼';
             };
 
-            // 初始化渲染小地点
             renderSmallArea(currentBigArea);
         }
 
-        // 获取OC当前所在区域列表
         async function getCurrentOcAreas() {
             const now = getRealTime();
             const areaSet = new Set();
@@ -876,7 +827,6 @@
             return Array.from(areaSet);
         }
 
-        // 高亮有OC的小地点
         async function setAreaHighlight(ocAreaCodes) {
             document.querySelectorAll('.small-area-item').forEach(item => {
                 const code = item.dataset.areacode;
@@ -886,12 +836,33 @@
             });
         }
 
-        // 获取OC当前基础日程
+        // ========================== ✨ 核心更新升级点 ✨ ==========================
+        // 升级版：智能兼容“扁平结构”与“带数组嵌套的周日程结构”
         function getOwnerCurrentSchedule(oc, now) {
             if (!oc.baseSchedule) return null;
             
-            for (const sched of oc.baseSchedule) {
-                if (!sched.week.includes(now.week)) continue;
+            // 1. 在内存中创建一个展开后的扁平化临时数组
+            let flatSchedule = [];
+            for (const item of oc.baseSchedule) {
+                // 判断是否是新写的“嵌套数组”格式
+                if (item.schedule && Array.isArray(item.schedule)) {
+                    // 将外层的 week 分配并打散赋予内层的每一个具体时段
+                    item.schedule.forEach(innerSched => {
+                        flatSchedule.push({
+                            ...innerSched,
+                            week: item.week
+                        });
+                    });
+                } else {
+                    // 如果原本就是老版的扁平格式，直接推进去
+                    flatSchedule.push(item);
+                }
+            }
+            
+            // 2. 使用展平后的数据执行原有时间匹配逻辑
+            for (const sched of flatSchedule) {
+                if (!sched.week || !sched.week.includes(now.week)) continue;
+                if (!sched.timeRange) continue;
                 
                 const [start, end] = sched.timeRange.split('-');
                 const [startH, startM] = start.split(':').map(Number);
@@ -918,8 +889,8 @@
             
             return null;
         }
+        // =========================================================================
 
-        // 格式化结束时间显示
         function getEndTimeDisplay(start, end, now) {
             const [startH] = start.split(':').map(Number);
             const [endH, endM] = end.split(':').map(Number);
@@ -930,11 +901,9 @@
             return endStr;
         }
 
-        // 检查随机事件
         function checkRandomEvent(oc, now) {
             if (!oc.randomEvents?.length) return {isRandom: false, schedule: null, isMandatory: false};
             
-            // 筛选当前时段有效的随机事件
             const validEvents = oc.randomEvents.filter(event => {
                 if (!event.week.includes(now.week)) return false;
                 
@@ -953,7 +922,6 @@
             
             if (!validEvents.length) return {isRandom: false, schedule: null, isMandatory: false};
 
-            // 持久化逻辑
             const needPersist = validEvents[0].persist !== false;
             let cacheKey;
             
@@ -981,7 +949,6 @@
                 const cached = localStorage.getItem(cacheKey);
                 if (cached) {
                     const result = JSON.parse(cached);
-                    // ========== 修复点5：随机事件提示使用random类型，受一次显示限制 ==========
                     if (result.isRandom && result.schedule?.tip) showTip(result.schedule.tip, 'random');
                     return result;
                 }
@@ -997,12 +964,10 @@
                 }
             }
 
-            // 区分必选/可选随机事件
             const hasMandatory = validEvents.some(e => e.isMandatory);
             let hitEvent = null;
 
             if (hasMandatory) {
-                // 必选事件：按权重100%选一个
                 const mandatoryEvents = validEvents.filter(e => e.isMandatory);
                 let totalWeight = 0;
                 const weightMap = mandatoryEvents.map(event => {
@@ -1012,12 +977,10 @@
                 const randomNum = Math.random() * totalWeight;
                 hitEvent = weightMap.find(item => randomNum <= item.endWeight)?.event;
             } else {
-                // 可选事件：低概率随机触发
                 const randomEvent = validEvents[Math.floor(Math.random() * validEvents.length)];
                 hitEvent = Math.random() * 100 < randomEvent.probability ? randomEvent : null;
             }
 
-            // 组装结果
             const result = {
                 isRandom: !!hitEvent,
                 isMandatory: hitEvent?.isMandatory || false,
@@ -1027,20 +990,17 @@
                 } : null
             };
             
-            // 缓存结果
             if (needPersist) {
                 localStorage.setItem(cacheKey, JSON.stringify(result));
             } else {
                 sessionStorage.setItem(cacheKey, JSON.stringify(result));
             }
             
-            // ========== 修复点5：随机事件提示使用random类型，受一次显示限制 ==========
             if (hitEvent && hitEvent.tip) showTip(hitEvent.tip, 'random');
             
             return result;
         }
 
-        // 获取OC随机行为文本
         function getLocationRandomAction(oc, area, type) {
             type = type || 'work';
             const actions = oc.locationRandomActions?.[area];
@@ -1052,11 +1012,9 @@
                 actionList = actions[type];
             }
             
-            // 兜底逻辑
             const defaultAction = oc.baseSchedule?.find(s => s.area === area)?.action || '暂无状态';
             if (actionList.length === 0) return defaultAction;
             
-            // 缓存避免频繁变化
             const cacheKey = `act_${oc.name}_${area}_${type}`;
             if (!ocActionCache[cacheKey]) {
                 ocActionCache[cacheKey] = actionList[Math.floor(Math.random() * actionList.length)];
@@ -1065,11 +1023,8 @@
             return ocActionCache[cacheKey];
         }
 
-        // ========== 事件绑定 ==========
-        // 模式切换事件
         modeToggle.onclick = () => isDark ? setLight() : setDark();
 
-        // 移动端下拉刷新事件
         document.addEventListener('touchstart', (e) => {
             if (isRefreshing) return;
             if (window.scrollY <= 0) {
@@ -1095,7 +1050,6 @@
 
         document.addEventListener('touchend', () => {
             if (!isPulling || isRefreshing) return;
-            
             if (pullDistance > 60) {
                 doRefresh();
             } else {
@@ -1103,7 +1057,6 @@
             }
         });
 
-        // 桌面端F5刷新事件
         window.addEventListener('keydown', (e) => {
             if (e.key === 'F5') {
                 e.preventDefault();
@@ -1111,34 +1064,27 @@
             }
         });
 
-        // ========== 初始化 ==========
         async function init() {
-            // 初始化主题
             if (savedTheme === 'light') setLight();
             else setDark();
 
-            // 重置下拉刷新状态
             resetPullState();
-            
-            // ========== 修复点6：初始化时重置随机事件tips标记 ==========
             randomEventTipShown = false;
             
             try {
-                // 加载数据
+                // 此处已指向你最新的本地数据包
                 const [ocRes, areaRes] = await Promise.all([
-                    fetch('./ocData.json').then(r => r.json()),
-                    fetch('./areaData.json').then(r => r.json())
+                    fetch(TARGET_OC_DATA_URL).then(r => r.json()),
+                    fetch(TARGET_AREA_DATA_URL).then(r => r.json())
                 ]);
                 ocData = ocRes;
                 areaData = areaRes;
 
-                // 初始化页面
                 initAreaNav();
                 updateRealTime();
                 renderOC();
                 renderOwnerSidebar();
                 
-                // 定时更新
                 setInterval(updateRealTimeOnly, 1000);
                 setInterval(async () => {
                     const ocAreas = await getCurrentOcAreas();
@@ -1151,7 +1097,6 @@
             }
         }
 
-        // 页面加载完成后初始化
         window.onload = init;
     </script>
 </body>
