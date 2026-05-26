@@ -266,10 +266,12 @@
             updateAll();
         }
 
+        // --- 修复：三级联动只按 统一生成的缓存特征 做去重展示，防止出现多层重复盒子 ---
         function syncMandatoryContainersHTML(detectedList) {
             const root = document.getElementById('mandatory-containers-root');
             const badge = document.getElementById('m3-badge');
             
+            // 提取出当前所有的特征（忽略周几，只留时间范围+组号特征）去重渲染
             const uniqueBoxes = [];
             const seenKeys = new Set();
             
@@ -311,6 +313,7 @@
                     `;
                 });
 
+                // 查出目前有哪些周几正在共用这个时间盒，显示在卡片头上
                 const tiedWeeks = detectedList.filter(x => x.timeRange === item.timeRange && x.groupId === item.groupId).map(x => `周${x.day}`).join(', ');
 
                 html += `
@@ -458,7 +461,7 @@
             generateJSON();
         }
 
-        // --- ⭐【核心全量重写：固定大轴日程与随机事件均实现跨周完美聚合】---
+        // --- ⭐【核心算法重写：高度智能合并同一时间发生的所有必然随机分支】⭐ ---
         function generateJSON() {
             const result = {
                 name: document.getElementById('m1-name').value.trim(),
@@ -468,13 +471,15 @@
                 locationRandomActions: {}
             };
 
+            const schedulePool = {};
             const detectedMandatories = []; 
             const uniqueLocations = new Set(); 
 
-            // 1. 固定大轴日程聚合字典：以“时间范围+地点+活动类型+具体动作”为特征键值
-            const baseScheduleMergeMap = {};
-
+            // 1. 扫描大表提取基础日程
             for (let d = 0; d <= 6; d++) {
+                const weekKey = JSON.stringify([d]);
+                if (!schedulePool[weekKey]) schedulePool[weekKey] = { week: [d], schedule: [] };
+
                 for (let i = 0; i < TIME_SLOTS.length; i++) {
                     const cell = document.getElementById(`cell-${d}-${i}`);
                     if (!cell || cell.style.display === 'none') continue;
@@ -489,7 +494,6 @@
                         finalTimeRange = `${startStr}-${endStr}`;
                     }
 
-                    // 拦截必然随机事件，送去独立的分流聚合引擎中
                     if (selectVal === 'mandatory') {
                         detectedMandatories.push({ day: d, timeRange: finalTimeRange, groupId: groupId });
                         continue; 
@@ -502,40 +506,16 @@
                     if (!area && !action) continue;
                     if (area) { uniqueLocations.add(`${area}|||${type}`); } 
 
-                    // 构造固定日程的指纹
-                    const scheduleFingerprint = `${finalTimeRange}|||${area}|||${type}|||${action}`;
-
-                    if (!baseScheduleMergeMap[scheduleFingerprint]) {
-                        baseScheduleMergeMap[scheduleFingerprint] = {
-                            weeks: new Set([d]),
-                            timeRange: finalTimeRange, area: area, type: type, action: action
-                        };
-                    } else {
-                        baseScheduleMergeMap[scheduleFingerprint].weeks.add(d);
-                    }
+                    schedulePool[weekKey].schedule.push({
+                        timeRange: finalTimeRange, area: area, type: type, action: action
+                    });
                 }
             }
+            result.baseSchedule = Object.values(schedulePool).filter(b => b.schedule.length > 0);
 
-            // 转化并装填合并后的标准 baseSchedule 结构
-            // 目标格式：每一个独特的周几组合 [0, 1] 对应包含它所拥有的全天时间块数组
-            const groupedByWeeks = {};
-            for (const finger in baseScheduleMergeMap) {
-                const item = baseScheduleMergeMap[finger];
-                const sortedWeekStr = Array.from(item.weeks).sort((a,b)=>a-b).join(',');
-                
-                if (!groupedByWeeks[sortedWeekStr]) {
-                    groupedByWeeks[sortedWeekStr] = {
-                        week: Array.from(item.weeks).sort((a,b)=>a-b),
-                        schedule: []
-                    };
-                }
-                groupedByWeeks[sortedWeekStr].schedule.push({
-                    timeRange: item.timeRange, area: item.area, type: item.type, action: item.action
-                });
-            }
-            result.baseSchedule = Object.values(groupedByWeeks);
-
-            // 2. 必然随机事件归一化聚合引擎（修复按特征合并）
+            // 2. ⭐必然随机组逻辑合并算法：在这里完成跨周几(Week)合并归一化！
+            // 建立一个临时字典，用来聚合完全等价的分支对象：
+            // 复合键规则：时间段 + 地点 + 分支动作描述 + 组号
             const mandatoryMergeMap = {};
 
             detectedMandatories.forEach(item => {
@@ -547,11 +527,12 @@
                     const t = b.type || "rest";
                     if (b.area) { uniqueLocations.add(`${b.area}|||${t}`); } 
 
+                    // 构造能够唯一标识这个具体子分支的核准特征码
                     const branchFingerprint = `${item.timeRange}|||${b.probability}|||${b.area}|||${t}|||${b.action}|||${item.groupId}`;
 
                     if (!mandatoryMergeMap[branchFingerprint]) {
                         mandatoryMergeMap[branchFingerprint] = {
-                            week: new Set([item.day]),
+                            week: new Set([item.day]), // 用 Set 自动剔除可能重复的星期绑定
                             timeRange: item.timeRange,
                             probability: b.probability,
                             area: b.area,
@@ -560,14 +541,16 @@
                             isMandatory: true
                         };
                     } else {
+                        // 如果特征完全一样，直接在已有的 week 列表中塞进今天
                         mandatoryMergeMap[branchFingerprint].week.add(item.day);
                     }
                 });
             });
 
+            // 将去重合并完的对象释放输出到结果集
             for (const key in mandatoryMergeMap) {
                 const obj = mandatoryMergeMap[key];
-                obj.week = Array.from(obj.week).sort((a, b) => a - b); 
+                obj.week = Array.from(obj.week).sort((a, b) => a - b); // 强制转回排好序的完美原生数组 [1, 2, 3, 4]
                 result.randomEvents.push(obj);
             }
 
@@ -588,7 +571,7 @@
                 });
             });
 
-            // 4. 话术数据编译
+            // 4. 话术数据整合编译
             uniqueLocations.forEach(key => {
                 const [area, type] = key.split('|||');
                 const rowEl = document.querySelector(`.text-list-container[data-loc-key="${key.replace(/"/g, '\\"')}"]`);
@@ -611,7 +594,7 @@
             return { detectedMandatories, uniqueLocations };
         }
 
-        // --- ⭐【反向导入全量重构：深度解析并精确覆盖多周并行的格子】---
+        // --- ⭐【核心反向导入修复：完全支撑多周并行的解构渲染】---
         function importJSON(event) {
             const file = event.target.files[0];
             if (!file) return;
@@ -628,11 +611,31 @@
                     MANDATORY_BRANCHES_DATA = {};
                     LOCATION_TEXTS_CACHE = {};
 
-                    // 1. 反向导入：固定排程回显逻辑修正
+                    if (data.baseSchedule && data.baseSchedule.length > 0) {
+                        const firstItem = data.baseSchedule[0];
+                        if (!firstItem.hasOwnProperty('schedule') && (firstItem.hasOwnProperty('area') || firstItem.hasOwnProperty('timeRange'))) {
+                            const upgradedBase = [];
+                            data.baseSchedule.forEach(oldItem => {
+                                const wKey = oldItem.week ? oldItem.week.sort().join(',') : 'all';
+                                let block = upgradedBase.find(b => (b._wKey === wKey));
+                                if (!block) {
+                                    block = { week: oldItem.week || [], schedule: [], _wKey: wKey };
+                                    upgradedBase.push(block);
+                                }
+                                block.schedule.push({
+                                    timeRange: oldItem.timeRange || "00:00-00:30",
+                                    area: oldItem.area || "",
+                                    type: oldItem.type || "rest",
+                                    action: oldItem.action || ""
+                                });
+                            });
+                            data.baseSchedule = upgradedBase;
+                        }
+                    }
+
                     if (data.baseSchedule) {
                         data.baseSchedule.forEach(block => {
-                            // 核心修复：完美轮询读取 week 数组内的每一个数字！
-                            const days = Array.isArray(block.week) ? block.week : [];
+                            const days = block.week || [];
                             if (!block.schedule) return;
 
                             block.schedule.forEach(item => {
@@ -641,10 +644,8 @@
                                 let startIdx = TIME_SLOTS.findIndex(s => s.startsWith(parts[0]));
                                 let endIdx = TIME_SLOTS.findIndex(s => s.endsWith(parts[1]));
 
-                                if (startIdx === -1 || endIdx === -1) return;
-
-                                // 在对应的每一个星期数下面渲染数据
                                 days.forEach(d => {
+                                    if (startIdx === -1 || endIdx === -1) return;
                                     const master = document.getElementById(`cell-${d}-${startIdx}`);
                                     if (!master) return;
 
@@ -669,7 +670,6 @@
                         });
                     }
 
-                    // 2. 反向导入：必然随机事件多周深度回显修复
                     const tbodyTR = document.getElementById('tbody-true-random'); tbodyTR.innerHTML = "";
                     let mockGroupCounter = 1;
                     const timeToGroupMap = {};
@@ -677,16 +677,18 @@
                     if (data.randomEvents) {
                         data.randomEvents.forEach((r, idx) => {
                             if (r.isMandatory) {
-                                const targetDays = Array.isArray(r.week) ? r.week : [0];
+                                // 🌟修复关键：不再只取 week[0]，而是遍历绑定的每一天！
+                                const targetDays = (r.week && r.week.length > 0) ? r.week : [0];
                                 const parts = r.timeRange.split('-');
                                 let startIdx = TIME_SLOTS.findIndex(s => s.startsWith(parts[0]));
 
                                 if (startIdx !== -1) {
+                                    // 确定共享的联合时间组ID
                                     const sharedMapKey = targetDays.join(',') + `_${r.timeRange}`;
                                     if (!timeToGroupMap[sharedMapKey]) timeToGroupMap[sharedMapKey] = mockGroupCounter++;
                                     const assignedGroupId = timeToGroupMap[sharedMapKey];
 
-                                    // 将这一组绑定的所有星期的格子同步点亮并隐藏输入框
+                                    // 将这一组里的每一个星期的格子都点亮为必然随机
                                     targetDays.forEach(day => {
                                         const master = document.getElementById(`cell-${day}-${startIdx}`);
                                         if (master) {
@@ -699,6 +701,7 @@
                                         }
                                     });
 
+                                    // 缓存库特征键变更为：不锁死单周，采用时间与组号绑定的统一特征池
                                     const cacheKey = `T${r.timeRange}_G${assignedGroupId}`;
                                     if (!MANDATORY_BRANCHES_DATA[cacheKey]) MANDATORY_BRANCHES_DATA[cacheKey] = [];
                                     MANDATORY_BRANCHES_DATA[cacheKey].push({
@@ -706,7 +709,6 @@
                                     });
                                 }
                             } else {
-                                // 恢复纯粹真随机普通表格行
                                 const tr = document.createElement('tr');
                                 tr.innerHTML = `
                                     <td class="p-1 border-r"><input type="text" value="ev_${idx}" class="w-full border-0 p-0"></td>
@@ -736,7 +738,7 @@
                     }
 
                     updateAll();
-                    alert("🎯 跨周联动全量修复！数据已经完美导入回显。");
+                    alert("🎯 完美承接多周绑定！数据已导入回显。");
                 } catch(e) { alert("导入错误: " + e.message); console.error(e); }
             };
             reader.readAsText(file);
@@ -752,6 +754,7 @@
             return s.split(/[,，]/).map(item => parseInt(item.trim())).filter(n => !isNaN(n));
         }
 
+        // 默认真随机事件的快捷配置模板修改
         function addTrueRandomRow() {
             const tr = document.createElement('tr');
             tr.innerHTML = `
