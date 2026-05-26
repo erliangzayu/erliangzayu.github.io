@@ -7,10 +7,10 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         .table-input { @apply border border-gray-300 px-1 py-0.5 w-full rounded focus:outline-none focus:border-blue-500 text-xs text-left bg-white text-gray-800; }
-        .table-select { @apply border border-gray-300 px-0.5 py-0.5 rounded focus:outline-none focus:border-blue-500 text-[11px] bg-gray-50; }
+        .table-select { @apply border border-gray-300 px-0.5 py-0.5 rounded focus:outline-none focus:border-blue-500 text-[11px] bg-gray-50 w-full; }
         .tab-btn-active { @apply border-b-2 border-blue-500 text-blue-600 font-bold; }
-        .excel-cell { @apply p-1.5 border border-gray-200 transition-colors duration-150 align-top; }
-        .cell-mandatory { @apply bg-amber-50/80; }
+        .excel-cell { @apply p-1 border border-gray-200 transition-colors duration-150 align-top h-full min-h-[95px]; }
+        .cell-mandatory { @apply bg-amber-50/90 border-amber-300; }
         .custom-scroll::-webkit-scrollbar { width: 6px; height: 6px; }
         .custom-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
     </style>
@@ -179,19 +179,19 @@
                 for (let d = 0; d <= 6; d++) {
                     dayCells += `
                         <td class="excel-cell" data-day="${d}" data-slot-index="${index}" data-slot="${slot}" id="cell-${d}-${index}">
-                            <div class="flex flex-col gap-1">
-                                <div class="flex gap-1 items-center">
+                            <div class="flex flex-col gap-1 h-full justify-between">
+                                <div class="flex gap-1 items-center w-full">
                                     <select class="table-select cell-main-dropdown" onchange="handleTypeChange(this)">
                                         <option value="fixed">固定日程</option>
                                         <option value="mandatory">必然随机事件</option>
                                     </select>
-                                    <div class="hidden item-group-wrapper items-center gap-0.5">
+                                    <div class="hidden item-group-wrapper items-center gap-0.5 shrink-0">
                                         <span class="text-[10px] text-amber-600 font-bold">组</span>
-                                        <input type="number" value="1" min="1" class="w-7 text-center border border-amber-300 bg-amber-50 text-amber-900 rounded text-[11px] font-bold cell-group-id" oninput="updateAll()">
+                                        <input type="number" value="1" min="1" class="w-8 text-center border border-amber-300 bg-amber-50 text-amber-900 rounded text-[11px] font-bold cell-group-id" oninput="updateAll()">
                                     </div>
-                                    <button onclick="splitCell(this)" class="text-[10px] text-gray-400 hover:text-red-500 hidden btn-split" title="拆分复原">🔓</button>
+                                    <button onclick="splitCell(this)" class="text-[10px] text-gray-400 hover:text-red-500 hidden btn-split shrink-0" title="拆分复原">🔓</button>
                                 </div>
-                                <div class="space-y-0.5 cell-input-container">
+                                <div class="space-y-1 cell-input-container w-full mt-1">
                                     <input type="text" placeholder="地点" list="location-list" class="table-input font-medium cell-area">
                                     <input type="text" placeholder="类别 (type)" class="table-input cell-type">
                                     <input type="text" placeholder="动作 (action)" class="table-input cell-action">
@@ -217,14 +217,12 @@
 
             if (select.value === 'mandatory') {
                 cell.classList.add('cell-mandatory');
-                groupWrapper.classList.remove('hidden');
-                groupWrapper.classList.add('flex');
-                inputContainer.classList.add('hidden');
+                groupWrapper.style.display = 'flex';
+                inputContainer.style.setProperty('display', 'none', 'important');
             } else {
                 cell.classList.remove('cell-mandatory');
-                groupWrapper.classList.add('hidden');
-                groupWrapper.classList.remove('flex');
-                inputContainer.classList.remove('hidden');
+                groupWrapper.style.display = 'none';
+                inputContainer.style.removeProperty('display');
             }
             updateAll();
         }
@@ -238,21 +236,25 @@
                 if (indices[i+1] - indices[i] !== 1) { alert("合并失败：所勾选的时间格必须是完全连续的！"); return; }
             }
             const startIdx = indices[0];
-            const masterCell = document.getElementById(`cell-${targetDay}-${startIdx}`);
-            if (!masterCell || masterCell.style.display === 'none') { alert("合并位置冲突，请先确保目标没有被合并覆盖。"); return; }
+            executeMergeOnUI(targetDay, startIdx, indices.length);
+            checkedBoxes.forEach(cb => cb.checked = false);
+            updateAll();
+        }
 
-            masterCell.rowSpan = indices.length;
+        function executeMergeOnUI(targetDay, startIdx, length) {
+            const masterCell = document.getElementById(`cell-${targetDay}-${startIdx}`);
+            if (!masterCell || masterCell.style.display === 'none') return;
+
+            masterCell.rowSpan = length;
             masterCell.querySelector('.btn-split').classList.remove('hidden');
             masterCell.classList.add('bg-slate-50', 'border-b-2', 'border-b-blue-400');
 
             const hiddenIds = [];
-            for (let i = 1; i < indices.length; i++) {
-                const subCell = document.getElementById(`cell-${targetDay}-${indices[i]}`);
+            for (let i = 1; i < length; i++) {
+                const subCell = document.getElementById(`cell-${targetDay}-${startIdx + i}`);
                 if (subCell) { subCell.style.display = 'none'; hiddenIds.push(subCell.id); }
             }
             masterCell.setAttribute('data-merged-ids', JSON.stringify(hiddenIds));
-            checkedBoxes.forEach(cb => cb.checked = false);
-            updateAll();
         }
 
         function splitCell(btn) {
@@ -266,12 +268,10 @@
             updateAll();
         }
 
-        // --- 修复：三级联动只按 统一生成的缓存特征 做去重展示，防止出现多层重复盒子 ---
         function syncMandatoryContainersHTML(detectedList) {
             const root = document.getElementById('mandatory-containers-root');
             const badge = document.getElementById('m3-badge');
             
-            // 提取出当前所有的特征（忽略周几，只留时间范围+组号特征）去重渲染
             const uniqueBoxes = [];
             const seenKeys = new Set();
             
@@ -313,7 +313,6 @@
                     `;
                 });
 
-                // 查出目前有哪些周几正在共用这个时间盒，显示在卡片头上
                 const tiedWeeks = detectedList.filter(x => x.timeRange === item.timeRange && x.groupId === item.groupId).map(x => `周${x.day}`).join(', ');
 
                 html += `
@@ -461,7 +460,6 @@
             generateJSON();
         }
 
-        // --- ⭐【核心算法重写：高度智能合并同一时间发生的所有必然随机分支】⭐ ---
         function generateJSON() {
             const result = {
                 name: document.getElementById('m1-name').value.trim(),
@@ -471,15 +469,11 @@
                 locationRandomActions: {}
             };
 
-            const schedulePool = {};
             const detectedMandatories = []; 
             const uniqueLocations = new Set(); 
+            const baseScheduleMergeMap = {};
 
-            // 1. 扫描大表提取基础日程
             for (let d = 0; d <= 6; d++) {
-                const weekKey = JSON.stringify([d]);
-                if (!schedulePool[weekKey]) schedulePool[weekKey] = { week: [d], schedule: [] };
-
                 for (let i = 0; i < TIME_SLOTS.length; i++) {
                     const cell = document.getElementById(`cell-${d}-${i}`);
                     if (!cell || cell.style.display === 'none') continue;
@@ -506,18 +500,37 @@
                     if (!area && !action) continue;
                     if (area) { uniqueLocations.add(`${area}|||${type}`); } 
 
-                    schedulePool[weekKey].schedule.push({
-                        timeRange: finalTimeRange, area: area, type: type, action: action
-                    });
+                    const scheduleFingerprint = `${finalTimeRange}|||${area}|||${type}|||${action}`;
+
+                    if (!baseScheduleMergeMap[scheduleFingerprint]) {
+                        baseScheduleMergeMap[scheduleFingerprint] = {
+                            weeks: new Set([d]),
+                            timeRange: finalTimeRange, area: area, type: type, action: action
+                        };
+                    } else {
+                        baseScheduleMergeMap[scheduleFingerprint].weeks.add(d);
+                    }
                 }
             }
-            result.baseSchedule = Object.values(schedulePool).filter(b => b.schedule.length > 0);
 
-            // 2. ⭐必然随机组逻辑合并算法：在这里完成跨周几(Week)合并归一化！
-            // 建立一个临时字典，用来聚合完全等价的分支对象：
-            // 复合键规则：时间段 + 地点 + 分支动作描述 + 组号
+            const groupedByWeeks = {};
+            for (const finger in baseScheduleMergeMap) {
+                const item = baseScheduleMergeMap[finger];
+                const sortedWeekStr = Array.from(item.weeks).sort((a,b)=>a-b).join(',');
+                
+                if (!groupedByWeeks[sortedWeekStr]) {
+                    groupedByWeeks[sortedWeekStr] = {
+                        week: Array.from(item.weeks).sort((a,b)=>a-b),
+                        schedule: []
+                    };
+                }
+                groupedByWeeks[sortedWeekStr].schedule.push({
+                    timeRange: item.timeRange, area: item.area, type: item.type, action: item.action
+                });
+            }
+            result.baseSchedule = Object.values(groupedByWeeks);
+
             const mandatoryMergeMap = {};
-
             detectedMandatories.forEach(item => {
                 const boxCacheKey = `T${item.timeRange}_G${item.groupId}`;
                 const branches = MANDATORY_BRANCHES_DATA[boxCacheKey] || [];
@@ -527,12 +540,11 @@
                     const t = b.type || "rest";
                     if (b.area) { uniqueLocations.add(`${b.area}|||${t}`); } 
 
-                    // 构造能够唯一标识这个具体子分支的核准特征码
                     const branchFingerprint = `${item.timeRange}|||${b.probability}|||${b.area}|||${t}|||${b.action}|||${item.groupId}`;
 
                     if (!mandatoryMergeMap[branchFingerprint]) {
                         mandatoryMergeMap[branchFingerprint] = {
-                            week: new Set([item.day]), // 用 Set 自动剔除可能重复的星期绑定
+                            week: new Set([item.day]),
                             timeRange: item.timeRange,
                             probability: b.probability,
                             area: b.area,
@@ -541,20 +553,17 @@
                             isMandatory: true
                         };
                     } else {
-                        // 如果特征完全一样，直接在已有的 week 列表中塞进今天
                         mandatoryMergeMap[branchFingerprint].week.add(item.day);
                     }
                 });
             });
 
-            // 将去重合并完的对象释放输出到结果集
             for (const key in mandatoryMergeMap) {
                 const obj = mandatoryMergeMap[key];
-                obj.week = Array.from(obj.week).sort((a, b) => a - b); // 强制转回排好序的完美原生数组 [1, 2, 3, 4]
+                obj.week = Array.from(obj.week).sort((a, b) => a - b); 
                 result.randomEvents.push(obj);
             }
 
-            // 3. 真随机事件提取
             document.querySelectorAll('#tbody-true-random tr').forEach(row => {
                 const els = row.querySelectorAll('input');
                 if (els.length < 9) return;
@@ -571,7 +580,6 @@
                 });
             });
 
-            // 4. 话术数据整合编译
             uniqueLocations.forEach(key => {
                 const [area, type] = key.split('|||');
                 const rowEl = document.querySelector(`.text-list-container[data-loc-key="${key.replace(/"/g, '\\"')}"]`);
@@ -594,7 +602,7 @@
             return { detectedMandatories, uniqueLocations };
         }
 
-        // --- ⭐【核心反向导入修复：完全支撑多周并行的解构渲染】---
+        // --- ⭐【全能修复版反向导入：完美兼容多重独立必选随机事件盒与行合并还原】---
         function importJSON(event) {
             const file = event.target.files[0];
             if (!file) return;
@@ -611,31 +619,10 @@
                     MANDATORY_BRANCHES_DATA = {};
                     LOCATION_TEXTS_CACHE = {};
 
-                    if (data.baseSchedule && data.baseSchedule.length > 0) {
-                        const firstItem = data.baseSchedule[0];
-                        if (!firstItem.hasOwnProperty('schedule') && (firstItem.hasOwnProperty('area') || firstItem.hasOwnProperty('timeRange'))) {
-                            const upgradedBase = [];
-                            data.baseSchedule.forEach(oldItem => {
-                                const wKey = oldItem.week ? oldItem.week.sort().join(',') : 'all';
-                                let block = upgradedBase.find(b => (b._wKey === wKey));
-                                if (!block) {
-                                    block = { week: oldItem.week || [], schedule: [], _wKey: wKey };
-                                    upgradedBase.push(block);
-                                }
-                                block.schedule.push({
-                                    timeRange: oldItem.timeRange || "00:00-00:30",
-                                    area: oldItem.area || "",
-                                    type: oldItem.type || "rest",
-                                    action: oldItem.action || ""
-                                });
-                            });
-                            data.baseSchedule = upgradedBase;
-                        }
-                    }
-
+                    // 1. 固定排程回显
                     if (data.baseSchedule) {
                         data.baseSchedule.forEach(block => {
-                            const days = block.week || [];
+                            const days = Array.isArray(block.week) ? block.week : [];
                             if (!block.schedule) return;
 
                             block.schedule.forEach(item => {
@@ -644,71 +631,79 @@
                                 let startIdx = TIME_SLOTS.findIndex(s => s.startsWith(parts[0]));
                                 let endIdx = TIME_SLOTS.findIndex(s => s.endsWith(parts[1]));
 
+                                if (startIdx === -1 || endIdx === -1) return;
+
                                 days.forEach(d => {
-                                    if (startIdx === -1 || endIdx === -1) return;
+                                    executeMergeOnUI(d, startIdx, (endIdx - startIdx + 1));
                                     const master = document.getElementById(`cell-${d}-${startIdx}`);
-                                    if (!master) return;
-
-                                    if (endIdx > startIdx) {
-                                        master.rowSpan = endIdx - startIdx + 1;
-                                        master.querySelector('.btn-split').classList.remove('hidden');
-                                        master.classList.add('bg-slate-50', 'border-b-2', 'border-b-blue-400');
-                                        const hiddenIds = [];
-                                        for (let k = startIdx + 1; k <= endIdx; k++) {
-                                            const subCell = document.getElementById(`cell-${d}-${k}`);
-                                            if (subCell) { subCell.style.display = 'none'; hiddenIds.push(subCell.id); }
-                                        }
-                                        master.setAttribute('data-merged-ids', JSON.stringify(hiddenIds));
+                                    if (master) {
+                                        master.querySelector('.cell-main-dropdown').value = 'fixed';
+                                        master.querySelector('.cell-area').value = item.area || "";
+                                        master.querySelector('.cell-type').value = item.type || "";
+                                        master.querySelector('.cell-action').value = item.action || "";
                                     }
-
-                                    master.querySelector('.cell-main-dropdown').value = 'fixed';
-                                    master.querySelector('.cell-area').value = item.area || "";
-                                    master.querySelector('.cell-type').value = item.type || "";
-                                    master.querySelector('.cell-action').value = item.action || "";
                                 });
                             });
                         });
                     }
 
+                    // 2. 必然随机事件：多时段、多组并行精准回显核心算法
                     const tbodyTR = document.getElementById('tbody-true-random'); tbodyTR.innerHTML = "";
-                    let mockGroupCounter = 1;
-                    const timeToGroupMap = {};
+                    
+                    // 用时间段特征对所有的必然随机事件做聚合组划分，确保不同时间段能被划分为独立的组ID
+                    let groupCounter = 1;
+                    const groupKeyMap = {}; 
 
                     if (data.randomEvents) {
                         data.randomEvents.forEach((r, idx) => {
                             if (r.isMandatory) {
-                                // 🌟修复关键：不再只取 week[0]，而是遍历绑定的每一天！
-                                const targetDays = (r.week && r.week.length > 0) ? r.week : [0];
+                                const targetDays = Array.isArray(r.week) ? r.week : [0];
                                 const parts = r.timeRange.split('-');
                                 let startIdx = TIME_SLOTS.findIndex(s => s.startsWith(parts[0]));
+                                let endIdx = TIME_SLOTS.findIndex(s => s.endsWith(parts[1]));
 
-                                if (startIdx !== -1) {
-                                    // 确定共享的联合时间组ID
-                                    const sharedMapKey = targetDays.join(',') + `_${r.timeRange}`;
-                                    if (!timeToGroupMap[sharedMapKey]) timeToGroupMap[sharedMapKey] = mockGroupCounter++;
-                                    const assignedGroupId = timeToGroupMap[sharedMapKey];
+                                if (startIdx !== -1 && endIdx !== -1) {
+                                    // 识别特征：以时间段本身作为独立盒子标志。
+                                    const featureKey = r.timeRange;
+                                    if (!groupKeyMap[featureKey]) {
+                                        groupKeyMap[featureKey] = groupCounter++;
+                                    }
+                                    const assignedGroupId = groupKeyMap[featureKey];
 
-                                    // 将这一组里的每一个星期的格子都点亮为必然随机
+                                    // 轮询点亮此事件盒中声明的所有星期的格子
                                     targetDays.forEach(day => {
+                                        // 高阶回显还原：必然随机事件如果也跨越了多行，将其 rowSpan 合并展现！
+                                        executeMergeOnUI(day, startIdx, (endIdx - startIdx + 1));
+
                                         const master = document.getElementById(`cell-${day}-${startIdx}`);
                                         if (master) {
-                                            master.querySelector('.cell-main-dropdown').value = 'mandatory';
+                                            const dropdown = master.querySelector('.cell-main-dropdown');
+                                            dropdown.value = 'mandatory';
+                                            
+                                            // 触发状态改变 UI 变换
                                             master.classList.add('cell-mandatory');
-                                            master.querySelector('.item-group-wrapper').classList.remove('hidden');
-                                            master.querySelector('.item-group-wrapper').classList.add('flex');
-                                            master.querySelector('.cell-input-container').classList.add('hidden');
+                                            master.querySelector('.item-group-wrapper').style.display = 'flex';
+                                            master.querySelector('.cell-input-container').style.setProperty('display', 'none', 'important');
                                             master.querySelector('.cell-group-id').value = assignedGroupId;
                                         }
                                     });
 
-                                    // 缓存库特征键变更为：不锁死单周，采用时间与组号绑定的统一特征池
+                                    // 将分支填回联动内存块
                                     const cacheKey = `T${r.timeRange}_G${assignedGroupId}`;
                                     if (!MANDATORY_BRANCHES_DATA[cacheKey]) MANDATORY_BRANCHES_DATA[cacheKey] = [];
-                                    MANDATORY_BRANCHES_DATA[cacheKey].push({
-                                        probability: r.probability || 0, area: r.area || "", type: r.type || "rest", action: r.action || ""
-                                    });
+                                    
+                                    // 避免完全一模一样的重复分支被推入
+                                    const isDuplicate = MANDATORY_BRANCHES_DATA[cacheKey].some(b => 
+                                        b.probability === r.probability && b.area === r.area && b.action === r.action && b.type === r.type
+                                    );
+                                    if (!isDuplicate) {
+                                        MANDATORY_BRANCHES_DATA[cacheKey].push({
+                                            probability: r.probability || 0, area: r.area || "", type: r.type || "rest", action: r.action || ""
+                                        });
+                                    }
                                 }
                             } else {
+                                // 恢复纯粹真随机普通表格行
                                 const tr = document.createElement('tr');
                                 tr.innerHTML = `
                                     <td class="p-1 border-r"><input type="text" value="ev_${idx}" class="w-full border-0 p-0"></td>
@@ -738,7 +733,7 @@
                     }
 
                     updateAll();
-                    alert("🎯 完美承接多周绑定！数据已导入回显。");
+                    alert("🎯 UI样式及多时段必然随机事件独立映射已完美修复还原！");
                 } catch(e) { alert("导入错误: " + e.message); console.error(e); }
             };
             reader.readAsText(file);
@@ -754,7 +749,6 @@
             return s.split(/[,，]/).map(item => parseInt(item.trim())).filter(n => !isNaN(n));
         }
 
-        // 默认真随机事件的快捷配置模板修改
         function addTrueRandomRow() {
             const tr = document.createElement('tr');
             tr.innerHTML = `
@@ -805,4 +799,3 @@
     </script>
 </body>
 </html>
-
