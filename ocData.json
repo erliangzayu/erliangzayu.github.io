@@ -278,8 +278,10 @@
             "action": "🏫 在校门口哦～",
             "tip": "✨ 杂鱼去给一中订晚餐的高三生送餐啦！",
             "persist": true
-        },
-        {
+        }
+      ]
+  },
+  {
   "name": "Marcel",
   "avatar": "./images/avatar/marcel.PNG",
   "baseSchedule": [
@@ -1004,7 +1006,5 @@
       ]
     }
   }
-}
-      ]
-    }
-  ]
+  }
+ ]
