@@ -246,7 +246,7 @@
         "week": [0,1,2,3,4,5,6],
         "timeRange": "14:00-15:00",
         "probability": 20,
-        "area": "大学城",
+        "area": "CULF/LF大学城",
         "isMandatory": true,
         "action": "休息中"
       },
