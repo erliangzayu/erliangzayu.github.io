@@ -29,7 +29,7 @@
         .custom-scroll::-webkit-scrollbar { width: 6px; height: 6px; }
         .custom-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
 
-        /* 核心重构：实现完美多列左侧固定（Sticky） 纵向横向互不干扰 */
+        /* 实现完美多列左侧固定（Sticky） 纵向横向互不干扰 */
         .sticky-col-check {
             position: sticky;
             left: 0;
@@ -47,11 +47,6 @@
         
         thead tr th.sticky-col-check { z-index: 30; top: 0; }
         thead tr th.sticky-col-time { z-index: 30; top: 0; }
-
-        /* 拖拽视觉提示 */
-        .branch-row.dragging {
-            @apply opacity-40 bg-blue-50 border-2 border-dashed border-blue-400;
-        }
     </style>
 </head>
 <body class="bg-slate-100 h-screen flex flex-col font-sans overflow-hidden text-slate-800">
@@ -60,7 +55,6 @@
         <option value="福源堂"><option value="九木酒屋"><option value="摸鱼网咖"><option value="LF 一中"><option value="肆的家"><option value="艺术街区"><option value="Valmont Plaza 购物中心"><option value="白日 Livehouse"> <option value="警署"><option value="旧港码头"><option value="旧港集市"><option value="小林的算命摊"> <option value="八爪胡同"><option value="真辉的公寓"><option value="小林的阁楼"><option value="融大附中"> <option value="市民公园"><option value="晴南的家"><option value="6-11 便利店"><option value="幻日乐队排练室"> <option value="Wesley 的家"><option value="奶奶的杂货铺"><option value="雾港仓库"><option value="Berlon 家老宅"> <option value="渔场"><option value="地下拳场"><option value="能乐町"><option value="悠真的出租屋"> <option value="Olivia 的出租屋"><option value="深蓝海岸"><option value="Adriana 的房车"><option value="水怪出没区"> <option value="Felix 的住所"><option value="猎人小屋"><option value="Valmont's 会员商店"><option value="CULF/LF 大学城"> <option value="凌的单人公寓"><option value="在地铁上"><option value="魔鬼鱼号">
     </datalist>
 
-    <!-- 顶部导航栏 -->
     <header class="bg-white border-b border-slate-200 px-6 py-2.5 flex justify-between items-center shrink-0 shadow-sm z-30">
         <div class="flex items-center gap-4">
             <div class="flex items-center gap-2">
@@ -78,7 +72,7 @@
                     <option value="1">周一 (W1)</option>
                     <option value="2">周二 (W2)</option>
                     <option value="3">周三 (W3)</option>
-                    <option value="4">周4 (W4)</option>
+                    <option value="4">周四 (W4)</option>
                     <option value="5">周五 (W5)</option>
                     <option value="6">周六 (W6)</option>
                 </select>
@@ -91,11 +85,8 @@
         </div>
     </header>
 
-    <!-- 主工作区 -->
     <main class="flex-1 flex overflow-hidden p-2 gap-2">
-        <!-- 左侧配置区 -->
         <section class="w-[72%] bg-white rounded-xl shadow-sm border border-slate-200/80 flex flex-col overflow-hidden">
-            <!-- 标签页栏 -->
             <div class="flex border-b border-slate-200 bg-slate-50 shrink-0 text-xs font-medium text-slate-600">
                 <button onclick="switchTab('m1')" id="tab-m1" class="px-4 py-2.5 hover:text-blue-600 tab-btn-active border-r border-slate-200 transition-all">1. 基础资料</button>
                 <button onclick="switchTab('m2')" id="tab-m2" class="px-4 py-2.5 hover:text-blue-600 border-r border-slate-200 transition-all">2. 全天日程总表 (00:00-24:00)</button>
@@ -104,10 +95,8 @@
                 <button onclick="switchTab('m5')" id="tab-m5" class="px-4 py-2.5 hover:text-blue-600 transition-all flex items-center gap-1.5">5. 地点随机话术池 <span id="m5-badge" class="bg-indigo-500 text-white font-mono rounded-full px-1.5 text-[10px] scale-90 hidden">0</span></button>
             </div>
 
-            <!-- 标签页内容体 -->
             <div class="flex-1 overflow-y-auto p-4 custom-scroll bg-slate-50/30">
                 
-                <!-- 1. 基础信息 -->
                 <div id="content-m1" class="tab-content space-y-4">
                     <div class="bg-white p-4 rounded-lg border border-slate-200 shadow-sm max-w-xl space-y-4">
                         <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider">角色核心参数</h3>
@@ -124,7 +113,6 @@
                     </div>
                 </div>
 
-                <!-- 2. 全天日程总表 -->
                 <div id="content-m2" class="tab-content hidden h-full flex flex-col">
                     <div class="flex-1 overflow-auto border border-slate-200 rounded-lg custom-scroll bg-white shadow-inner relative">
                         <table class="w-full text-left border-collapse table-fixed min-w-[1350px]" id="excel-main-table">
@@ -146,12 +134,11 @@
                     </div>
                 </div>
 
-                <!-- 3. 必然随机事件库 -->
                 <div id="content-m3" class="tab-content hidden space-y-4">
                     <div class="bg-amber-50 border border-amber-200 p-3 rounded-lg text-xs text-amber-800 shadow-sm flex items-start gap-2">
                         <span class="text-base">💡</span>
                         <div>
-                            <strong>高级操控技巧：</strong>支持<strong>拖动排序/跨组流转</strong>！按住左侧的 <strong>☰ 句柄</strong>，可以上下自由移动分支，甚至直接拖进别的时间组盒子里。输入文本时支持实时更新，且不会打断输入。
+                            <strong>操作提示：</strong>当你在大表中将某些单元格设置为“必选随机”并匹配对应的组号（G）后，该时段的分支容器会自动在此激活呈现。你可以自由添加或点击右侧 <strong>×</strong> 秒删分支，右侧 JSON 会秒级实时重编响应。
                         </div>
                     </div>
                     <div id="mandatory-containers-root" class="space-y-4">
@@ -159,7 +146,6 @@
                     </div>
                 </div>
 
-                <!-- 4. 真随机事件 -->
                 <div id="content-m4" class="tab-content hidden space-y-3">
                     <div class="flex justify-between items-center bg-white p-2 rounded-lg border border-slate-200 shadow-sm">
                         <span class="text-xs text-slate-400">💡 脱离大轴固定排程的纯概率真随机事件池。</span>
@@ -186,10 +172,9 @@
                     </div>
                 </div>
 
-                <!-- 5. 地点随机话术池 -->
                 <div id="content-m5" class="tab-content hidden space-y-3">
                     <div class="bg-indigo-50 border border-indigo-200 p-3 rounded-lg text-xs text-indigo-800 shadow-sm">
-                        ✨ <strong>动态重组归并：</strong>类别 (type) 现已支持**直接在格子中随意编辑**。如果你将“常规(留空)”的格子直接打入已存在的类别名（如 `deliver`），系统在编译和重塑时会自动将其中的话术合并，并清理多余的空行！
+                        ✨ <strong>动态重组归并：</strong>类别 (type) 支持直接在格子中编辑。如果你将“常规(留空)”的分类框直接打入已存在的类别名（如 `deliver`），系统在编译和重塑时会自动将其中的话术合并，并清理多余的空行！
                     </div>
                     <div class="border rounded-lg overflow-hidden bg-white shadow-sm">
                         <table class="w-full border-collapse text-xs" id="location-text-table">
@@ -209,7 +194,6 @@
             </div>
         </section>
 
-        <!-- 右侧实时 JSON 预览区 -->
         <section class="w-[28%] bg-slate-900 rounded-xl flex flex-col overflow-hidden text-xs text-slate-300 font-mono shadow-md border border-slate-950">
             <div class="bg-slate-800/90 px-3 py-2.5 text-slate-400 font-semibold border-b border-slate-950 flex justify-between items-center select-none">
                 <span>实时配置编译数据 (JSON)</span>
@@ -229,7 +213,6 @@
 
         let MANDATORY_BRANCHES_DATA = {};  
         let LOCATION_TEXTS_CACHE = {}; 
-        let draggedRowInfo = null; 
 
         function initTimelineTable() {
             const tbody = document.getElementById('tbody-timeline');
@@ -350,9 +333,8 @@
                 let rowsHtml = "";
                 branches.forEach((b, bIdx) => {
                     rowsHtml += `
-                        <tr class="branch-row group hover:bg-slate-50" data-cache-key="${cacheKey}" draggable="true" 
-                            ondragstart="handleDragStart(event)" ondragover="handleDragOver(event)" ondragend="handleDragEnd(event)" ondrop="handleDrop(event, '${cacheKey}')">
-                            <td class="p-1.5 border-r text-center font-bold text-amber-700 bg-amber-50/50 cursor-move select-none" title="拖动该行以改变顺序或调整分组">☰ 分支 ${bIdx + 1}</td>
+                        <tr class="branch-row group hover:bg-slate-50" data-cache-key="${cacheKey}">
+                            <td class="p-1.5 border-r text-center font-bold text-amber-700 bg-amber-50/50 select-none">分支 ${bIdx + 1}</td>
                             <td class="p-1.5 border-r"><input type="number" value="${b.probability}" class="w-full text-center border border-slate-200 rounded px-1 b-prob"></td>
                             <td class="p-1.5 border-r"><input type="text" value="${b.area || ''}" list="location-list" class="w-full border border-slate-200 rounded px-1 text-center b-area"></td>
                             <td class="p-1.5 border-r"><input type="text" value="${b.type || 'rest'}" class="w-full border border-slate-200 rounded px-1 text-center b-type"></td>
@@ -365,7 +347,7 @@
                 const weekStr = item.days.map(d => `周${d === 0 ? '日' : d === 1 ? '一' : d === 2 ? '二' : d === 3 ? '三' : d === 4 ? '四' : d === 5 ? '五' : d === 6 ? '六' : d}`).join(' / ');
 
                 html += `
-                    <div class="bg-white border border-amber-200 rounded-xl shadow-sm overflow-hidden" id="box-${cacheKey}" ondragover="handleDragOver(event)" ondrop="handleDrop(event, '${cacheKey}')">
+                    <div class="bg-white border border-amber-200 rounded-xl shadow-sm overflow-hidden" id="box-${cacheKey}">
                         <div class="bg-amber-50 px-4 py-2 flex justify-between items-center border-b border-amber-100">
                             <div class="flex items-center gap-3">
                                 <span class="bg-amber-600 text-white font-bold rounded-md px-2 py-0.5 text-[10px]">必选随机事件组 ${item.groupId}</span>
@@ -376,7 +358,7 @@
                         <table class="w-full text-xs text-center border-collapse">
                             <thead>
                                 <tr class="bg-slate-50 border-b border-slate-100 text-slate-500 font-medium">
-                                    <th class="p-1.5 border-r w-24">操作柄</th>
+                                    <th class="p-1.5 border-r w-24">当前行</th>
                                     <th class="p-1.5 border-r w-20">概率(%)</th>
                                     <th class="p-1.5 border-r w-48">目标发生地点</th>
                                     <th class="p-1.5 border-r w-28">类别(type)</th>
@@ -393,41 +375,24 @@
             root.querySelectorAll('input').forEach(input => { input.addEventListener('input', updateLivePreview); });
         }
 
-        function handleDragStart(e) {
-            const row = e.target.closest('.branch-row');
-            if (!row) return;
-            row.classList.add('dragging');
-            const key = row.getAttribute('data-cache-key');
-            const allRows = Array.from(document.querySelectorAll(`[data-cache-key="${key}"]`));
-            const idx = allRows.indexOf(row);
-            draggedRowInfo = { fromKey: key, index: idx };
-            e.dataTransfer.effectAllowed = 'move';
+                // 核心修复 1：结构性更新增加 skipSave 参数，阻止对老旧残余 DOM 节点的反向保存还原
+        function addBranchRow(cacheKey) {
+            saveAllCurrentBranchInputs();
+            if (!MANDATORY_BRANCHES_DATA[cacheKey]) MANDATORY_BRANCHES_DATA[cacheKey] = [];
+            MANDATORY_BRANCHES_DATA[cacheKey].push({probability: 0, area: '', type: 'rest', action: ''});
+            updateStructure(true); // 传入 true 跳过重新读取老旧 DOM 结构
         }
 
-        function handleDragOver(e) { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; }
-        function handleDragEnd(e) { const row = e.target.closest('.branch-row'); if (row) row.classList.remove('dragging'); draggedRowInfo = null; }
-
-        function handleDrop(e, toKey) {
-            e.preventDefault();
-            if (!draggedRowInfo) return;
-            saveAllCurrentBranchInputs();
-            const sourceArr = MANDATORY_BRANCHES_DATA[draggedRowInfo.fromKey];
-            if (!sourceArr || !sourceArr[draggedRowInfo.index]) return;
-
-            const [movedItem] = sourceArr.splice(draggedRowInfo.index, 1);
-            if (sourceArr.length === 0) { sourceArr.push({probability: 50, area: '', type: 'rest', action: ''}); }
-            if (!MANDATORY_BRANCHES_DATA[toKey]) MANDATORY_BRANCHES_DATA[toKey] = [];
-            
-            const hoverRow = e.target.closest('.branch-row');
-            if (hoverRow && hoverRow.getAttribute('data-cache-key') === toKey) {
-                const targetRows = Array.from(document.querySelectorAll(`[data-cache-key="${toKey}"]`));
-                const targetIdx = targetRows.indexOf(hoverRow);
-                MANDATORY_BRANCHES_DATA[toKey].splice(targetIdx, 0, movedItem);
-            } else {
-                MANDATORY_BRANCHES_DATA[toKey].push(movedItem);
+        // 核心修复 2：精准删除逻辑，切断死循环
+        function deleteBranchRow(btn, cacheKey, bIdx) {
+            saveAllCurrentBranchInputs(); // 先把没被删除的格子内容打包存入内存
+            if (MANDATORY_BRANCHES_DATA[cacheKey]) {
+                MANDATORY_BRANCHES_DATA[cacheKey].splice(bIdx, 1); // 放心剔除底层数组内的指定行
+                if (MANDATORY_BRANCHES_DATA[cacheKey].length === 0) {
+                    MANDATORY_BRANCHES_DATA[cacheKey].push({probability: 100, area: '', type: 'rest', action: ''});
+                }
             }
-            draggedRowInfo = null;
-            updateStructure();
+            updateStructure(true); // 核心修复：传入 true，强制阻止旧 HTML 残余的干扰，使删除立刻生效并重绘！
         }
 
         function saveAllCurrentBranchInputs() {
@@ -446,7 +411,6 @@
             });
         }
 
-        // 核心优化 1：支持从 DOM 直接动态解析已编辑的类别并全量合并
         function saveAllLocationTextInputs() {
             const tbody = document.getElementById('tbody-location-texts');
             if (!tbody) return;
@@ -469,7 +433,6 @@
 
                 if (phrases.length > 0) {
                     if (!newCache[key]) newCache[key] = [];
-                    // 如果存在复数行指向同一个 type（例如用户把留空改为了 deliver），自动进行无损数组合并
                     newCache[key] = newCache[key].concat(phrases);
                 }
             });
@@ -479,7 +442,6 @@
             }
         }
 
-        // 核心优化 2：把 type 位置转换为完美的 input 框（支持实时编译预览，防打断输入）
         function syncLocationTextsHTML(uniqueLocations) {
             const tbody = document.getElementById('tbody-location-texts');
             const badge = document.getElementById('m5-badge');
@@ -557,7 +519,6 @@
             updateLivePreview();
         }
 
-        // 核心优化 3：基于缓存状态高能编译，完全解耦对 DOM 的死板属性查找
         function generateJSON() {
             const result = {
                 name: document.getElementById('m1-name').value.trim(),
@@ -646,7 +607,6 @@
                 });
             });
 
-            // 完美输出打包结构逻辑
             uniqueLocations.forEach(key => {
                 const [area, type] = key.split('|||');
                 const textArr = LOCATION_TEXTS_CACHE[key] || [];
@@ -832,7 +792,7 @@
                         }
                     }
 
-                    updateStructure();
+                    updateStructure(true);
                     alert("🎯 数据反向识别成功！");
                 } catch(e) { alert("导入错误: " + e.message); console.error(e); }
             };
@@ -879,9 +839,12 @@
             generateJSON();
         }
 
-        function updateStructure() { 
-            saveAllCurrentBranchInputs();
-            saveAllLocationTextInputs();
+        // 核心修复 3：添加控制锁，阻止 DOM 级联回写污染
+        function updateStructure(skipSave = false) { 
+            if (!skipSave) {
+                saveAllCurrentBranchInputs();
+                saveAllLocationTextInputs();
+            }
             const state = generateJSON(); 
             syncMandatoryContainersHTML(state.detectedMandatories);
             syncLocationTextsHTML(state.uniqueLocations);
@@ -897,8 +860,8 @@
 
         window.onload = function() {
             initTimelineTable();
-            document.getElementById('excel-main-table').addEventListener('input', updateStructure);
-            document.getElementById('tbody-true-random').addEventListener('input', updateStructure);
+            document.getElementById('excel-main-table').addEventListener('input', function() { updateStructure(); });
+            document.getElementById('tbody-true-random').addEventListener('input', function() { updateStructure(); });
             updateStructure();
         };
     </script>
