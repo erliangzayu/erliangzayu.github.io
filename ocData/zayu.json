@@ -1,105 +1,606 @@
 {
-    "name": "杂鱼",
-    "avatar": "./images/avatar/zayu.PNG",
-    "baseSchedule": [
-      {
-        "week": [ 0,1,2,3,4,5,6 ],
-        "timeRange": "20:00-03:30",
-        "area": "九木酒屋",
-        "type": "work",
-        "action": "营业中"
-      },
-      {
-        "week":  [ 0,1,2,3,4,5,6 ],
-        "timeRange": "03:30-04:30",
-        "area": "九木酒屋",
-        "type": "rest",
-        "action": "收工啦！吃饭打扫中！"
-      },
-      {
-        "week":  [ 0,1,2,3,4,5,6 ],
-        "timeRange": "04:30-05:30",
-        "area": "旧港集市",
-        "type": "buy",
-        "action": "采购食材中"
-      },
-      {
-        "week":  [ 0,1,2,3,4,5,6 ],
-        "timeRange": "05:30-13:00",
-        "area": "九木酒屋",
-        "type": "sleep",
-        "action": "睡眠中"
-      },
-      {
-        "week":  [ 0,1,2,3,4,5,6 ],
-        "timeRange": "15:00-16:30",
-        "area": "九木酒屋",
-        "type": "prepare",
-        "action": "预处理食材中"
-      },
-      {
-        "week":  [ 0,1,2,3,4,5,6 ],
-        "timeRange": "16:30-17:00",
-        "area": "福源堂",
-        "type": "deliver",
-        "action": "送餐中"
-      },
-      {
-        "week": [ 5,6,0 ],
-        "timeRange": "16:30-17:00",
-        "area": "警署",
-        "type": "deliver",
-        "action": "送餐中"
-      },
-      {
-        "week": [
-          0,
-          6
-        ],
-        "timeRange": "17:00-18:00",
-        "area": "九木酒屋",
-        "type": "eat",
-        "action": "用餐中"
-      },
-      {
-        "week": [
-          1,
-          2,
-          3,
-          4
-        ],
-        "timeRange": "17:00-18:00",
-        "area": "福源堂",
-        "type": "eat",
-        "action": "用餐中"
-      },
-      {
-        "week": [
-          5
-        ],
-        "timeRange": "17:00-18:00",
-        "area": "八爪胡同",
-        "type": "eat",
-        "action": "用餐中"
-      },
-      {
-        "week":  [ 0,1,2,3,4,5,6 ],
-        "timeRange": "18:00-20:00",
-        "area": "九木酒屋",
-        "type": "prepare",
-        "action": "做开店准备中"
-      }
-    ],
-    "locationRandomActions": {
+  "name": "杂鱼",
+  "avatar": "./images/avatar/zayu.PNG",
+  "baseSchedule": [
+    {
+      "week": [
+        0
+      ],
+      "schedule": [
+        {
+          "timeRange": "00:00-03:30",
+          "area": "九木酒屋",
+          "type": "work",
+          "action": "营业中"
+        },
+        {
+          "timeRange": "03:30-04:30",
+          "area": "九木酒屋",
+          "type": "rest",
+          "action": "收工啦！吃饭打扫中！"
+        },
+        {
+          "timeRange": "04:30-05:30",
+          "area": "旧港集市",
+          "type": "buy",
+          "action": "采购食材中"
+        },
+        {
+          "timeRange": "05:30-13:00",
+          "area": "九木酒屋",
+          "type": "sleep",
+          "action": "睡眠中"
+        },
+        {
+          "timeRange": "15:00-16:30",
+          "area": "九木酒屋",
+          "type": "prepare",
+          "action": "预处理食材中"
+        },
+        {
+          "timeRange": "16:30-17:00",
+          "area": "警署",
+          "type": "deliver",
+          "action": "送餐中"
+        },
+        {
+          "timeRange": "17:00-17:30",
+          "area": "九木酒屋",
+          "type": "eat",
+          "action": "用餐中"
+        },
+        {
+          "timeRange": "18:00-20:00",
+          "area": "九木酒屋",
+          "type": "prepare",
+          "action": "做开店准备中"
+        },
+        {
+          "timeRange": "20:00-24:00",
+          "area": "九木酒屋",
+          "type": "work",
+          "action": "营业中"
+        }
+      ]
+    },
+    {
+      "week": [
+        1
+      ],
+      "schedule": [
+        {
+          "timeRange": "00:00-03:30",
+          "area": "九木酒屋",
+          "type": "work",
+          "action": "营业中"
+        },
+        {
+          "timeRange": "03:30-04:30",
+          "area": "九木酒屋",
+          "type": "rest",
+          "action": "收工啦！吃饭打扫中！"
+        },
+        {
+          "timeRange": "04:30-05:30",
+          "area": "旧港集市",
+          "type": "buy",
+          "action": "采购食材中"
+        },
+        {
+          "timeRange": "05:30-13:00",
+          "area": "九木酒屋",
+          "type": "sleep",
+          "action": "睡眠中"
+        },
+        {
+          "timeRange": "15:00-16:30",
+          "area": "九木酒屋",
+          "type": "prepare",
+          "action": "预处理食材中"
+        },
+        {
+          "timeRange": "16:30-17:00",
+          "area": "福源堂",
+          "type": "deliver",
+          "action": "送餐中"
+        },
+        {
+          "timeRange": "17:00-18:00",
+          "area": "福源堂",
+          "type": "eat",
+          "action": "用餐中"
+        },
+        {
+          "timeRange": "18:00-20:00",
+          "area": "九木酒屋",
+          "type": "prepare",
+          "action": "做开店准备中"
+        },
+        {
+          "timeRange": "20:00-24:00",
+          "area": "九木酒屋",
+          "type": "work",
+          "action": "营业中"
+        }
+      ]
+    },
+    {
+      "week": [
+        2
+      ],
+      "schedule": [
+        {
+          "timeRange": "00:00-03:30",
+          "area": "九木酒屋",
+          "type": "work",
+          "action": "营业中"
+        },
+        {
+          "timeRange": "03:30-04:30",
+          "area": "九木酒屋",
+          "type": "rest",
+          "action": "收工啦！吃饭打扫中！"
+        },
+        {
+          "timeRange": "04:30-05:30",
+          "area": "旧港集市",
+          "type": "buy",
+          "action": "采购食材中"
+        },
+        {
+          "timeRange": "05:30-13:00",
+          "area": "九木酒屋",
+          "type": "sleep",
+          "action": "睡眠中"
+        },
+        {
+          "timeRange": "15:00-16:30",
+          "area": "九木酒屋",
+          "type": "prepare",
+          "action": "预处理食材中"
+        },
+        {
+          "timeRange": "16:30-17:00",
+          "area": "福源堂",
+          "type": "deliver",
+          "action": "送餐中"
+        },
+        {
+          "timeRange": "17:00-18:00",
+          "area": "福源堂",
+          "type": "eat",
+          "action": "用餐中"
+        },
+        {
+          "timeRange": "18:00-20:00",
+          "area": "九木酒屋",
+          "type": "prepare",
+          "action": "做开店准备中"
+        },
+        {
+          "timeRange": "20:00-24:00",
+          "area": "九木酒屋",
+          "type": "work",
+          "action": "营业中"
+        }
+      ]
+    },
+    {
+      "week": [
+        3
+      ],
+      "schedule": [
+        {
+          "timeRange": "00:00-03:30",
+          "area": "九木酒屋",
+          "type": "work",
+          "action": "营业中"
+        },
+        {
+          "timeRange": "03:30-04:30",
+          "area": "九木酒屋",
+          "type": "rest",
+          "action": "收工啦！吃饭打扫中！"
+        },
+        {
+          "timeRange": "04:30-05:30",
+          "area": "旧港集市",
+          "type": "buy",
+          "action": "采购食材中"
+        },
+        {
+          "timeRange": "05:30-13:00",
+          "area": "九木酒屋",
+          "type": "sleep",
+          "action": "睡眠中"
+        },
+        {
+          "timeRange": "15:00-16:30",
+          "area": "九木酒屋",
+          "type": "prepare",
+          "action": "预处理食材中"
+        },
+        {
+          "timeRange": "16:30-17:00",
+          "area": "福源堂",
+          "type": "deliver",
+          "action": "送餐中"
+        },
+        {
+          "timeRange": "17:00-18:00",
+          "area": "福源堂",
+          "type": "eat",
+          "action": "用餐中"
+        },
+        {
+          "timeRange": "18:00-20:00",
+          "area": "九木酒屋",
+          "type": "prepare",
+          "action": "做开店准备中"
+        },
+        {
+          "timeRange": "20:00-24:00",
+          "area": "九木酒屋",
+          "type": "work",
+          "action": "营业中"
+        }
+      ]
+    },
+    {
+      "week": [
+        4
+      ],
+      "schedule": [
+        {
+          "timeRange": "00:00-03:30",
+          "area": "九木酒屋",
+          "type": "work",
+          "action": "营业中"
+        },
+        {
+          "timeRange": "03:30-04:30",
+          "area": "九木酒屋",
+          "type": "rest",
+          "action": "收工啦！吃饭打扫中！"
+        },
+        {
+          "timeRange": "04:30-05:30",
+          "area": "旧港集市",
+          "type": "buy",
+          "action": "采购食材中"
+        },
+        {
+          "timeRange": "05:30-13:00",
+          "area": "九木酒屋",
+          "type": "sleep",
+          "action": "睡眠中"
+        },
+        {
+          "timeRange": "15:00-16:30",
+          "area": "九木酒屋",
+          "type": "prepare",
+          "action": "预处理食材中"
+        },
+        {
+          "timeRange": "16:30-17:00",
+          "area": "福源堂",
+          "type": "deliver",
+          "action": "送餐中"
+        },
+        {
+          "timeRange": "17:00-18:00",
+          "area": "福源堂",
+          "type": "eat",
+          "action": "用餐中"
+        },
+        {
+          "timeRange": "18:00-20:00",
+          "area": "九木酒屋",
+          "type": "prepare",
+          "action": "做开店准备中"
+        },
+        {
+          "timeRange": "20:00-24:00",
+          "area": "九木酒屋",
+          "type": "work",
+          "action": "营业中"
+        }
+      ]
+    },
+    {
+      "week": [
+        5
+      ],
+      "schedule": [
+        {
+          "timeRange": "00:00-03:30",
+          "area": "九木酒屋",
+          "type": "work",
+          "action": "营业中"
+        },
+        {
+          "timeRange": "03:30-04:30",
+          "area": "九木酒屋",
+          "type": "rest",
+          "action": "收工啦！吃饭打扫中！"
+        },
+        {
+          "timeRange": "04:30-05:30",
+          "area": "旧港集市",
+          "type": "buy",
+          "action": "采购食材中"
+        },
+        {
+          "timeRange": "05:30-13:00",
+          "area": "九木酒屋",
+          "type": "sleep",
+          "action": "睡眠中"
+        },
+        {
+          "timeRange": "15:00-16:30",
+          "area": "九木酒屋",
+          "type": "prepare",
+          "action": "预处理食材中"
+        },
+        {
+          "timeRange": "16:30-17:00",
+          "area": "警署",
+          "type": "deliver",
+          "action": "送餐中"
+        },
+        {
+          "timeRange": "17:00-17:30",
+          "area": "八爪胡同",
+          "type": "eat",
+          "action": "用餐中"
+        },
+        {
+          "timeRange": "18:00-20:00",
+          "area": "九木酒屋",
+          "type": "prepare",
+          "action": "做开店准备中"
+        },
+        {
+          "timeRange": "20:00-24:00",
+          "area": "九木酒屋",
+          "type": "work",
+          "action": "营业中"
+        }
+      ]
+    },
+    {
+      "week": [
+        6
+      ],
+      "schedule": [
+        {
+          "timeRange": "00:00-03:30",
+          "area": "九木酒屋",
+          "type": "work",
+          "action": "营业中"
+        },
+        {
+          "timeRange": "03:30-04:30",
+          "area": "九木酒屋",
+          "type": "rest",
+          "action": "收工啦！吃饭打扫中！"
+        },
+        {
+          "timeRange": "04:30-05:30",
+          "area": "旧港集市",
+          "type": "buy",
+          "action": "采购食材中"
+        },
+        {
+          "timeRange": "05:30-13:00",
+          "area": "九木酒屋",
+          "type": "sleep",
+          "action": "睡眠中"
+        },
+        {
+          "timeRange": "15:00-16:30",
+          "area": "九木酒屋",
+          "type": "prepare",
+          "action": "预处理食材中"
+        },
+        {
+          "timeRange": "16:30-17:00",
+          "area": "警署",
+          "type": "deliver",
+          "action": "送餐中"
+        },
+        {
+          "timeRange": "17:00-17:30",
+          "area": "九木酒屋",
+          "type": "eat",
+          "action": "用餐中"
+        },
+        {
+          "timeRange": "18:00-20:00",
+          "area": "九木酒屋",
+          "type": "prepare",
+          "action": "做开店准备中"
+        },
+        {
+          "timeRange": "20:00-24:00",
+          "area": "九木酒屋",
+          "type": "work",
+          "action": "营业中"
+        }
+      ]
+    }
+  ],
+  "randomEvents": [
+    {
+      "week": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "timeRange": "13:00-14:00",
+      "probability": 40,
+      "area": "九木酒屋",
+      "type": "eat",
+      "action": "用餐中",
+      "isMandatory": true
+    },
+    {
+      "week": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "timeRange": "13:00-14:00",
+      "probability": 40,
+      "area": "旧港集市",
+      "type": "eat",
+      "action": "用餐中",
+      "isMandatory": true
+    },
+    {
+      "week": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "timeRange": "13:00-14:00",
+      "probability": 20,
+      "area": "小林的算命摊",
+      "type": "rest",
+      "action": "被小林拉到算命摊一起吃饭",
+      "isMandatory": true
+    },
+    {
+      "week": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "timeRange": "14:00-15:00",
+      "probability": 20,
+      "area": "市民公园",
+      "type": "rest",
+      "action": "休息中",
+      "isMandatory": true
+    },
+    {
+      "week": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "timeRange": "14:00-15:00",
+      "probability": 30,
+      "area": "艺术街区",
+      "type": "rest",
+      "action": "休息中",
+      "isMandatory": true
+    },
+    {
+      "week": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "timeRange": "14:00-15:00",
+      "probability": 20,
+      "area": "CULF/LF大学城",
+      "type": "rest",
+      "action": "休息中",
+      "isMandatory": true
+    },
+    {
+      "week": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "timeRange": "14:00-15:00",
+      "probability": 30,
+      "area": "旧港码头",
+      "type": "rest",
+      "action": "休息中",
+      "isMandatory": true
+    },
+    {
+      "week": [
+        3,
+        5,
+        6,
+        0
+      ],
+      "timeRange": "18:00-19:00",
+      "probability": 25,
+      "area": "八爪胡同",
+      "type": "buy",
+      "action": "🛻 采购中！",
+      "tip": "✨ 杂鱼跑去八爪胡同采购啦！酒又不够了吗～",
+      "persist": true
+    },
+    {
+      "week": [
+        1,
+        2,
+        4
+      ],
+      "timeRange": "18:00-19:00",
+      "probability": 35,
+      "area": "LF一中",
+      "type": "deliver",
+      "action": "🏫 在校门口哦～",
+      "tip": "✨ 杂鱼去给一中订晚餐的高三生送餐啦！",
+      "persist": true
+    }
+  ],
+  "locationRandomActions": {
+    "CULF/LF大学城": {
+      "rest": [
+        "找了个靠窗的位置看书，阳光太好了！",
+        "睡着了.",
+        "果然还是只能看懂漫画书吗...",
+        "偷窥小情侣中...噫～"
+      ]
+    },
+    "LF一中": {
+      "deliver": [
+        "21号！21号呢！你的餐————",
+        "又没遇到肆那小子放学啊...",
+        "九木的餐在这儿————哎同学好你是几号？"
+      ]
+    },
     "九木酒屋": {
-      "work": [
-        "\"欢迎光临～看看想吃什么？\"",
-        "\"里边卡座空着，您随便坐！\"",
-        "\"蒜烤帆立贝，请慢用～❤️\"",
-        "记下客人的点单，转身快步进了后厨",
-        "给熟客添酒，聊聊最近的新鲜事",
-        "正端着餐盘穿梭在桌间",
-        "终于得闲，慢慢洗着酒杯，留意着客人的招呼手势"
+      "eat": [
+        "吃点什么呢...炒个菜吗？",
+        "翻翻剩菜...🧐",
+        "煮个面条吧！"
       ],
       "prepare": [
         "生蚝～好难撬！",
@@ -108,175 +609,97 @@
         "牛肉切薄片，用料酒生抽简单腌渍入味",
         "整理吧台，把酒瓶摆得整整齐齐"
       ],
-      "eat": [
-        "吃点什么呢...炒个菜吗？",
-        "翻翻剩菜...🧐",
-        "煮个面条吧！"
-      ],
-      "rest": [ 
+      "rest": [
         "下～班！",
         "好饿...拖个地就休息！"
       ],
-      "sleep":[
+      "sleep": [
         "💤..."
-      ]
-    },
-      "旧港集市": {
-        "eat":[
-          "紫金八刀汤～",
-          "馄饨！馄饨！"
-        ],
-        "buy":[
-        "捏着海鲜检查状态，和摊主随口聊着今日的海货行情",
-        "在买嫩青菜🥬",
-        "拎着装好的花蛤袋，蹲在菜摊前挑着小葱"
-      ]
-    },
-      "福源堂": {
-        "deliver":[
-        "Sasa今天怎么样？",
-        "看到诊所的金鱼，停下来逗了一会儿",
-        "给Marcel带了刚烤的丸子😋"],
-        "eat":[
-        "坐在诊所角落吃饭，听Marcel和病人聊天",
-        "你们慢慢吃，炖锅没人看呢，我马上回去。",
-        "明天想吃什么？"],
-        "rest":[
-            "我血压没问题的啦～",
-            "中、中药...一定要喝吗😭",
-            "A————咳咳咳咳咳————"
-        ]
-    },
-      "警署": [
-        "各位维护治安辛苦啦！订餐到啦～",
-        "下次去我店里坐坐～",
-        "给北原真辉递送餐盒，顺便聊两句",
-        "看到警署忙碌的样子，轻声没有打扰",
-        "提醒大家趁热吃，别放凉了"
       ],
-      "八爪胡同": {
-        "eat":[
+      "work": [
+        "\"欢迎光临～看看想吃什么？\"",
+        "\"里边卡座空着，您随便坐！\"",
+        "\"蒜烤帆立贝，请慢用～❤️\"",
+        "记下客人的点单，转身快步进了后厨",
+        "给熟客添酒，聊聊最近的新鲜事",
+        "正端着餐盘穿梭在桌间",
+        "终于偷闲～"
+      ]
+    },
+    "八爪胡同": {
+      "buy": [
+        "饮品的话...请帮我补乌龙茶、柠檬沙瓦基酒",
+        "长期在你这拿，给个实在价...嘿嘿！多谢啦！",
+        "还得麻烦您明天帮我把酒送到啊～感谢！"
+      ],
+      "eat": [
         "选哪家店呢....",
         "肠粉好吃...加蛋加瘦肉！",
         "坐在小摊子前，偷师老板炒粉...",
         "好想再加一份鱼蛋啊..可是吃不动了"
-      ],
-      "buy":[
-        "饮品的话...请帮我补乌龙茶、柠檬沙瓦基酒",
-        "长期在你这拿，给个实在价...嘿嘿！多谢啦！",
-        "还得麻烦您明天帮我把酒送到啊～感谢！"
       ]
     },
-      "市民公园": [
+    "小林的算命摊": {
+      "rest": [
+        "你怎么总吃这家炒饭...",
+        "噎...噎住了...shui....",
+        "晚上来吗？"
+      ]
+    },
+    "市民公园": {
+      "rest": [
         "在公园小路遛弯儿",
         "给公园的流浪猫喂零食"
+      ]
+    },
+    "旧港码头": {
+      "rest": [
+        "靠在码头栏杆上，看渔船慢慢靠岸",
+        "举着手机拍海鸥...不要突然💩啊！"
+      ]
+    },
+    "旧港集市": {
+      "buy": [
+        "捏着海鲜检查状态，和摊主随口聊着今日的海货行情",
+        "在买嫩青菜🥬",
+        "拎着装好的花蛤袋，蹲在菜摊前挑着小葱"
       ],
-      "艺术街区": [
+      "eat": [
+        "紫金八刀汤～",
+        "馄饨！馄饨！"
+      ]
+    },
+    "福源堂": {
+      "deliver": [
+        "Sasa今天怎么样？",
+        "看到诊所的金鱼，停下来逗了一会儿",
+        "给Marcel带了刚烤的丸子😋"
+      ],
+      "eat": [
+        "坐在诊所角落吃饭，听Marcel和病人聊天",
+        "你们慢慢吃，炖锅没人看呢，我马上回去。",
+        "明天想吃什么？"
+      ],
+      "rest": [
+        "我血压没问题的啦～",
+        "中、中药...一定要喝吗😭",
+        "A————咳咳咳咳咳————"
+      ]
+    },
+    "艺术街区": {
+      "rest": [
         "欣赏青花瓷碗中...",
         "好贵...",
         "看街头艺人画油画",
         "在手工饰品店给Addy挑礼物中..."
-      ],
-      "CULF/LF大学城": [
-        "找了个靠窗的位置看书，阳光太好了！",
-        "睡着了.",
-        "果然还是只能看懂漫画书吗...",
-        "偷窥小情侣中...噫～"
-      ],
-      "旧港码头": [
-        "靠在码头栏杆上，看渔船慢慢靠岸",
-        "举着手机拍海鸥...不要突然💩啊！"
-      ],
-      "小林的算命摊": [
-        "你怎么总吃这家炒饭...",
-        "噎...噎住了...shui....",
-        "晚上来吗？"
-      ],
-     "LF一中": [
-        "21号！21号呢！你的餐————",
-        "又没遇到肆那小子放学啊...",
-        "九木的餐在这儿————哎同学好你是几号？"
       ]
-
     },
-      "randomEvents": [
-      {
-        "week": [0,1,2,3,4,5,6],
-        "timeRange": "13:00-14:00",
-        "probability": 40,
-        "area": "九木酒屋",
-        "type": "eat",
-        "action": "用餐中",
-        "isMandatory": true
-      },
-      {
-        "week": [0,1,2,3,4,5,6],
-        "timeRange": "13:00-14:00",
-        "probability": 40,
-        "area": "旧港集市",
-        "type":"eat",
-        "action": "用餐中",
-        "isMandatory": true
-      },
-      {
-        "week": [0,1,2,3,4,5,6],
-        "timeRange": "13:00-14:00",
-        "probability": 20,
-        "area": "小林的算命摊",
-        "action": "被小林拉到算命摊一起吃饭",
-        "isMandatory": true
-      },
-      {
-        "week": [0,1,2,3,4,5,6],
-        "timeRange": "14:00-15:00",
-        "probability": 20,
-        "area": "市民公园",
-        "isMandatory": true,
-        "action": "休息中"
-      },
-      {
-        "week": [0,1,2,3,4,5,6],
-        "timeRange": "14:00-15:00",
-        "probability": 30,
-        "area": "艺术街区",
-        "isMandatory": true,
-        "action": "休息中"
-      },
-      {
-        "week": [0,1,2,3,4,5,6],
-        "timeRange": "14:00-15:00",
-        "probability": 20,
-        "area": "CULF/LF大学城",
-        "isMandatory": true,
-        "action": "休息中"
-      },
-      {
-        "week": [0,1,2,3,4,5,6],
-        "timeRange": "14:00-15:00",
-        "probability": 30,
-        "area": "旧港码头",
-        "isMandatory": true,
-        "action": "休息中"
-      },
-        {
-            "week": [3,5,6,0], 
-            "timeRange": "18:00-19:00",
-            "probability": 25, 
-            "area": "八爪胡同",
-            "type": "buy",
-            "action": "🛻 采购中！",
-            "tip": "✨ 杂鱼跑去八爪胡同采购啦！酒又不够了吗～",
-            "persist": true 
-        },
-        {
-            "week": [1,2,4],
-            "timeRange": "18:00-19:00",
-            "probability": 35,
-            "area": "LF一中",
-            "type": "deliver",
-            "action": "🏫 在校门口哦～",
-            "tip": "✨ 杂鱼去给一中订晚餐的高三生送餐啦！",
-            "persist": true
-        }
+    "警署": {
+      "deliver": [
+        "各位维护治安辛苦啦！订餐到啦～",
+        "下次去我店里坐坐～",
+        "给北原真辉送餐盒。"
       ]
+    }
   }
+}
