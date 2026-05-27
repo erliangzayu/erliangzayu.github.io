@@ -229,7 +229,7 @@
       {
         "week": [0,1,2,3,4,5,6],
         "timeRange": "14:00-15:00",
-        "probability": 30,
+        "probability": 0,
         "area": "市民公园",
         "isMandatory": true,
         "action": "休息中"
@@ -237,7 +237,7 @@
       {
         "week": [0,1,2,3,4,5,6],
         "timeRange": "14:00-15:00",
-        "probability": 20,
+        "probability": 0,
         "area": "艺术街区",
         "isMandatory": true,
         "action": "休息中"
@@ -245,7 +245,7 @@
       {
         "week": [0,1,2,3,4,5,6],
         "timeRange": "14:00-15:00",
-        "probability": 20,
+        "probability": 100,
         "area": "CULF/LF大学城",
         "isMandatory": true,
         "action": "休息中"
@@ -253,7 +253,7 @@
       {
         "week": [0,1,2,3,4,5,6],
         "timeRange": "14:00-15:00",
-        "probability": 30,
+        "probability": 0,
         "area": "旧港码头",
         "isMandatory": true,
         "action": "休息中"
