@@ -229,7 +229,7 @@
       {
         "week": [0,1,2,3,4,5,6],
         "timeRange": "14:00-15:00",
-        "probability": 0,
+        "probability": 100,
         "area": "市民公园",
         "isMandatory": true,
         "action": "休息中"
@@ -245,7 +245,7 @@
       {
         "week": [0,1,2,3,4,5,6],
         "timeRange": "14:00-15:00",
-        "probability": 100,
+        "probability": 0,
         "area": "CULF/LF大学城",
         "isMandatory": true,
         "action": "休息中"
