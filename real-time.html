@@ -660,12 +660,20 @@
                 return `<div class="small-area-item ${hotClass} ${hideClass}" data-area="${item.smallArea}" data-areaCode="${item.areaCode||''}">${item.smallArea}</div>`;
             }).join('');
 
-            let defaultArea;
-            if (savedSmallArea && areas.some(item => item.smallArea === savedSmallArea)) {
-                defaultArea = areas.find(item => item.smallArea === savedSmallArea) || areas[0];
+        // ✅ 修复后的默认地点选择逻辑：优先选中当前有 OC 正在活动的小地点
+        let defaultArea;
+        if (savedSmallArea && areas.some(item => item.smallArea === savedSmallArea)) {
+            defaultArea = areas.find(item => item.smallArea === savedSmallArea) || areas[0];
+        } else {
+            // 1. 尝试在大区内寻找当前有 OC 在活动的地点（无视是否常驻）
+            const areaWithOc = areas.find(item => ocAreas.includes(item.areaCode));
+            if (areaWithOc) {
+                defaultArea = areaWithOc;
             } else {
+                // 2. 如果当前全都没人，再 fallback 到原本的常驻地点逻辑
                 defaultArea = areas.find(item => item.isPermanent !== false) || areas[0];
             }
+        }
             
             currentSmallArea = defaultArea.smallArea;
             activeAreaCode = savedAreaCode || defaultArea.areaCode;
