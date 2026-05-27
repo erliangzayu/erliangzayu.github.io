@@ -1,726 +1,446 @@
-{
-  "name": "Marcel",
-  "avatar": "./images/avatar/marcel.PNG",
-  "baseSchedule": [
-    {
-      "week": [
-        0
-      ],
-      "schedule": [
-        {
-          "timeRange": "00:00-07:00",
-          "area": "福源堂",
-          "type": "sleep",
-          "action": "睡眠中"
-        },
-        {
-          "timeRange": "07:00-08:00",
-          "area": "福源堂",
-          "type": "breakfast",
-          "action": "吃早饭"
-        },
-        {
-          "timeRange": "08:00-12:00",
-          "area": "福源堂",
-          "type": "work",
-          "action": "坐诊中"
-        },
-        {
-          "timeRange": "12:00-13:00",
-          "area": "福源堂",
-          "type": "eat",
-          "action": "吃午餐"
-        },
-        {
-          "timeRange": "13:00-14:00",
-          "area": "福源堂",
-          "type": "sleep",
-          "action": "午睡中"
-        },
-        {
-          "timeRange": "14:00-17:00",
-          "area": "福源堂",
-          "type": "work",
-          "action": "坐诊"
-        },
-        {
-          "timeRange": "17:00-22:00",
-          "area": "Valmont Plaza 购物中心",
-          "type": "rest",
-          "action": "休息中～"
-        },
-        {
-          "timeRange": "22:00-24:00",
-          "area": "福源堂",
-          "type": "rest",
-          "action": "休息中"
-        }
+ {
+    "name": "Marcel",
+    "avatar": "./images/avatar/marcel.PNG",
+    "baseSchedule": [
+      {
+        "week": [0,1,2,3,4,5,6],
+        "timeRange": "00:00-07:00",
+        "area": "福源堂",
+        "type": "sleep",
+        "action": "睡眠中"
+      },
+      {
+        "week": [3],
+        "timeRange": "07:00-08:30",
+        "area": "福源堂",
+        "type": "sleep",
+        "action": "睡眠中"
+      },
+      {
+        "week": [0,1,2,4,5,6],
+        "timeRange": "07:00-08:00",
+        "area": "福源堂",
+        "type": "breakfast",
+        "action": "吃早饭"
+      },
+      {
+        "week": [3],
+        "timeRange": "08:30-09:30",
+        "area": "市民公园",
+        "type": "eat",
+        "action": "吃早饭"
+      },
+      {
+        "week": [0,1,2,4,5,6],
+        "timeRange": "08:00-12:00",
+        "area": "福源堂",
+        "type": "work",
+        "action": "坐诊中"
+      },
+      {
+        "week": [3],
+        "timeRange": "09:30-12:00",
+        "area": "市民公园",
+        "type": "work",
+        "action": "义诊中"
+      },
+      {
+        "week": [0,1,2,4,5,6],
+        "timeRange": "12:00-13:00",
+        "area": "福源堂",
+        "type": "eat",
+        "action": "吃午餐"
+      },
+      {
+        "week": [3],
+        "timeRange": "12:00-13:00",
+        "area": "6-11便利店",
+        "type": "eat",
+        "action": "吃午餐"
+      },
+      {
+        "week": [4],
+        "timeRange": "13:00-14:00",
+        "area": "福源堂",
+        "type": "sasacheck",
+        "action": "Sasa体检"
+      },
+      {
+        "week": [3],
+        "timeRange": "13:00-14:30",
+        "area": "Wesley的家",
+        "type": "work",
+        "action": "面诊中"
+      },
+      {
+        "week": [0,1,2,5,6],
+        "timeRange": "13:00-14:00",
+        "area": "福源堂",
+        "type": "sleep",
+        "action": "午睡中"
+      },
+      {
+        "week": [0,1,2,4,6],
+        "timeRange": "14:00-17:00",
+        "area": "福源堂",
+        "type": "work",
+        "action": "坐诊"
+      },
+      {
+        "week": [3],
+        "timeRange": "14:30-15:30",
+        "area": "Berlon家老宅",
+        "type": "work",
+        "action": "面诊中"
+      },
+      {
+        "week": [3],
+        "timeRange": "15:30-16:30",
+        "area": "雾港仓库",
+        "type": "deliver",
+        "action": "送药"
+      },
+      {
+        "week": [3],
+        "timeRange": "16:30-17:00",
+        "area": "在地铁上",
+        "action": "🚇..."
+      },
+      {
+        "week": [5],
+        "timeRange": "14:00-17:00",
+        "area": "警署",
+        "type": "work",
+        "action": "异能监管局检查"
+      },
+      {
+        "week": [0],
+        "timeRange": "17:00-22:00",
+        "area": "Valmont Plaza 购物中心",
+        "type": "rest",
+        "action": "休息中～"
+      },
+      {
+        "week": [1,2,3,4,5,6],
+        "timeRange": "17:00-18:00",
+        "area": "福源堂",
+        "type": "eat",
+        "action": "晚餐时间！"
+      },
+      {
+        "week": [1,2,3,4,5,6],
+        "timeRange": "18:00-20:00",
+        "area": "福源堂",
+        "type": "rest",
+        "action": "休息中"
+      },
+      {
+        "week": [3,4],
+        "timeRange": "20:00-22:00",
+        "area": "福源堂",
+        "type": "rest",
+        "action": "休息中"
+      },
+      {
+        "week": [1],
+        "timeRange": "20:00-22:00",
+        "area": "旧港集市",
+        "type": "buy",
+        "action": "买菜中"
+      },
+      {
+        "week": [0,6],
+        "timeRange": "22:00-24:00",
+        "area": "福源堂",
+        "type": "rest",
+        "action": "休息中"
+      },
+      {
+        "week": [1,3],
+        "timeRange": "22:00-24:00",
+        "area": "九木酒屋",
+        "type": "eat",
+        "action": "吃夜宵"
+      }
+    ],
+    "locationRandomActions": {
+      "福源堂": {
+        "sleep": [
+          "呼噜呼噜💤",
+          "...鸭鸭🌀"
+        ],
+        "breakfast": [
+          "喝杯咖啡?☕️",
+          "今天是煎蛋饼?嗯,好吃｡",
+          "昨晚睡得腰有些疼啊｡"
+        ],
+        "eat": [
+          "Sasa?别忙活了,来先吃饭｡",
+          "这牛肉好吃｡",
+          "凉拌黄瓜?有营养啊｡",
+          "嗯...炖的还挺香😌"
+        ],
+         "sasacheck": [
+          "今天这状态不错嘛",
+          "最近什么时候头疼过还记得吗?",
+          "稳定多了(笑)",
+          "你这手...给先生看看｡昨天烫到的?怎么不说?"
+        ],
+        "work": [
+          "处理些擦伤､感冒､跌打损伤这类小毛病",
+          "汤药回去煎二十分钟...记好了",
+          "明天这个点儿回来换药,不能耽误了,明白吗?",
+          "舌苔厚腻,脾胃不和,忌辛辣生冷,我开个方子｡",
+          "头疼是神经性的,少熬夜,等下去拿药｡",
+          "你这只是扭伤...不信我?想拍片得去大医院,我这小地方可拍不了｡"
+        ],
+        "rest": [
+          "但愿别来什么活儿...清净会儿",
+          "Sasa?电视调大点声｡",
+          "(趴在沙发上,似乎睡着了)",
+          "洗好的衣服该晾了啊｡",
+          "晃着水杯里的水，看着金鱼缸发呆🐠"
+        ]
+      },
+      "市民公园": {
+        "eat": [
+          "豆浆不错｡",
+          "啧｡太油了｡",
+          "今天还去那家早餐店吗?",
+          "Sasa还准备了餐盒啊...这小子有心了｡"
+        ],
+        "work": [
+          "张大爷?又来了?血压又高了吧?",
+          "今天感觉怎么样?比上次强点没?",
+          "血压得坚持测｡可别偷懒",
+          "您这个血糖问题还得再调理...",
+          "我?我是医生,我不是鬼(笑)...别薅我鸭子👋🏻"
+        ]
+      },
+      "6-11便利店": {
+        "eat": [
+          "🍱便当麻烦帮我加热吧｡",
+          "嘶...好烫｡",
+          "再来杯咖啡"
+        ]
+      },
+      "Wesley的家": [
+          "孙子还省心？",
+          "这几天睡得还稳，没再头晕了吧？"
+        ],
+      "雾港仓库": {
+        "deliver": [
+          "药放这了，注意剂量",
+          "门口血腥味这么重，就不能收拾干净点？",
+          "真不用给你推荐个心理医生？"
+        ],
+        "work": [
+          "驾轻就熟地给自己盛杯咖啡。",
+          "Lee，你腿怎么样？",
+          "来看看有什么事儿？"
+        ]
+      },
+      "警署": {
+        "work": [
+          "这位没什么社会危害性。",
+          "容易自燃？有意思。",
+          "最近私闯水怪出没区的市民很多啊，你们不去问问？"
+        ],
+      "check": [
+        "Marcel.",
+        "材料都没过期吧？"
       ]
-    },
-    {
-      "week": [
-        1
+      },
+      "Valmont Plaza 购物中心": {
+        "rest": [
+          "找个长椅坐会儿，人太多了闹得慌",
+          "买杯冰饮🧊",
+          "Sasa...？SASA!!...原来在这儿呢..吓死先生了。",
+          "想吃什么？泰餐？"
+        ]
+      },
+      "在地铁上": [
+        "地铁————晕车患者的福音"
       ],
-      "schedule": [
-        {
-          "timeRange": "00:00-07:00",
-          "area": "福源堂",
-          "type": "sleep",
-          "action": "睡眠中"
-        },
-        {
-          "timeRange": "07:00-08:00",
-          "area": "福源堂",
-          "type": "breakfast",
-          "action": "吃早饭"
-        },
-        {
-          "timeRange": "08:00-12:00",
-          "area": "福源堂",
-          "type": "work",
-          "action": "坐诊中"
-        },
-        {
-          "timeRange": "12:00-13:00",
-          "area": "福源堂",
-          "type": "eat",
-          "action": "吃午餐"
-        },
-        {
-          "timeRange": "13:00-14:00",
-          "area": "福源堂",
-          "type": "sleep",
-          "action": "午睡中"
-        },
-        {
-          "timeRange": "14:00-17:00",
-          "area": "福源堂",
-          "type": "work",
-          "action": "坐诊"
-        },
-        {
-          "timeRange": "17:00-18:00",
-          "area": "福源堂",
-          "type": "eat",
-          "action": "晚餐时间！"
-        },
-        {
-          "timeRange": "18:00-20:00",
-          "area": "福源堂",
-          "type": "rest",
-          "action": "休息中"
-        },
-        {
-          "timeRange": "20:00-22:00",
-          "area": "旧港集市",
-          "type": "buy",
-          "action": "买菜中"
-        },
-        {
-          "timeRange": "22:00-24:00",
-          "area": "九木酒屋",
-          "type": "eat",
-          "action": "吃夜宵"
-        }
-      ]
-    },
-    {
-      "week": [
-        2
+      "旧港集市": {
+        "buy": [
+          "老板，这青菜怎么卖？",
+          "正在把橙子塞进身体里",
+          "捏捏番茄",
+          "顺道买包糖，Sasa爱吃甜的"
+        ]
+      },
+      "九木酒屋": {
+        "eat": [
+          "杂鱼，来碗味增汤，少放点盐",
+          "厨房下水道还堵吗？",
+          "有什么炒菜？你随便炒。",
+          "怎么？医生下班还不能喝酒了（笑）",
+          "看着店里的客人，嘴角勾着笑看热闹"
+        ]
+      },
+      "Berlon家老宅": [
+          "Lee那边没事儿，竹本家的小子我盯着呢。",
+          "家里的药箱该补了，我给你们留了些常备药。"
+        ],
+      "融大附中": [
+          "准备做午间卫生安全讲座",
+          "主题是什么？结膜炎？"
+        ],
+      "深蓝海岸": [
+          "靠在礁石上，听着海浪声发呆🌊",
+          "海水...",
+          "捡些漂亮的贝壳，随手塞进口袋"
+        ],
+      "水怪出没区": {
+        "rest": [
+          "摸摸水怪触手。",
+          "...起雾了。",
+          "只留下一团暗夜下的黑影。"
+        ]
+      },
+      "魔鬼鱼号": [
+          "Addy？东西我取走了？",
+          "小心点儿，最近查得严。",
+          "...呕...你这船还是这么晃..."
+        ],
+      "猎人小屋": [
+          "老板，来点草药，配点药膏...那边儿有点麻烦。",
+          "顺道买个药杵，家里的坏了",
+          "屋里的松脂味，还挺安神的",
+          "山里最近怎么样？",
+          "给老板带了包凉茶。"
       ],
-      "schedule": [
-        {
-          "timeRange": "00:00-07:00",
-          "area": "福源堂",
-          "type": "sleep",
-          "action": "睡眠中"
-        },
-        {
-          "timeRange": "07:00-08:00",
-          "area": "福源堂",
-          "type": "breakfast",
-          "action": "吃早饭"
-        },
-        {
-          "timeRange": "08:00-12:00",
-          "area": "福源堂",
-          "type": "work",
-          "action": "坐诊中"
-        },
-        {
-          "timeRange": "12:00-13:00",
-          "area": "福源堂",
-          "type": "eat",
-          "action": "吃午餐"
-        },
-        {
-          "timeRange": "13:00-14:00",
-          "area": "福源堂",
-          "type": "sleep",
-          "action": "午睡中"
-        },
-        {
-          "timeRange": "14:00-17:00",
-          "area": "福源堂",
-          "type": "work",
-          "action": "坐诊"
-        },
-        {
-          "timeRange": "17:00-18:00",
-          "area": "福源堂",
-          "type": "eat",
-          "action": "晚餐时间！"
-        },
-        {
-          "timeRange": "18:00-20:00",
-          "area": "福源堂",
-          "type": "rest",
-          "action": "休息中"
-        }
-      ]
+      "白日Livehouse": {
+        "rest": [
+          "找个角落坐下，听着歌喝点酒",
+          "😋",
+          "😎"
+        ]
+      },
+      "能乐町": {
+        "rest": [
+          "茶屋...不错。",
+          "办的是正事儿。",
+          "来买...霓虹助剂。"
+        ]
+      },
+      "地下拳场": {
+        "work": [
+          "不要命了？",
+          "Felix...让我在这种地方呆着，总要多给点诊费吧？"
+        ]
+      }
     },
-    {
-      "week": [
-        3
-      ],
-      "schedule": [
-        {
-          "timeRange": "00:00-07:00",
-          "area": "福源堂",
-          "type": "sleep",
-          "action": "睡眠中"
-        },
-        {
-          "timeRange": "07:00-08:30",
-          "area": "福源堂",
-          "type": "sleep",
-          "action": "睡眠中"
-        },
-        {
-          "timeRange": "08:30-09:30",
-          "area": "市民公园",
-          "type": "eat",
-          "action": "吃早饭"
-        },
-        {
-          "timeRange": "09:30-12:00",
-          "area": "市民公园",
-          "type": "work",
-          "action": "义诊中"
-        },
-        {
-          "timeRange": "12:00-13:00",
-          "area": "6-11便利店",
-          "type": "eat",
-          "action": "吃午餐"
-        },
-        {
-          "timeRange": "13:00-14:30",
-          "area": "Wesley的家",
-          "type": "work",
-          "action": "面诊中"
-        },
-        {
-          "timeRange": "14:30-15:30",
-          "area": "Berlon家老宅",
-          "type": "work",
-          "action": "面诊中"
-        },
-        {
-          "timeRange": "15:30-16:30",
-          "area": "雾港仓库",
-          "type": "deliver",
-          "action": "送药"
-        },
-        {
-          "timeRange": "16:30-17:00",
-          "area": "在地铁上",
-          "type": "rest",
-          "action": "🚇..."
-        },
-        {
-          "timeRange": "17:00-18:00",
-          "area": "福源堂",
-          "type": "eat",
-          "action": "晚餐时间！"
-        },
-        {
-          "timeRange": "18:00-20:00",
-          "area": "福源堂",
-          "type": "rest",
-          "action": "休息中"
-        },
-        {
-          "timeRange": "20:00-22:00",
-          "area": "福源堂",
-          "type": "rest",
-          "action": "休息中"
-        },
-        {
-          "timeRange": "22:00-24:00",
-          "area": "九木酒屋",
-          "type": "eat",
-          "action": "吃夜宵"
-        }
-      ]
-    },
-    {
-      "week": [
-        4
-      ],
-      "schedule": [
-        {
-          "timeRange": "00:00-07:00",
-          "area": "福源堂",
-          "type": "sleep",
-          "action": "睡眠中"
-        },
-        {
-          "timeRange": "07:00-08:00",
-          "area": "福源堂",
-          "type": "breakfast",
-          "action": "吃早饭"
-        },
-        {
-          "timeRange": "08:00-12:00",
-          "area": "福源堂",
-          "type": "work",
-          "action": "坐诊中"
-        },
-        {
-          "timeRange": "12:00-13:00",
-          "area": "福源堂",
-          "type": "eat",
-          "action": "吃午餐"
-        },
-        {
-          "timeRange": "13:00-14:00",
-          "area": "福源堂",
-          "type": "sasacheck",
-          "action": "Sasa体检"
-        },
-        {
-          "timeRange": "14:00-17:00",
-          "area": "福源堂",
-          "type": "work",
-          "action": "坐诊"
-        },
-        {
-          "timeRange": "17:00-18:00",
-          "area": "福源堂",
-          "type": "eat",
-          "action": "晚餐时间！"
-        },
-        {
-          "timeRange": "18:00-20:00",
-          "area": "福源堂",
-          "type": "rest",
-          "action": "休息中"
-        },
-        {
-          "timeRange": "20:00-22:00",
-          "area": "福源堂",
-          "type": "rest",
-          "action": "休息中"
-        }
-      ]
-    },
-    {
-      "week": [
-        5
-      ],
-      "schedule": [
-        {
-          "timeRange": "00:00-07:00",
-          "area": "福源堂",
-          "type": "sleep",
-          "action": "睡眠中"
-        },
-        {
-          "timeRange": "07:00-08:00",
-          "area": "福源堂",
-          "type": "breakfast",
-          "action": "吃早饭"
-        },
-        {
-          "timeRange": "08:00-12:00",
-          "area": "福源堂",
-          "type": "work",
-          "action": "坐诊中"
-        },
-        {
-          "timeRange": "12:00-13:00",
-          "area": "福源堂",
-          "type": "eat",
-          "action": "吃午餐"
-        },
-        {
-          "timeRange": "13:00-14:00",
-          "area": "福源堂",
-          "type": "sleep",
-          "action": "午睡中"
-        },
-        {
-          "timeRange": "14:00-17:00",
-          "area": "警署",
-          "type": "work",
-          "action": "异能监管局检查"
-        },
-        {
-          "timeRange": "17:00-18:00",
-          "area": "福源堂",
-          "type": "eat",
-          "action": "晚餐时间！"
-        },
-        {
-          "timeRange": "18:00-20:00",
-          "area": "福源堂",
-          "type": "rest",
-          "action": "休息中"
-        }
-      ]
-    },
-    {
-      "week": [
-        6
-      ],
-      "schedule": [
-        {
-          "timeRange": "00:00-07:00",
-          "area": "福源堂",
-          "type": "sleep",
-          "action": "睡眠中"
-        },
-        {
-          "timeRange": "07:00-08:00",
-          "area": "福源堂",
-          "type": "breakfast",
-          "action": "吃早饭"
-        },
-        {
-          "timeRange": "08:00-12:00",
-          "area": "福源堂",
-          "type": "work",
-          "action": "坐诊中"
-        },
-        {
-          "timeRange": "12:00-13:00",
-          "area": "福源堂",
-          "type": "eat",
-          "action": "吃午餐"
-        },
-        {
-          "timeRange": "13:00-14:00",
-          "area": "福源堂",
-          "type": "sleep",
-          "action": "午睡中"
-        },
-        {
-          "timeRange": "14:00-17:00",
-          "area": "福源堂",
-          "type": "work",
-          "action": "坐诊"
-        },
-        {
-          "timeRange": "17:00-18:00",
-          "area": "福源堂",
-          "type": "eat",
-          "action": "晚餐时间！"
-        },
-        {
-          "timeRange": "18:00-20:00",
-          "area": "福源堂",
-          "type": "rest",
-          "action": "休息中"
-        },
-        {
-          "timeRange": "20:00-22:00",
-          "area": "九木酒屋",
-          "type": "eat",
-          "action": "吃夜宵"
-        }
-      ]
-    }
-  ],
-  "randomEvents": [
-    {
-      "week": [
-        2,
-        5
-      ],
-      "timeRange": "20:00-24:00",
-      "probability": 45,
-      "area": "雾港仓库",
-      "type": "work",
-      "action": "来看看",
-      "isMandatory": true
-    },
-    {
-      "week": [
-        2,
-        5
-      ],
-      "timeRange": "20:00-24:00",
-      "probability": 55,
-      "area": "地下拳场",
-      "type": "work",
-      "action": "工作中",
-      "isMandatory": true
-    },
-    {
-      "week": [
-        2,
-        5
-      ],
-      "timeRange": "20:00-24:00",
-      "probability": 30,
-      "area": "九木酒屋",
-      "type": "eat",
-      "action": "吃夜宵",
-      "isMandatory": true
-    },
-    {
-      "week": [
-        2,
-        5
-      ],
-      "timeRange": "20:00-24:00",
-      "probability": 35,
-      "area": "白日Livehouse",
-      "type": "rest",
-      "action": "休闲中",
-      "isMandatory": true
-    },
-    {
-      "week": [
-        2,
-        5
-      ],
-      "timeRange": "20:00-24:00",
-      "probability": 35,
-      "area": "能乐町",
-      "type": "rest",
-      "action": "闲逛中",
-      "isMandatory": true
-    },
-    {
-      "week": [
-        4,
-        6
-      ],
-      "timeRange": "22:00-24:00",
-      "probability": 30,
-      "area": "福源堂",
-      "type": "rest",
-      "action": "休息中",
-      "isMandatory": true
-    },
-    {
-      "week": [
-        4,
-        6
-      ],
-      "timeRange": "22:00-24:00",
-      "probability": 25,
-      "area": "深蓝海岸",
-      "type": "rest",
-      "action": "休息中",
-      "isMandatory": true
-    },
-    {
-      "week": [
-        4,
-        6
-      ],
-      "timeRange": "22:00-24:00",
-      "probability": 25,
-      "area": "水怪出没区",
-      "type": "rest",
-      "action": "散心中",
-      "isMandatory": true
-    },
-    {
-      "week": [
-        4,
-        6
-      ],
-      "timeRange": "22:00-24:00",
-      "probability": 20,
-      "area": "魔鬼鱼号",
-      "type": "rest",
-      "action": "取货中",
-      "isMandatory": true
-    },
-    {
-      "week": [
-        2,
-        4
-      ],
-      "timeRange": "13:00-14:00",
-      "probability": 25,
-      "area": "融大附中",
-      "type": "work",
-      "action": "📖 校园健康讲座",
-      "tip": "✨ Marcel去融大附中做校园卫生安全讲座啦！",
-      "persist": true
-    },
-    {
-      "week": [
-        1
-      ],
-      "timeRange": "10:00-11:30",
-      "probability": 25,
-      "area": "警署",
-      "type": "work",
-      "action": "🔍 异能局常规审查",
-      "tip": "✨ 根据异能局规定，在册登记的超能力者需要定期报道复查",
-      "persist": true
-    },
-    {
-      "week": [
-        0,
-        6
-      ],
-      "timeRange": "09:30-11:00",
-      "probability": 30,
-      "area": "猎人小屋",
-      "type": "rest",
-      "action": "🌿 采购草药",
-      "tip": "✨ Marcel去猎人小屋采购草药啦，要配新药膏咯！",
-      "persist": true
-    }
-  ],
-  "locationRandomActions": {
-    "福源堂": {
-      "sleep": [
-        "呼噜呼噜💤",
-        "...鸭鸭🌀"
-      ],
-      "breakfast": [
-        "喝杯咖啡?☕️",
-        "今天是煎蛋饼?嗯,好吃｡",
-        "昨晚睡得腰有些疼啊｡"
-      ],
-      "work": [
-        "处理些擦伤､感冒､跌打损伤这类小毛病",
-        "汤药回去煎二十分钟...记好了",
-        "明天这个点儿回来换药,不能耽误了,明白吗?",
-        "舌苔厚腻,脾胃不和,忌辛辣生冷,我开个方子｡",
-        "头疼是神经性的,少熬夜,等下去拿药｡",
-        "你这只是扭伤...不信我?想拍片得去大医院,我这小地方可拍不了｡"
-      ],
-      "eat": [
-        "Sasa?别忙活了,来先吃饭｡",
-        "这牛肉好吃｡",
-        "凉拌黄瓜?有营养啊｡",
-        "嗯...炖的还挺香😌"
-      ],
-      "rest": [
-        "但愿别来什么活儿...清净会儿",
-        "Sasa?电视调大点声｡",
-        "(趴在沙发上,似乎睡着了)",
-        "洗好的衣服该晾了啊｡",
-        "晃着水杯里的水，看着金鱼缸发呆🐠"
-      ],
-      "sasacheck": [
-        "今天这状态不错嘛",
-        "最近什么时候头疼过还记得吗?",
-        "稳定多了(笑)",
-        "你这手...给先生看看｡昨天烫到的?怎么不说?"
-      ]
-    },
-    "Valmont Plaza 购物中心": {
-      "rest": [
-        "找个长椅坐会儿，人太多了闹得慌",
-        "买杯冰饮🧊",
-        "Sasa...？SASA!!...原来在这儿呢..吓死先生了。",
-        "想吃什么？泰餐？"
-      ]
-    },
-    "旧港集市": {
-      "buy": [
-        "老板，这青菜怎么卖？",
-        "正在把橙子塞进身体里",
-        "捏捏番茄",
-        "顺道买包糖，Sasa爱吃甜的"
-      ]
-    },
-    "九木酒屋": {
-      "eat": [
-        "杂鱼，来碗味增汤，少放点盐",
-        "厨房下水道还堵吗？",
-        "有什么炒菜？你随便炒。",
-        "怎么？医生下班还不能喝酒了（笑）",
-        "看着店里的客人，嘴角勾着笑看热闹"
-      ]
-    },
-    "市民公园": {
-      "eat": [
-        "豆浆不错｡",
-        "啧｡太油了｡",
-        "今天还去那家早餐店吗?",
-        "Sasa还准备了餐盒啊...这小子有心了｡"
-      ],
-      "work": [
-        "张大爷?又来了?血压又高了吧?",
-        "今天感觉怎么样?比上次强点没?",
-        "血压得坚持测｡可别偷懒",
-        "您这个血糖问题还得再调理...",
-        "我?我是医生,我不是鬼(笑)...别薅我鸭子👋🏻"
-      ]
-    },
-    "6-11便利店": {
-      "eat": [
-        "🍱便当麻烦帮我加热吧｡",
-        "嘶...好烫｡",
-        "再来杯咖啡"
-      ]
-    },
-    "雾港仓库": {
-      "deliver": [
-        "药放这了，注意剂量",
-        "门口血腥味这么重，就不能收拾干净点？",
-        "真不用给你推荐个心理医生？"
-      ],
-      "work": [
-        "驾轻就熟地给自己盛杯咖啡。",
-        "Lee，你腿怎么样？",
-        "来看看有什么事儿？"
-      ]
-    },
-    "警署": {
-      "work": [
-        "这位没什么社会危害性。",
-        "容易自燃？有意思。",
-        "最近私闯水怪出没区的市民很多啊，你们不去问问？"
-      ]
-    },
-    "地下拳场": {
-      "work": [
-        "不要命了？",
-        "Felix...让我在这种地方呆着，总要多给点诊费吧？"
-      ]
-    },
-    "白日Livehouse": {
-      "rest": [
-        "找个角落坐下，听着歌喝点酒",
-        "😋",
-        "😎"
-      ]
-    },
-    "能乐町": {
-      "rest": [
-        "茶屋...不错。",
-        "办的是正事儿。",
-        "来买...霓虹助剂。"
-      ]
-    },
-    "水怪出没区": {
-      "rest": [
-        "摸摸水怪触手。",
-        "...起雾了。",
-        "只留下一团暗夜下的黑影。"
-      ]
-    }
+    "randomEvents": [
+      {
+        "week": [4,6],
+        "timeRange": "22:00-24:00",
+        "probability": 30,
+        "area": "福源堂",
+        "type": "rest",
+        "action": "休息中",
+        "isMandatory": true
+      },
+      {
+        "week": [4,6],
+        "timeRange": "22:00-24:00",
+        "probability": 25,
+        "area": "深蓝海岸",
+        "type": "rest",
+        "action": "休息中",
+        "isMandatory": true
+      },
+      {
+        "week": [4,6],
+        "timeRange": "22:00-24:00",
+        "probability": 25,
+        "area": "水怪出没区",
+        "type": "rest",
+        "action": "散心中",
+        "isMandatory": true
+      },
+      {
+        "week": [4,6],
+        "timeRange": "22:00-24:00",
+        "probability": 20,
+        "area": "魔鬼鱼号",
+        "action": "取货中",
+        "isMandatory": true
+      },
+      {
+        "week": [5],
+        "timeRange": "20:00-24:00",
+        "probability": 45,
+        "area": "雾港仓库",
+        "type": "work",
+        "action": "来看看",
+        "isMandatory": true
+      },
+      {
+        "week": [5],
+        "timeRange": "20:00-24:00",
+        "probability": 55,
+        "area": "地下拳场",
+        "type": "work",
+        "action": "工作中",
+        "isMandatory": true
+      },
+      {
+        "week": [2],
+        "timeRange": "20:00-24:00",
+        "probability": 30,
+        "area": "九木酒屋",
+        "type": "eat",
+        "action": "吃夜宵",
+        "isMandatory": true
+      },
+      {
+        "week": [2],
+        "timeRange": "20:00-24:00",
+        "probability": 35,
+        "area": "白日Livehouse",
+        "type": "rest",
+        "action": "休闲中",
+        "isMandatory": true
+      },
+      {
+        "week": [2],
+        "timeRange": "20:00-24:00",
+        "probability": 35,
+        "area": "能乐町",
+        "type": "rest",
+        "action": "闲逛中",
+        "isMandatory": true
+      },
+      {
+        "week": [2,4],
+        "timeRange": "13:00-14:00",
+        "probability": 25,
+        "area": "融大附中",
+        "type": "work",
+        "action": "📖 校园健康讲座",
+        "tip": "✨ Marcel去融大附中做校园卫生安全讲座啦！",
+        "persist": true
+      },
+      {
+        "week": [1],
+        "timeRange": "10:00-11:30",
+        "probability": 25,
+        "area": "警署",
+        "type": "work",
+        "action": "🔍 异能局常规审查",
+        "tip": "✨ 根据异能局规定，在册登记的超能力者需要定期报道复查",
+        "persist": true
+      },
+      {
+        "week": [0,6],
+        "timeRange": "09:30-11:00",
+        "probability": 30,
+        "area": "猎人小屋",
+        "action": "🌿 采购草药",
+        "tip": "✨ Marcel去猎人小屋采购草药啦，要配新药膏咯！",
+        "persist": true
+      }
+    ]
   }
-}
